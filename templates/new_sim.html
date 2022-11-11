@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link"><h3>New simulation</h3></a>
+              </li>
+        </ul>
+    </nav>
+    <form method="post" enctype = "multipart/form-data">
+        <fieldset>
+            <table class="table-sm-form">
+                <tbody>
+                    <tr>
+                        <td>Company - route</td>
+                        <td>
+                            <select class="form-select" name="comp_line">
+                                {% for cl in comp_lines %}
+                                    <option value="{{cl}}">{{ cl }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Battery size</td>
+                        <td><input type="text" class="form-control-sm" name="bsize" value="652"></td>
+                    </tr>
+                    <tr>
+                        <td>Maximum Charging Power:</td>
+                        <td><input type="text" class="form-control-sm" name="max_charge_power" value="150"></td>
+                    </tr>
+                    <tr>
+                        <td>Day type label:</td>
+                        <td><input type="text" class="form-control-sm" name="day_type" value="weekday"></td>
+                    </tr>
+                    <tr>
+                        <td>Data file:</td>
+                        <td><input class="form-control" type="file" name="data_file" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are launching a new simulation! Are you sure? It should take ~1 minute to finish!')">Submit & Run</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
+    </form>
+  {% if error %}
+    <br>
+    <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
+  {% endif %}
+{% endblock %}
