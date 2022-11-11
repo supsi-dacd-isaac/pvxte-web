@@ -7,3 +7,4 @@ static/output/*.zip
 key.key
 *.log
 *.sql
+init_db.py
