@@ -1,0 +1,9 @@
+{
+    "simSettings": {
+        "modelTimesteps": 1560,
+        "chargingAtDeposit": true
+    },
+    "appSecretKey": "8EuPLSnVQ47U1XcymcUcadLdk9H7P3Cg5tWH5Pc1aj27GtHsFt"
+}
+
+
