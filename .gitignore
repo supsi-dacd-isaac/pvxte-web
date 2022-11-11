@@ -1,0 +1,9 @@
+venv
+.idea
+database.db
+static/input-csv/*.csv
+static/sim-config/*.json
+static/output/*.zip
+key.key
+*.log
+*.sql
