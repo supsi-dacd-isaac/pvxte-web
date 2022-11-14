@@ -240,7 +240,13 @@ def new_sim():
                 request.files['data_file'].save(file_destination)
 
                 # Run the simulation and save the output in the DB
-                run_sim(sim_file_path=file_destination, main_cfg=main_cfg, pars=request.form)
+                try:
+                    run_sim(sim_file_path=file_destination, main_cfg=main_cfg, pars=request.form)
+                except Exception as e:
+                    print('EXCEPTION: %s' % str(e))
+                    return render_template('new_sim.html',
+                                           error='Data file has a wrong format! The simulation cannot be run',
+                                           comp_lines=get_companies_lines_list())
 
                 return redirect(url_for('index'))
             else:
