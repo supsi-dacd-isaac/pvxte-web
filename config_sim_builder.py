@@ -1,12 +1,10 @@
-import os
+import json
 from collections import defaultdict
 
-from scipy.sparse import csr_matrix
 import numpy as np
-from gurobipy import *
-import json
 import pandas as pd
-import argparse
+from gurobipy import *
+from scipy.sparse import csr_matrix
 
 
 def generate_sparse_matrix(node_times: list, max_index: int) -> csr_matrix:
