@@ -97,18 +97,24 @@ def get_companies_lines_list():
         cl_list.append(cl_file.split(os.sep)[-1].replace('.json', '').replace('-time-energy-', '__'))
     return cl_list
 
+def delete_file_sim(file_path):
+    try:
+        os.unlink(file_path)
+    except Exception as e:
+        print('ERROR: Unable to delete file %s' % file_path)
 
 def delete_sim(conn, created_at):
     conn.execute('DELETE FROM sim WHERE id_user = ? AND created_at = ?', (session['id_user'], created_at))
     conn.commit()
 
     id_file = '%s_%s' % (session['id_user'], created_at)
-    os.unlink('static/input-csv/%s.csv' % id_file)
-    os.unlink('static/sim-config/%s.json' % id_file)
-    os.unlink('static/output/%s.zip' % id_file)
-    os.unlink('static/output-df/%s.csv' % id_file)
-    os.unlink('static/output-bsize/%s.csv' % id_file)
-    os.unlink('static/plot/%s.png' % id_file)
+
+    delete_file_sim('static/input-csv/%s.csv' % id_file)
+    delete_file_sim('static/sim-config/%s.json' % id_file)
+    delete_file_sim('static/output/%s.zip' % id_file)
+    delete_file_sim('static/output-df/%s.csv' % id_file)
+    delete_file_sim('static/output-bsize/%s.csv' % id_file)
+    delete_file_sim('static/plot/%s.png' % id_file)
 
 
 def run_sim(sim_file_path, main_cfg, pars):
