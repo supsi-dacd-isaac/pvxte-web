@@ -150,10 +150,10 @@ def run_sim(sim_file_path, main_cfg, pars):
     model = MILP(config=config_file,
                  env=e,
                  charging_power=max_charging_power,
+                 opt_battery_for_each_bus=False,
                  default_assignment=True,
                  partial_assignment=[],
-                 non_overlap_charging=False,
-                 opt_battery_for_each_bus=opt_all_flag)
+                 non_overlap_charging=False)
 
     model.optimize()
 
