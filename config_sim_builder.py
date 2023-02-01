@@ -45,7 +45,8 @@ def num_buses_at_time(df):
     return result
 
 
-def configuration(csv_file_path, company, route_number, battery_size, charging_locations, t_horizon, p_max, depot_charging):
+def configuration(csv_file_path, company, route_number, battery_size, charging_locations, t_horizon, p_max,
+                  depot_charging, optimize_for_each_bus):
     if battery_size == -1:
         battery_size = 652 if company == 'FART' else 244.5
 
@@ -72,7 +73,6 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     config = {"route_id": f"{route_number}",
               "company": f"{company}",
               "#vehicles": len(vehicle_ids),
-              "#slack_vehicles": 2,
               "#depot": 1,
               "charging_locations": charging_locations,
               "#trips": len(trips_times),
@@ -92,11 +92,11 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "charge_ids": [],
               "depot_charge_ids": [],
               "vehicle_ids": [],
-              "driver_ids": [x for x in range(10)],
               "service_time": [],
               "service_energy": [],
               "charging_cost": [],
-              "num_buses_at_time": None
+              "optimize_for_each_bus": optimize_for_each_bus,
+              "Battery pack size": 88
               }
     trips = []
     charge = []

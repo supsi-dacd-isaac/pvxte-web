@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% if 'username' in session.keys() and session['username'] != '' %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link"><h3>Simulation detail:</h3></a>
+              </li>
+        </ul>
+    </nav>
+
+    <div>
+        <a class="nav-link"><h4>Minimum number of drivers: {{ data['min_num_drivers']|int }}</h4></a><br>
+    </div>
+
+    <div>
+        <a class="nav-link"><h4>Batteries sizing:</h4></a><br>
+        <table class="table-sm-list">
+            <thead>
+                <tr>
+                    <td>Bus id:</td>
+                    <td>Battery size [kWh]:</td>
+                    <td>Battery packs:</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bsize in data['df_bsize'].iterrows() %}
+                    <tr>
+                        <td>{{ bsize[1]['Bus id']|int }}</td>
+                        <td>{{ bsize[1]['Battery side (kWh)']|int }}</td>
+                        <td>{{ bsize[1]['Battery packs']|int }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <div>
+        <a class="nav-link"><h4>Plot section:</h4></a><br>
+        <table class="table-sm-list">
+            <tbody>
+                <tr>
+                    <td>
+                        <img src="{{ url_for('static', filename='plot/') }}{{ session['id_user'] }}_{{ data['created_at'] }}.png" style="width:1080px;height:495px;">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <br>
+    <div>
+        <a class="nav-link"><h4>Download section:</h4></a><br>
+        <table class="table-sm-list">
+            <tbody>
+                <tr>
+                    <td>Results:</td>
+                    <td>
+                        <a class="link-dark" href="{{ url_for('static', filename='output-df/') }}{{ session['id_user'] }}_{{ data['created_at'] }}.csv">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                            </svg>
+                        </a>
+                    </td>
+                    <td>Raw data:</td>
+                    <td>
+                        <a class="link-dark" href="{{ url_for('static', filename='output/') }}{{ session['id_user'] }}_{{ data['created_at'] }}.zip">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
+                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                            </svg>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+{% endblock %}
