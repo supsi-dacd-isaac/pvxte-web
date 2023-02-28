@@ -13,13 +13,25 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
           <li class="nav-item active">
-            <a class="nav-link" href="{{ url_for('index') }}">Home</span></a>
+            <a class="nav-link" href="{{ url_for('index') }}">Simulations</span></a>
           </li>
           <li class="nav-item">
             <a class="nav-link">|</span></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('new_sim') }}">New</span></a>
+            <a class="nav-link" href="{{ url_for('new_sim') }}">Create simulation</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link">|</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('buses_models_list') }}">Buses models editor</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link">|</span></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('new_bus_model') }}">Add bus model</span></a>
           </li>
           <li class="nav-item">
             <a class="nav-link">|</span></a>

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link"><h3>Edit bus model</h3></a>
+              </li>
+        </ul>
+    </nav>
+    <form method="post" enctype = "multipart/form-data">
+        <input type="hidden" class="form-control-sm" name="id" value="{{ bus_model_data['bus_model_id'] }}">
+        <fieldset>
+            <table class="table-sm-form">
+                <tbody>
+                    <tr>
+                        <td>Name</td>
+                        <td><input type="text" class="form-control-sm" name="bus_name" value="{{ bus_model_data['name'] }}"></td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td><input type="text" class="form-control-sm" name="length" value="{{ bus_model_data['length'] }}">&nbsp;[m]</td>
+                    </tr>
+                    <tr>
+                        <td>Maximum passengers capacity</td>
+                        <td><input type="text" class="form-control-sm" name="max_pass_cap" value="{{ bus_model_data['max_pass_cap'] }}"></td>
+                    </tr>
+                    <tr>
+                        <td>Minimum required battery packs</td>
+                        <td><input type="text" class="form-control-sm" name="min_required_batt_packs" value="{{ bus_model_data['min_required_batt_packs'] }}"></td>
+                    </tr>
+                    <tr>
+                        <td>Minimum allowed battery packs</td>
+                        <td><input type="text" class="form-control-sm" name="min_allowed_batt_packs" value="{{ bus_model_data['min_allowed_batt_packs'] }}"></td>
+                    </tr>
+                    <tr>
+                        <td>Capacity of a battery pack</td>
+                        <td><input type="text" class="form-control-sm" name="batt_pack_capacity" value="{{ bus_model_data['batt_pack_capacity'] }}">&nbsp;[kWh]</td>
+                    </tr>
+                    <tr>
+                        <td>Empty weight of a bus without battery</td>
+                        <td><input type="text" class="form-control-sm" name="empty_bus_weight" value="{{ bus_model_data['empty_bus_weight'] }}">&nbsp;[kg]</td>
+                    </tr>
+                    <tr>
+                        <td>Weight of a battery pack</td>
+                        <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="{{ bus_model_data['batt_pack_weight'] }}">&nbsp;[kg]</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are updating this bus model! Are you sure?')">Submit</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
+    </form>
+  {% if error %}
+    <br>
+    <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
+  {% endif %}
+{% endblock %}
