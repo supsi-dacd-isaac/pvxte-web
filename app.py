@@ -75,28 +75,6 @@ def get_sims_data(conn):
     return conn.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
                         "FROM sim WHERE id_user=%i" % session['id_user']).fetchall()
 
-def get_buses_models_data(conn):
-    cur = conn.cursor()
-    cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id_user=%i" % session['id_user'])
-    bus_data = []
-    for row in cur.fetchall():
-        row_dict = json.loads(row[3])
-        row_dict['id'] = row[0]
-        row_dict['id_user'] = row[1]
-        row_dict['name'] = row[2]
-        bus_data.append(row_dict)
-    return bus_data
-
-def get_single_bus_model_data(conn, id_bus_model):
-    cur = conn.cursor()
-    cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id=%i" % id_bus_model)
-    for row in cur.fetchall():
-        row_dict = json.loads(row[3])
-        row_dict['id'] = row[0]
-        row_dict['bus_model_id'] = row[0]
-        row_dict['id_user'] = row[1]
-        row_dict['name'] = row[2]
-    return row_dict
 
 def is_logged():
     if 'username' in session.keys():
@@ -138,9 +116,6 @@ def delete_sim(conn, created_at):
     delete_file_sim('static/output-bsize/%s.csv' % id_file)
     delete_file_sim('static/plot/%s.png' % id_file)
 
-def delete_bus_model(conn, bus_model_id):
-    conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id, ))
-    conn.commit()
 
 def run_sim(sim_file_path, main_cfg, pars):
     conn = get_db_connection()
@@ -228,30 +203,6 @@ def run_sim(sim_file_path, main_cfg, pars):
     conn.commit()
     conn.close()
     return True
-
-def create_new_bus_model(pars):
-    bus_name = pars['bus_name']
-    del pars['bus_name']
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("INSERT INTO bus_model (id_user, name, features) "
-                "VALUES (?, ?, ?)",
-                (int(session['id_user']), bus_name, json.dumps(pars)))
-    conn.commit()
-    conn.close()
-
-def update_bus_model(conn, pars):
-    bus_id = pars['id']
-    bus_name = pars['bus_name']
-    del pars['id']
-    del pars['bus_name']
-    cur = conn.cursor()
-
-    cur.execute("UPDATE bus_model SET name=?, features=? WHERE id=?",
-                (bus_name, json.dumps(pars), bus_id))
-    conn.commit()
 
 def read_solution(solution_file_path, sep=';'):
     file = os.path.join(solution_file_path)
@@ -670,52 +621,6 @@ def new_sim():
             else:
                 return render_template('new_sim.html', error='No file uploaded', comp_lines=get_companies_lines_list())
         return render_template('new_sim.html', comp_lines=get_companies_lines_list())
-    else:
-        return redirect(url_for('login'))
-
-@app.route('/new_bus_model', methods=('GET', 'POST'))
-def new_bus_model():
-    if is_logged():
-        if request.method == 'POST':
-            create_new_bus_model(request.form.to_dict())
-            return redirect(url_for('buses_models_list'))
-        else:
-            return render_template('new_bus_model.html')
-    else:
-        return redirect(url_for('login'))
-
-@app.route('/edit_bus_model', methods=('GET', 'POST'))
-def edit_bus_model():
-    if is_logged():
-        conn = get_db_connection()
-        if request.method == 'POST':
-            # Update data on db
-            update_bus_model(conn, request.form.to_dict())
-
-            # Get data of bus model and pass them to the page
-            bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
-            conn.close()
-            return render_template('edit_bus_model.html', bus_model_data=bus_model_data)
-        else:
-            # Get data of bus model and pass them to the page
-            bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
-            conn.close()
-            return render_template('edit_bus_model.html', bus_model_data=bus_model_data)
-        # return render_template('edit_bus_model.html')
-    else:
-        return redirect(url_for('login'))
-
-@app.route('/buses_models_list', methods=('GET', 'POST'))
-def buses_models_list():
-    if is_logged():
-        conn = get_db_connection()
-        if 'del' in request.args.keys() and 'id_bus_model' in request.args.keys():
-            delete_bus_model(conn, request.args['id_bus_model'])
-
-        # Get bus models data
-        buses_models = get_buses_models_data(conn)
-        conn.close()
-        return render_template('buses_models_list.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
 
