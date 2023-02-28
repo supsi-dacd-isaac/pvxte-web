@@ -267,12 +267,12 @@ def read_battery_size(solution_file_path, sep=';'):
     return dfb
 
 
-def schedule_plot(solution_file_path, bat_size):
+def schedule_plot(solution_file_path, bat_size, charging_blocks=3):
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
     with open(config_name, 'r') as f:
         c = json.load(f)
 
-    df, df_soc = read_solution(solution_file_path)
+    df, df_soc, dfc = read_solution(solution_file_path)
     t_start, t_end, times, depot_start, depot_end = read_time_windows(config_name)
     df_final = df_soc[df_soc.node == str(depot_end[0])]
 
@@ -287,10 +287,38 @@ def schedule_plot(solution_file_path, bat_size):
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
         else:
-            n1 = int(row.n1)
+            if int(row.n1) < c['#trips']:
+                n1 = int(row.n1)
+            else:
+                n1 = int(row.n1) - c['#trips']
             df.at[index, 'start'] = t_start[n1]
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
+
+    # for index, row in df.iterrows():
+    #     if int(row.n1) in depot_start:
+    #         n1 = int(row.n1)
+    #         df.at[index, 'end'] = t_start[int(row.n2)]
+    #         df.at[index, 'duration'] = times[n1, int(row.n2)]
+    #         df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
+    #     else:
+    #         n1 = int(row.n1)
+    #         df.at[index, 'start'] = t_start[n1]
+    #         df.at[index, 'duration'] = times[n1, int(row.n2)]
+    #         df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
+
+    if not dfc.empty:
+        dfc['start'] = 0
+        dfc['duration'] = dfc['val']
+        dfc = dfc.merge(df[['n1', 'bus']], how='left', on=['n1'])
+
+        for index, row in dfc.iterrows():
+            rem = int(row.n1) // c['#trips']
+            dfc.at[index, 'start'] = t_end[int(row.n1) - rem * c['#trips']]
+            dfc.at[index, 'var'] = "Dt" if rem == 2 else "Ct"
+
+        dfc['end'] = dfc['start'] + dfc['duration']
+        dfc = dfc[['var', 'bus', 'start', 'val', 'duration', 'end']]
 
     df = df.sort_values(['bus', 'start', 'end']).reset_index().drop(['index'], axis=1)
     max_step = max(df.end)
@@ -308,11 +336,15 @@ def schedule_plot(solution_file_path, bat_size):
 
     for b in set(df.bus):
         b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery packs'].values[0] * c["Battery pack size"]
-        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size * 60 / 150)
+        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size * 60 / c['max_depot_charging_power'])
 
     model = Model('charge')
+    # Bus i charges at time j.
     x = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='x')
+    # Total charging events at time j.
     y = model.addVars(np.arange(max_step), lb=0, name='y')
+    # Bus i is charging at timestep j but not j + 1
+    u = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='u')
     z2 = model.addVar(name='z2')
 
     cost = model.addVar(name='cost')
@@ -320,8 +352,15 @@ def schedule_plot(solution_file_path, bat_size):
     for k, v in step_mask.items():
         model.addConstrs(x[k, t] == 0 for t in range(len(v)) if v[t] == 0)
 
+    # Sum of charging time-steps should be equal to the min. number of time-steps each bus should charge.
     model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) <= df_charge[k] for k in set(df.bus))
     model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) >= df_charge[k] for k in set(df.bus))
+    # Charging stop is indicated by an active node at time t and inactive node at time t + 1
+    model.addConstrs(x[k, t] - x[k, t + 1] <= u[k, t] for t in np.arange(max_step - 1) for k in set(df.bus))
+    # For each bus, the number of charging start-stop sequences should be less than or equal to charging_blocks
+    model.addConstrs(quicksum(u[k, t] for t in np.arange(max_step)) <= charging_blocks for k in set(df.bus))
+
+    # Sum of charging events at each time-step.
     model.addConstrs(y[t] == quicksum(x[k, t] for k in set(df.bus)) for t in np.arange(max_step))
 
     model.addConstr(z2 == max_(y))
@@ -343,6 +382,7 @@ def schedule_plot(solution_file_path, bat_size):
     solution['start'] = solution['start'].astype('int')
     solution['duration'] = solution['val'].astype('int')
     solution['end'] = solution['start'] + solution['duration']
+    solution = pd.concat([solution, dfc], axis=0, ignore_index=True)
 
     temp_x = pd.DataFrame(columns=df.columns)
 
@@ -412,14 +452,18 @@ def schedule_plot(solution_file_path, bat_size):
 
     df = pd.concat([df, temp_x], axis=0, ignore_index=True)
     df_charge = pd.concat([solution, temp_y], axis=0, ignore_index=True)
+    df_depot_charge = df_charge[df_charge['var'].isin(['Dt', 'x'])]
+    df_panto_charge = df_charge[df_charge['var'].isin(['Ct'])]
 
-    df_trips = df[(df.n1 != str(depot_start[0])) & (df.n2 != str(depot_end[0])) & ~df['n1'].isna()]
-    df_dead = df[(df.n1 == str(depot_start[0])) | (df.n2 == str(depot_end[0])) & ~df['n1'].isna()]
+    df_trips = df[(df.n1 != str(depot_start[0])) & (df.n2 != str(depot_end[0])) & (~df['n1'].isna())]
+    df_dead = df[((df.n1 == str(depot_start[0])) | (df.n2 == str(depot_end[0]))) & (~df['n1'].isna())]
     x_ticks = [i * 30 for i in range(49)]
 
     plt.figure(figsize=(12, 4.5))
-    plt.barh(y=df_charge.bus, left=df_charge.start, width=df_charge.duration, color='#F5CBA7', label='Charging', height=0.8)
-    plt.barh(y=df_dead.bus, left=df_dead.start, width=df_dead.duration, color='#C1C1C1', label='Dead-heading', height=0.8)
+    plt.barh(y=df_depot_charge.bus, left=df_depot_charge.start, width=df_depot_charge.duration, color='#F5CBA7', label='Depot Charging', height=0.8)
+    plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455', label='Pantograph Charging',
+             height=0.8)
+    plt.barh(y=df_dead.bus, left=df_dead.start, width=df_dead.duration, color='grey', label='Dead-heading', height=0.8)
     plt.barh(y=df_trips.bus, left=df_trips.start, width=df_trips.duration, color='black', label='Trips', height=0.8)
     plt.gca().invert_yaxis()
     plt.xticks(ticks=x_ticks[::3], fontsize=12)
