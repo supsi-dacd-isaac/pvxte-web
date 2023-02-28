@@ -467,7 +467,7 @@ if __name__ == '__main__':
         if model.status == GRB.INFEASIBLE:
             print("Model is infeasible!!!!")
 
-        res_var = ['bp', 'bs', 'bi', 'mx', 'u', 'x', 'SOC']
+        res_var = ['bp', 'bs', 'bi', 'mx', 'u', 'x', 'SOC', "Ct"]
         varInfo = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in res_var])]
 
         # Write to csv
