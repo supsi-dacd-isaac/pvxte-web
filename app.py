@@ -222,7 +222,12 @@ def read_solution(solution_file_path, sep=';'):
 
     dfs[['bus', 'node']] = dfs['index1'].str.split(',', expand=True)
     dfs = dfs.reset_index()[['var', 'bus', 'node', 'val']]
-    return dfx, dfs
+
+    dfc = df[df['var'] == 'Ct'].copy()
+    if not dfc.empty:
+        dfc[['n1']] = dfc['index1'].str.split(',', expand=True)
+        dfc = dfc.reset_index()[['var', 'n1', 'val']]
+    return dfx, dfs, dfc
 
 
 def read_time_windows(fname):
