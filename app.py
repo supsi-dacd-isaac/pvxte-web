@@ -97,11 +97,13 @@ def get_companies_lines_list():
         cl_list.append(cl_file.split(os.sep)[-1].replace('.json', '').replace('-time-energy-', '__'))
     return cl_list
 
+
 def delete_file_sim(file_path):
     try:
         os.unlink(file_path)
     except Exception as e:
         print('ERROR: Unable to delete file %s' % file_path)
+
 
 def delete_sim(conn, created_at):
     conn.execute('DELETE FROM sim WHERE id_user = ? AND created_at = ?', (session['id_user'], created_at))
@@ -204,6 +206,7 @@ def run_sim(sim_file_path, main_cfg, pars):
     conn.close()
     return True
 
+
 def read_solution(solution_file_path, sep=';'):
     file = os.path.join(solution_file_path)
     df = pd.read_csv(file, sep=sep, header=None)
@@ -221,6 +224,7 @@ def read_solution(solution_file_path, sep=';'):
     dfs = dfs.reset_index()[['var', 'bus', 'node', 'val']]
     return dfx, dfs
 
+
 def read_time_windows(fname):
     # Load data files
     with open(f"{fname}", "r") as f:
@@ -231,6 +235,7 @@ def read_time_windows(fname):
     depot_origin = {i["index"]: i["n_start"] for i in c['depot_origin']}
     depot_destination = {i["index"]: i["n_start"] for i in c['depot_destination']}
     return service_start, service_end, service_relocation_time, list(depot_origin.keys()), list(depot_destination.keys())
+
 
 def read_battery_size(solution_file_path, sep=';'):
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
@@ -249,12 +254,13 @@ def read_battery_size(solution_file_path, sep=';'):
         dfb["Battery packs"] = dfb['Battery side (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
     else:
         size = dfb.val.values[0]
-        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns =['Bus id', 'Battery side (kWh)'])
+        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns=['Bus id', 'Battery side (kWh)'])
         dfb["Battery packs"] = dfb['Battery side (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
 
     df_file_name = 'static/output-bsize/%s' % solution_file_path.split(os.sep)[-1]
     dfb.to_csv(df_file_name)
     return dfb
+
 
 def schedule_plot(solution_file_path, bat_size):
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
@@ -420,6 +426,7 @@ def schedule_plot(solution_file_path, bat_size):
     plt.savefig(plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
                 facecolor='auto', edgecolor='auto', backend=None)
 
+
 def generate_graph(nodes_list, edges_list):
     graph = nx.Graph()
 
@@ -434,6 +441,8 @@ def generate_graph(nodes_list, edges_list):
 def create_edge_list(edges, data_frame, start, end):
     e_list = defaultdict(list)
     for i, j in edges:
+        bus_i = data_frame.loc[data_frame.n1 == i.split('_')[0], 'bus'].values[0]
+        bus_j = data_frame.loc[data_frame.n1 == j.split('_')[0], 'bus'].values[0]
         # If (i, j) or (j, i) is in node_pairs there is no edge.
         if 'S' in i.split('_')[0]:
             tsi = data_frame.loc[data_frame.n1 == i.split('_')[0], 'start'].values[0]
@@ -452,7 +461,7 @@ def create_edge_list(edges, data_frame, start, end):
         else:
             tej = end[int(j.split('_')[-1])]
 
-        if (np.abs(tej - tsi) >= 270) or (tsj < tei) or ('E' in i) or ('S' in j):
+        if (np.abs(tej - tsi) >= 270) or (tsj < tei) or ('E' in i) or ('S' in j) or (bus_i != bus_j):
             e_list[i].append(j)
     return e_list
 
@@ -580,6 +589,7 @@ def index():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/detail', methods=('GET', 'POST'))
 def detail():
     if is_logged():
@@ -595,6 +605,7 @@ def detail():
         return render_template('detail.html', data=data)
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/new_sim/', methods=('GET', 'POST'))
 def new_sim():
