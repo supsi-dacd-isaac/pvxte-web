@@ -249,7 +249,7 @@ def run_sim_step2(main_cfg, pars):
     battery_size = read_battery_size(res_file, sep=';')
 
     # Create the plot
-    schedule_plot(res_file, battery_size)
+    schedule_plot(res_file, charging_blocks=3)
 
     # Create the final dataframe result
     schedule_drivers(res_file)
