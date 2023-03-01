@@ -75,6 +75,7 @@ def get_sims_data(conn):
     return conn.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
                         "FROM sim WHERE id_user=%i" % session['id_user']).fetchall()
 
+
 def get_buses_models_data(conn):
     cur = conn.cursor()
     cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id_user=%i" % session['id_user'])
@@ -87,6 +88,7 @@ def get_buses_models_data(conn):
         bus_data.append(row_dict)
     return bus_data
 
+
 def get_single_bus_model_data(conn, id_bus_model):
     cur = conn.cursor()
     cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id=%i" % id_bus_model)
@@ -97,6 +99,7 @@ def get_single_bus_model_data(conn, id_bus_model):
         row_dict['id_user'] = row[1]
         row_dict['name'] = row[2]
     return row_dict
+
 
 def is_logged():
     if 'username' in session.keys():
@@ -119,11 +122,13 @@ def get_companies_lines_list():
         cl_list.append(cl_file.split(os.sep)[-1].replace('.json', '').replace('-time-energy-', '__'))
     return cl_list
 
+
 def delete_file_sim(file_path):
     try:
         os.unlink(file_path)
     except Exception as e:
         print('ERROR: Unable to delete file %s' % file_path)
+
 
 def delete_sim(conn, created_at):
     conn.execute('DELETE FROM sim WHERE id_user = ? AND created_at = ?', (session['id_user'], created_at))
@@ -138,9 +143,11 @@ def delete_sim(conn, created_at):
     delete_file_sim('static/output-bsize/%s.csv' % id_file)
     delete_file_sim('static/plot/%s.png' % id_file)
 
+
 def delete_bus_model(conn, bus_model_id):
-    conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id, ))
+    conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
+
 
 def run_sim(sim_file_path, main_cfg, pars):
     conn = get_db_connection()
@@ -229,6 +236,7 @@ def run_sim(sim_file_path, main_cfg, pars):
     conn.close()
     return True
 
+
 def create_new_bus_model(pars):
     bus_name = pars['bus_name']
     del pars['bus_name']
@@ -242,6 +250,7 @@ def create_new_bus_model(pars):
     conn.commit()
     conn.close()
 
+
 def update_bus_model(conn, pars):
     bus_id = pars['id']
     bus_name = pars['bus_name']
@@ -252,6 +261,7 @@ def update_bus_model(conn, pars):
     cur.execute("UPDATE bus_model SET name=?, features=? WHERE id=?",
                 (bus_name, json.dumps(pars), bus_id))
     conn.commit()
+
 
 def read_solution(solution_file_path, sep=';'):
     file = os.path.join(solution_file_path)
@@ -286,6 +296,7 @@ def read_time_windows(fname):
     depot_origin = {i["index"]: i["n_start"] for i in c['depot_origin']}
     depot_destination = {i["index"]: i["n_start"] for i in c['depot_destination']}
     return service_start, service_end, service_relocation_time, list(depot_origin.keys()), list(depot_destination.keys())
+
 
 def read_battery_size(solution_file_path, sep=';'):
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
@@ -732,6 +743,7 @@ def new_sim():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/new_bus_model', methods=('GET', 'POST'))
 def new_bus_model():
     if is_logged():
@@ -742,6 +754,7 @@ def new_bus_model():
             return render_template('new_bus_model.html')
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/edit_bus_model', methods=('GET', 'POST'))
 def edit_bus_model():
@@ -764,6 +777,7 @@ def edit_bus_model():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/buses_models_list', methods=('GET', 'POST'))
 def buses_models_list():
     if is_logged():
@@ -777,6 +791,7 @@ def buses_models_list():
         return render_template('buses_models_list.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
+
 
 # @app.route('/<int:id_user>/<int:ts>/delete/', methods=('POST',))
 # def delete(id_user, ts):
