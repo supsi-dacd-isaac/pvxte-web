@@ -95,6 +95,7 @@ def get_buses_models_data(conn):
         bus_data.append(row_dict)
     return bus_data
 
+
 def get_single_bus_model_data(conn, id_bus_model):
     cur = conn.cursor()
     cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id=%i" % id_bus_model)
@@ -105,6 +106,7 @@ def get_single_bus_model_data(conn, id_bus_model):
         row_dict['id_user'] = row[1]
         row_dict['name'] = row[2]
     return row_dict
+
 
 def is_logged():
     if 'username' in session.keys():
@@ -127,6 +129,7 @@ def get_companies_lines_list():
         cl_list.append(cl_file.split(os.sep)[-1].replace('.json', '').replace('-time-energy-', '__'))
     return cl_list
 
+
 def delete_file_sim(file_path):
     try:
         os.unlink(file_path)
@@ -148,8 +151,9 @@ def delete_sim(conn, sim_metadata):
     delete_file_sim('static/output-bsize/%s.csv' % id_file)
     delete_file_sim('static/plot/%s.png' % id_file)
 
+
 def delete_bus_model(conn, bus_model_id):
-    conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id, ))
+    conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
 
 def get_lines_day_types_from_data_file(sim_file_path):
@@ -171,6 +175,7 @@ def get_lines_day_types_from_data_file(sim_file_path):
     return lines, days_types, starting_station, arrival_station
 
 def run_sim_step2(main_cfg, pars):
+
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -190,9 +195,14 @@ def run_sim_step2(main_cfg, pars):
     # todo opt_all_flag variable should be configurable
     opt_all_flag = False
 
-    sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize, [],
-                                         main_cfg['simSettings']['modelTimesteps'], max_charging_power,
-                                         main_cfg['simSettings']['chargingAtDeposit'], opt_all_flag)
+    sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize,
+                                         charging_locations=[],
+                                         day_type=pars['day_type'],
+                                         t_horizon=main_cfg['simSettings']['modelTimesteps'],
+                                         p_max=max_charging_power,
+                                         pd_max=1,
+                                         depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
+                                         optimize_for_each_bus=opt_all_flag)
 
     e = Env("gurobi.log", params={'MemLimit': 30,
                                   'PreSparsify': 1,
@@ -265,6 +275,7 @@ def run_sim_step2(main_cfg, pars):
     conn.close()
     return True
 
+
 def create_new_bus_model(pars):
     bus_name = pars['bus_name']
     del pars['bus_name']
@@ -278,6 +289,7 @@ def create_new_bus_model(pars):
     conn.commit()
     conn.close()
 
+
 def update_bus_model(conn, pars):
     bus_id = pars['id']
     bus_name = pars['bus_name']
@@ -288,6 +300,7 @@ def update_bus_model(conn, pars):
     cur.execute("UPDATE bus_model SET name=?, features=? WHERE id=?",
                 (bus_name, json.dumps(pars), bus_id))
     conn.commit()
+
 
 def read_solution(solution_file_path, sep=';'):
     file = os.path.join(solution_file_path)
@@ -304,7 +317,13 @@ def read_solution(solution_file_path, sep=';'):
 
     dfs[['bus', 'node']] = dfs['index1'].str.split(',', expand=True)
     dfs = dfs.reset_index()[['var', 'bus', 'node', 'val']]
-    return dfx, dfs
+
+    dfc = df[df['var'] == 'Ct'].copy()
+    if not dfc.empty:
+        dfc[['n1']] = dfc['index1'].str.split(',', expand=True)
+        dfc = dfc.reset_index()[['var', 'n1', 'val']]
+    return dfx, dfs, dfc
+
 
 def read_time_windows(fname):
     # Load data files
@@ -316,6 +335,7 @@ def read_time_windows(fname):
     depot_origin = {i["index"]: i["n_start"] for i in c['depot_origin']}
     depot_destination = {i["index"]: i["n_start"] for i in c['depot_destination']}
     return service_start, service_end, service_relocation_time, list(depot_origin.keys()), list(depot_destination.keys())
+
 
 def read_battery_size(solution_file_path, sep=';'):
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
@@ -334,20 +354,22 @@ def read_battery_size(solution_file_path, sep=';'):
         dfb["Battery packs"] = dfb['Battery side (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
     else:
         size = dfb.val.values[0]
-        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns =['Bus id', 'Battery side (kWh)'])
+        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns=['Bus id', 'Battery side (kWh)'])
         dfb["Battery packs"] = dfb['Battery side (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
 
     df_file_name = 'static/output-bsize/%s' % solution_file_path.split(os.sep)[-1]
     dfb.to_csv(df_file_name)
     return dfb
 
-def schedule_plot(solution_file_path, bat_size):
+
+def schedule_plot(solution_file_path, charging_blocks=3):
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
     with open(config_name, 'r') as f:
         c = json.load(f)
 
-    df, df_soc = read_solution(solution_file_path)
+    df, df_soc, dfc = read_solution(solution_file_path)
     t_start, t_end, times, depot_start, depot_end = read_time_windows(config_name)
+    bat_size = read_battery_size(solution_file_path)
     df_final = df_soc[df_soc.node == str(depot_end[0])]
 
     df['start'] = 0
@@ -361,10 +383,38 @@ def schedule_plot(solution_file_path, bat_size):
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
         else:
-            n1 = int(row.n1)
+            if int(row.n1) < c['#trips']:
+                n1 = int(row.n1)
+            else:
+                n1 = int(row.n1) - c['#trips']
             df.at[index, 'start'] = t_start[n1]
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
+
+    # for index, row in df.iterrows():
+    #     if int(row.n1) in depot_start:
+    #         n1 = int(row.n1)
+    #         df.at[index, 'end'] = t_start[int(row.n2)]
+    #         df.at[index, 'duration'] = times[n1, int(row.n2)]
+    #         df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
+    #     else:
+    #         n1 = int(row.n1)
+    #         df.at[index, 'start'] = t_start[n1]
+    #         df.at[index, 'duration'] = times[n1, int(row.n2)]
+    #         df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
+
+    if not dfc.empty:
+        dfc['start'] = 0
+        dfc['duration'] = dfc['val']
+        dfc = dfc.merge(df[['n1', 'bus']], how='left', on=['n1'])
+
+        for index, row in dfc.iterrows():
+            rem = int(row.n1) // c['#trips']
+            dfc.at[index, 'start'] = t_end[int(row.n1) - rem * c['#trips']]
+            dfc.at[index, 'var'] = "Dt" if rem == 2 else "Ct"
+
+        dfc['end'] = dfc['start'] + dfc['duration']
+        dfc = dfc[['var', 'bus', 'start', 'val', 'duration', 'end']]
 
     df = df.sort_values(['bus', 'start', 'end']).reset_index().drop(['index'], axis=1)
     max_step = max(df.end)
@@ -382,11 +432,15 @@ def schedule_plot(solution_file_path, bat_size):
 
     for b in set(df.bus):
         b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery packs'].values[0] * c["Battery pack size"]
-        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size * 60 / 150)
+        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size * 60 / c['max_depot_charging_power'])
 
     model = Model('charge')
+    # Bus i charges at time j.
     x = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='x')
+    # Total charging events at time j.
     y = model.addVars(np.arange(max_step), lb=0, name='y')
+    # Bus i is charging at timestep j but not j + 1
+    u = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='u')
     z2 = model.addVar(name='z2')
 
     cost = model.addVar(name='cost')
@@ -394,8 +448,15 @@ def schedule_plot(solution_file_path, bat_size):
     for k, v in step_mask.items():
         model.addConstrs(x[k, t] == 0 for t in range(len(v)) if v[t] == 0)
 
+    # Sum of charging time-steps should be equal to the min. number of time-steps each bus should charge.
     model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) <= df_charge[k] for k in set(df.bus))
     model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) >= df_charge[k] for k in set(df.bus))
+    # Charging stop is indicated by an active node at time t and inactive node at time t + 1
+    model.addConstrs(x[k, t] - x[k, t + 1] <= u[k, t] for t in np.arange(max_step - 1) for k in set(df.bus))
+    # For each bus, the number of charging start-stop sequences should be less than or equal to charging_blocks
+    model.addConstrs(quicksum(u[k, t] for t in np.arange(max_step)) <= charging_blocks for k in set(df.bus))
+
+    # Sum of charging events at each time-step.
     model.addConstrs(y[t] == quicksum(x[k, t] for k in set(df.bus)) for t in np.arange(max_step))
 
     model.addConstr(z2 == max_(y))
@@ -417,6 +478,7 @@ def schedule_plot(solution_file_path, bat_size):
     solution['start'] = solution['start'].astype('int')
     solution['duration'] = solution['val'].astype('int')
     solution['end'] = solution['start'] + solution['duration']
+    solution = pd.concat([solution, dfc], axis=0, ignore_index=True)
 
     temp_x = pd.DataFrame(columns=df.columns)
 
@@ -486,14 +548,20 @@ def schedule_plot(solution_file_path, bat_size):
 
     df = pd.concat([df, temp_x], axis=0, ignore_index=True)
     df_charge = pd.concat([solution, temp_y], axis=0, ignore_index=True)
+    df_depot_charge = df_charge[df_charge['var'].isin(['Dt', 'x'])]
+    df_panto_charge = df_charge[df_charge['var'].isin(['Ct'])]
 
-    df_trips = df[(df.n1 != str(depot_start[0])) & (df.n2 != str(depot_end[0])) & ~df['n1'].isna()]
-    df_dead = df[(df.n1 == str(depot_start[0])) | (df.n2 == str(depot_end[0])) & ~df['n1'].isna()]
+    df_trips = df[(df.n1 != str(depot_start[0])) & (df.n2 != str(depot_end[0])) & (~df['n1'].isna())]
+    df_dead = df[((df.n1 == str(depot_start[0])) | (df.n2 == str(depot_end[0]))) & (~df['n1'].isna())]
     x_ticks = [i * 30 for i in range(49)]
 
     plt.figure(figsize=(12, 4.5))
-    plt.barh(y=df_charge.bus, left=df_charge.start, width=df_charge.duration, color='#F5CBA7', label='Charging', height=0.8)
-    plt.barh(y=df_dead.bus, left=df_dead.start, width=df_dead.duration, color='#C1C1C1', label='Dead-heading', height=0.8)
+    plt.barh(y=df_depot_charge.bus, left=df_depot_charge.start, width=df_depot_charge.duration, color='#F5CBA7', label='Depot Charging',
+             height=0.8)
+    plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455',
+             label='Pantograph Charging',
+             height=0.8)
+    plt.barh(y=df_dead.bus, left=df_dead.start, width=df_dead.duration, color='grey', label='Dead-heading', height=0.8)
     plt.barh(y=df_trips.bus, left=df_trips.start, width=df_trips.duration, color='black', label='Trips', height=0.8)
     plt.gca().invert_yaxis()
     plt.xticks(ticks=x_ticks[::3], fontsize=12)
@@ -504,6 +572,7 @@ def schedule_plot(solution_file_path, bat_size):
     plot_file_name = 'static/plot/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.png')
     plt.savefig(plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
                 facecolor='auto', edgecolor='auto', backend=None)
+
 
 def generate_graph(nodes_list, edges_list):
     graph = nx.Graph()
@@ -519,6 +588,8 @@ def generate_graph(nodes_list, edges_list):
 def create_edge_list(edges, data_frame, start, end):
     e_list = defaultdict(list)
     for i, j in edges:
+        bus_i = data_frame.loc[data_frame.n1 == i.split('_')[0], 'bus'].values[0]
+        bus_j = data_frame.loc[data_frame.n1 == j.split('_')[0], 'bus'].values[0]
         # If (i, j) or (j, i) is in node_pairs there is no edge.
         if 'S' in i.split('_')[0]:
             tsi = data_frame.loc[data_frame.n1 == i.split('_')[0], 'start'].values[0]
@@ -537,7 +608,7 @@ def create_edge_list(edges, data_frame, start, end):
         else:
             tej = end[int(j.split('_')[-1])]
 
-        if (np.abs(tej - tsi) >= 270) or (tsj < tei) or ('E' in i) or ('S' in j):
+        if (np.abs(tej - tsi) >= 270) or (tsj < tei) or ('E' in i) or ('S' in j) or (bus_i != bus_j):
             e_list[i].append(j)
     return e_list
 
@@ -668,6 +739,7 @@ def index():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/detail', methods=('GET', 'POST'))
 def detail():
     if is_logged():
@@ -761,6 +833,7 @@ def new_bus_model():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/edit_bus_model', methods=('GET', 'POST'))
 def edit_bus_model():
     if is_logged():
@@ -781,6 +854,7 @@ def edit_bus_model():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/buses_models_list', methods=('GET', 'POST'))
 def buses_models_list():
     if is_logged():
@@ -794,6 +868,7 @@ def buses_models_list():
         return render_template('buses_models_list.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
+
 
 # @app.route('/<int:id_user>/<int:ts>/delete/', methods=('POST',))
 # def delete(id_user, ts):
