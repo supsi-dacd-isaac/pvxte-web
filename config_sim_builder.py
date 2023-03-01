@@ -45,6 +45,7 @@ def num_buses_at_time(df):
 
 def configuration(csv_file_path, company, route_number, battery_size, charging_locations, day_type, t_horizon, p_max, pd_max,
                   depot_charging, optimize_for_each_bus):
+    # todo: battery size is read from the bus profile. So this line is redundant. Remove it and other related statements!
     if battery_size == -1:
         battery_size = 704
 
