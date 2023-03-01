@@ -189,18 +189,16 @@ def run_sim_step2(main_cfg, pars):
     (id_user, ts) = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')
 
     bsize = float(bus_model_data['batt_pack_capacity'])
-    max_charging_power = float(bus_model_data['max_pass_cap'])
+    max_charging_power = float(pars['p_max'])
 
     # Get user id and timestamp
-    # todo opt_all_flag variable should be configurable
     opt_all_flag = False
-
     sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize,
                                          charging_locations=[],
                                          day_type=pars['day_type'],
                                          t_horizon=main_cfg['simSettings']['modelTimesteps'],
                                          p_max=max_charging_power,
-                                         pd_max=1,
+                                         pd_max=float(pars['pd_max']),
                                          depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
                                          optimize_for_each_bus=opt_all_flag)
 
@@ -212,7 +210,7 @@ def run_sim_step2(main_cfg, pars):
                                   'Presolve': 1,
                                   'NoRelHeurTime': 60,
                                   'NonConvex': 2,
-                                  'MIPGap': 0.01})
+                                  'MIPGap': 0.2})
 
     start = datetime.datetime.now()
     print("Generated configuration. Setting up optimization model: ", start)
