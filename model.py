@@ -10,7 +10,6 @@ from datetime import datetime
 
 def MILP(env,
          config,
-         charging_power,
          opt_battery_for_each_bus,
          default_assignment,
          partial_assignment,
@@ -30,7 +29,8 @@ def MILP(env,
 
     battery_size = config['battery_size']
     soc_start = config['soc_start']
-    P_max = charging_power
+    p_max = config["max_charging_power"]
+    pd_max = config["max_depot_charging_power"]
     nodes = trip_indices + charge_indices + depot_origin + depot_destination + depot_charge_indices
 
     service_start = {i["index"]: i["t_start"] for i in config['trips_info']}
@@ -65,7 +65,7 @@ def MILP(env,
     print(f"Charging overlap constraint {non_overlap_charging}")
     print(f"Optimize battery for each bus individually {opt_battery_for_each_bus}")
     print(f"Maximum charging time {max_charge_time}")
-    print(f"Maximum charging power {P_max} kW")
+    print(f"Maximum charging powers: Pantograph {p_max} kW, depot {pd_max} kW")
     print(f"Maximum battery size {battery_size} kWh")
     print(f'Depot charging {bool(depot_charge_indices)}')
     print(f'Node charging {bool(charge_indices)}')
@@ -354,23 +354,23 @@ def MILP(env,
     if opt_battery_for_each_bus:
         if charge_indices:
             model.addConstrs(
-                Ct[i] * b[k] >= quicksum(DSOC[k, i - len(trip_indices)] for k in vehicle_indices) * 60 / P_max
+                Ct[i] * b[k] >= quicksum(DSOC[k, i - len(trip_indices)] for k in vehicle_indices) * 60 / p_max
                 for i in charge_indices
                 for k in vehicle_indices)
 
         if depot_charge_indices:
-            model.addConstrs(Ct[i] * b[k] >= quicksum(DSOC[k, i] for k in vehicle_indices) * 60 / P_max
+            model.addConstrs(Ct[i] * b[k] >= quicksum(DSOC[k, i] for k in vehicle_indices) * 60 / pd_max
                              for i in depot_charge_indices
                              for k in vehicle_indices)
 
     else:
         if charge_indices:
             model.addConstrs(Ct[i] * b >= quicksum(DSOC[k, i - len(trip_indices)]
-                                                   for k in vehicle_indices) * 60 / P_max
+                                                   for k in vehicle_indices) * 60 / p_max
                              for i in charge_indices)
 
         if depot_charge_indices:
-            model.addConstrs(Ct[i] * b >= quicksum(DSOC[k, i] for k in vehicle_indices) * 60 / P_max
+            model.addConstrs(Ct[i] * b >= quicksum(DSOC[k, i] for k in vehicle_indices) * 60 / pd_max
                              for i in depot_charge_indices)
 
     if opt_battery_for_each_bus:
@@ -406,7 +406,8 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--config_type', required=True, type=str, help='Config file (without file extension).')
     parser.add_argument('-v', '--partial_assignment', required=False, type=str, default=[], help='Cutoffs for partial vehicle assignment.')
     parser.add_argument('-o', '--non_overlap_charging', required=False, action='store_true', help='Use non-overlapped charging constraint.')
-    parser.add_argument('-b', '--opt_battery_for_each_bus', required=False, action='store_true', help='Optimize battery size for each bus.')
+    parser.add_argument('-b', '--opt_battery_for_each_bus', required=False, action='store_false', help='Optimize battery size for each '
+                                                                                                       'bus.')
     parser.add_argument('-t', '--charge_time', required=True, type=str, help='Max. allowable charge-time(s).')
     parser.add_argument('-g', '--mip_gap', required=False, default=0.01, type=float, help='Set Gurobi MIPGap parameter.')
     parser.add_argument('-n', '--nrel_time', required=False, default=60, type=int, help='Set Gurobi NoRelHeurTime parameter.')
@@ -454,7 +455,6 @@ if __name__ == '__main__':
         model = MILP(config=config_file,
                      env=e,
                      max_charge_time=ctime,
-                     charging_power=power,
                      default_assignment=default,
                      opt_battery_for_each_bus=opt_battery,
                      partial_assignment=partial,
