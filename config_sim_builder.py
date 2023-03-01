@@ -63,7 +63,7 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     trips_times['departure_node'] = trips_times['starting_city'].apply(lambda x: node_map[x])
     trips_times['arrival_node'] = trips_times['arrival_city'].apply(lambda x: node_map[x])
 
-    with open(f'static/time-energy/{company}-time-energy-{route_number}.json', 'r') as f:
+    with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
         data = json.load(f)
 
     txy, exy, num_nodes = data[0], data[1], data[2]
