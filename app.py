@@ -164,9 +164,14 @@ def run_sim(sim_file_path, main_cfg, pars):
     # todo opt_all_flag variable should be configurable
     opt_all_flag = False
 
-    sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize, [],
-                                         main_cfg['simSettings']['modelTimesteps'], max_charging_power,
-                                         main_cfg['simSettings']['chargingAtDeposit'], opt_all_flag)
+    sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize,
+                                         charging_locations=[],
+                                         day_type= ,
+                                         t_horizon=main_cfg['simSettings']['modelTimesteps'],
+                                         p_max=max_charging_power,
+                                         pd_max= ,
+                                         depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
+                                         optimize_for_each_bus=opt_all_flag)
 
     e = Env("gurobi.log", params={'MemLimit': 30,
                                   'PreSparsify': 1,
