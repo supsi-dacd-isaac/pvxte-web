@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link"><h3>New simulation - step1</h3></a>
+              </li>
+        </ul>
+    </nav>
+    <form method="post" enctype = "multipart/form-data">
+        <fieldset>
+            <table class="table-sm-form">
+                <tbody>
+                    <tr>
+                        <td>Bus model</td>
+                        <td>
+                            <select class="form-select" name="id_bus_model">
+                                {% for bus_model in buses_models %}
+                                    <option value="{{bus_model['id']}}">{{ bus_model['name'] }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Timetable/line file:</td>
+                        <td><input class="form-control" type="file" name="data_file" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are setting up the configuration of new simulation! Are you sure?')">Submit</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </fieldset>
+    </form>
+  {% if error %}
+    <br>
+    <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
+  {% endif %}
+{% endblock %}

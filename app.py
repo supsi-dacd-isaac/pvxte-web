@@ -64,20 +64,28 @@ def check_login_data(conn, u, p):
     login_data = conn.execute("SELECT * FROM user WHERE username='%s'" % u).fetchall()
     if len(login_data) > 0 and 'username' in login_data[0].keys():
         if decrypt(login_data[0]['password']) == p:
-            return login_data[0]['id']
+            return login_data[0]['id'], login_data[0]['email'], login_data[0]['company']
         else:
-            return False
+            return False, False, False
     else:
-        return False
+        return False, False, False
 
 
 def get_sims_data(conn):
     return conn.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
                         "FROM sim WHERE id_user=%i" % session['id_user']).fetchall()
 
+def get_single_sim_data(conn, id_sim):
+    cur = conn.cursor()
+    cur.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
+                        "FROM sim WHERE id=%i" % int(id_sim))
+
+    for row in cur.fetchall():
+        return list(row)
+
 def get_buses_models_data(conn):
     cur = conn.cursor()
-    cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id_user=%i" % session['id_user'])
+    cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id_user=%i ORDER BY name ASC" % session['id_user'])
     bus_data = []
     for row in cur.fetchall():
         row_dict = json.loads(row[3])
@@ -125,9 +133,11 @@ def delete_file_sim(file_path):
     except Exception as e:
         print('ERROR: Unable to delete file %s' % file_path)
 
-def delete_sim(conn, created_at):
-    conn.execute('DELETE FROM sim WHERE id_user = ? AND created_at = ?', (session['id_user'], created_at))
+def delete_sim(conn, sim_metadata):
+    conn.execute('DELETE FROM sim WHERE id = ?', (sim_metadata[0],))
     conn.commit()
+
+    created_at = sim_metadata[2]
 
     id_file = '%s_%s' % (session['id_user'], created_at)
 
@@ -142,18 +152,41 @@ def delete_bus_model(conn, bus_model_id):
     conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id, ))
     conn.commit()
 
-def run_sim(sim_file_path, main_cfg, pars):
+def get_lines_day_types_from_data_file(sim_file_path):
+    lines = []
+    days_types = []
+    flag_start = True
+    with open(sim_file_path) as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            if flag_start is True:
+                starting_station = row['starting_city']
+                flag_start = False
+
+            if row['line_id'] not in lines:
+                lines.append(row['line_id'])
+            if row['day_type'] not in days_types:
+                days_types.append(row['day_type'])
+        arrival_station = row['arrival_city']
+    return lines, days_types, starting_station, arrival_station
+
+def run_sim_step2(main_cfg, pars):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    # Set properly the parameters
-    (company, line) = pars['comp_line'].split('__')
-    bsize = float(pars['bsize'])
-    max_charging_power = int(pars['max_charge_power'])
+    print(pars)
+    bus_model_data = get_single_bus_model_data(conn, int(pars['bus_model_id']))
+
+    # Set properly the main parameters
+    company = session['company_user']
+    line = pars['line']
+    sim_file_path = pars['data_file']
+    (id_user, ts) = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')
+
+    bsize = float(bus_model_data['batt_pack_capacity'])
+    max_charging_power = float(bus_model_data['max_pass_cap'])
 
     # Get user id and timestamp
-    (id_user, ts) = sim_file_path.replace('.csv', '').split(os.sep)[-1].split('_')
-
     # todo opt_all_flag variable should be configurable
     opt_all_flag = False
 
@@ -222,9 +255,12 @@ def run_sim(sim_file_path, main_cfg, pars):
     print("End time: ", end)
     print('Solution time (seconds): ', (end - start).total_seconds())
 
-    cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (int(id_user), int(ts), company, line, pars['day_type'], bsize, max_charging_power))
+    cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power, "
+                "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                (int(id_user), int(ts), company, line, pars['day_type'], bsize, max_charging_power,
+                 int(pars['depo_elevation']), int(pars['starting_station_elevation']),
+                 int(pars['arrival_station_elevation'])))
     conn.commit()
     conn.close()
     return True
@@ -583,12 +619,14 @@ def login():
     error = None
     if request.method == 'POST':
         conn = get_db_connection()
-        login_result = check_login_data(conn, request.form['username'], request.form['password'])
+        id_user, email_user, company_user = check_login_data(conn, request.form['username'], request.form['password'])
         conn.close()
-        if login_result is False:
+        if id_user is False:
             error = 'Invalid Credentials. Please try again.'
         else:
-            session['id_user'] = login_result
+            session['id_user'] = id_user
+            session['email_user'] = email_user
+            session['company_user'] = company_user
             session['username'] = request.form['username']
             session['password'] = request.form['password']
             return redirect(url_for('index'))
@@ -618,8 +656,9 @@ def signup():
 def index():
     if is_logged():
         conn = get_db_connection()
-        if 'del' in request.args.keys() and 'created_at' in request.args.keys():
-            delete_sim(conn, request.args['created_at'])
+        if 'del' in request.args.keys() and 'id' in request.args.keys():
+            sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
+            delete_sim(conn, sim_metadata)
 
         # Get simulation data
         sims = get_sims_data(conn)
@@ -632,24 +671,31 @@ def index():
 @app.route('/detail', methods=('GET', 'POST'))
 def detail():
     if is_logged():
-        df_bsize_filename = 'static/output-bsize/%s_%s.csv' % (session['id_user'], request.args['created_at'])
+        conn = get_db_connection()
+        sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
+        conn.close()
+
+        df_bsize_filename = 'static/output-bsize/%s_%i.csv' % (session['id_user'], sim_metadata[2])
         df_bsize = pd.read_csv(df_bsize_filename)
 
-        df_data_filename = 'static/output-df/%s_%s.csv' % (session['id_user'], request.args['created_at'])
+        df_data_filename = 'static/output-df/%s_%i.csv' % (session['id_user'], sim_metadata[2])
         df_data = pd.read_csv(df_data_filename)
 
         data = dict(request.args)
         data['min_num_drivers'] = len(set(df_data["Driver#"]))
         data['df_bsize'] = df_bsize
-        return render_template('detail.html', data=data)
+        print(sim_metadata)
+        return render_template('detail.html', sim_metadata=sim_metadata, data=data)
     else:
         return redirect(url_for('login'))
 
-@app.route('/new_sim/', methods=('GET', 'POST'))
-def new_sim():
+@app.route('/new_sim_step1/', methods=('GET', 'POST'))
+def new_sim_step1():
     if is_logged():
         if request.method == 'POST':
             target = 'static/input-csv'
+            conn = get_db_connection()
+            cur = conn.cursor()
 
             ts = (datetime.datetime.now(tz=pytz.UTC).timestamp())
             if len(request.files['data_file'].filename) > 0:
@@ -657,21 +703,52 @@ def new_sim():
                 file_destination = '/'.join([target, file_name])
                 request.files['data_file'].save(file_destination)
 
-                # Run the simulation and save the output in the DB
-                try:
-                    run_sim(sim_file_path=file_destination, main_cfg=main_cfg, pars=request.form)
-                except Exception as e:
-                    print('EXCEPTION: %s' % str(e))
-                    return render_template('new_sim.html',
-                                           error='Data file has a wrong format! The simulation cannot be run',
-                                           comp_lines=get_companies_lines_list())
-
-                return redirect(url_for('index'))
+                return redirect(url_for('new_sim_step2', id_bus_model=int(request.form.to_dict()['id_bus_model']),
+                                                                          data_file=file_destination))
             else:
-                return render_template('new_sim.html', error='No file uploaded', comp_lines=get_companies_lines_list())
-        return render_template('new_sim.html', comp_lines=get_companies_lines_list())
+                buses_models = get_buses_models_data(conn)
+                conn.close()
+                return render_template('new_sim_step1.html', error='No file uploaded', buses_models=buses_models)
+        else:
+            conn = get_db_connection()
+            buses_models = get_buses_models_data(conn)
+            conn.close()
+            return render_template('new_sim_step1.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
+
+@app.route('/new_sim_step2/', methods=('GET', 'POST'))
+def new_sim_step2():
+    if is_logged():
+        if request.method == 'POST':
+            # Run the simulation and save the output in the DB
+            try:
+                run_sim_step2(main_cfg=main_cfg, pars=request.form.to_dict())
+                return redirect(url_for('index'))
+            except Exception as e:
+                print('EXCEPTION: %s' % str(e))
+                conn = get_db_connection()
+                req_dict = request.args.to_dict()
+                lines, days_types, starting_station, arrival_station = get_lines_day_types_from_data_file(req_dict['data_file'])
+                bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
+                conn.close()
+                return render_template('new_sim_step2.html',
+                                       error='Data file has a wrong format! The simulation cannot be run',
+                                       data_file=req_dict['data_file'], lines=lines, days_types=days_types,
+                                       bus_model_data=bus_model_data, starting_station=starting_station,
+                                       arrival_station=arrival_station)
+        else:
+            conn = get_db_connection()
+            req_dict = request.args.to_dict()
+            lines, days_types, starting_station, arrival_station = get_lines_day_types_from_data_file(req_dict['data_file'])
+            bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
+            conn.close()
+            return render_template('new_sim_step2.html', data_file=req_dict['data_file'], lines=lines,
+                                   days_types=days_types, bus_model_data=bus_model_data,
+                                   starting_station=starting_station, arrival_station=arrival_station)
+    else:
+        return redirect(url_for('login'))
+
 
 @app.route('/new_bus_model', methods=('GET', 'POST'))
 def new_bus_model():
@@ -701,7 +778,6 @@ def edit_bus_model():
             bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
             conn.close()
             return render_template('edit_bus_model.html', bus_model_data=bus_model_data)
-        # return render_template('edit_bus_model.html')
     else:
         return redirect(url_for('login'))
 
