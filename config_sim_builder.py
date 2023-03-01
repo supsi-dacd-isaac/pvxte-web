@@ -21,9 +21,9 @@ def generate_sparse_matrix(node_times: list, max_index: int) -> csr_matrix:
     return csr_matrix((data, (row, col)), shape=(size, size)).toarray()
 
 
-def select_vehicle(dataset, ids):
+def select_routes(dataset, ids, scn):
     ids = list(map(int, ids))
-    return dataset[dataset.bus_id.isin(ids)]
+    return dataset[dataset.line_id.isin(ids) & dataset.day_type.isin(scn)]
 
 
 def get_key_from_value(d, val):
@@ -43,17 +43,25 @@ def num_buses_at_time(df):
     return result
 
 
-def configuration(csv_file_path, company, route_number, battery_size, charging_locations, t_horizon, p_max,
+def configuration(csv_file_path, company, route_number, battery_size, charging_locations, day_type, t_horizon, p_max, pd_max,
                   depot_charging, optimize_for_each_bus):
     if battery_size == -1:
-        battery_size = 652 if company == 'FART' else 244.5
+        battery_size = 704
 
     # Load data files
     route_num_split = route_number.split(',')
     route_number = '-'.join(route_num_split)
     trips_times = pd.read_csv(csv_file_path)
+    trips_times = select_routes(trips_times, route_num_split, day_type.split(','))
+    trips_times = trips_times.reset_index().drop(['index'], axis=1)
 
     vehicle_ids = list(set(trips_times.bus_id.to_list()))
+
+    with open(f'static/node-map/{company}-node-map.json', 'r') as file:
+        node_map = json.load(file)
+
+    trips_times['departure_node'] = trips_times['starting_city'].apply(lambda x: node_map[x])
+    trips_times['arrival_node'] = trips_times['arrival_city'].apply(lambda x: node_map[x])
 
     with open(f'static/time-energy/{company}-time-energy-{route_number}.json', 'r') as f:
         data = json.load(f)
@@ -78,7 +86,7 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               'battery_size': battery_size,
               'soc_start': 1.0,
               "max_charging_power": p_max,
-              "dc_start_node": get_key_from_value(txy, min([v for k, v in txy.items() if k[1] == 0 and k[0] > 0]))[0],
+              "max_depot_charging_power": pd_max,
               "trips_info": [],
               "depot_origin": [],
               "depot_destination": [],
@@ -103,13 +111,14 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     num_depots = config["#depot"]
     max_index = num_depots + 3 * num_trips
 
+    # Trip energy is in the E_total column of the dataframe.
     for index, row in trips_times.iterrows():
         trips.append({'index': index,
                       't_start': row.departure_timestep,
                       't_end': row.arrival_timestep,
                       'n_start': row.departure_node,
                       'n_end': row.arrival_node,
-                      'energy': exy[row.departure_node, row.arrival_node],
+                      'energy': row.E_total if row.E_total is not np.nan else 0,
                       'vehicle_id': row.bus_id})
 
     config["trips_info"] = trips
