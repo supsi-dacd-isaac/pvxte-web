@@ -440,7 +440,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     # Total charging events at time j.
     y = model.addVars(np.arange(max_step), lb=0, name='y')
     # Bus i is charging at timestep j but not j + 1
-    u = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='u')
+    # u = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='u')
     z2 = model.addVar(name='z2')
 
     cost = model.addVar(name='cost')
@@ -452,9 +452,9 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) <= df_charge[k] for k in set(df.bus))
     model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) >= df_charge[k] for k in set(df.bus))
     # Charging stop is indicated by an active node at time t and inactive node at time t + 1
-    model.addConstrs(x[k, t] - x[k, t + 1] <= u[k, t] for t in np.arange(max_step - 1) for k in set(df.bus))
-    # For each bus, the number of charging start-stop sequences should be less than or equal to charging_blocks
-    model.addConstrs(quicksum(u[k, t] for t in np.arange(max_step)) <= charging_blocks for k in set(df.bus))
+    # model.addConstrs(x[k, t] - x[k, t + 1] <= u[k, t] for t in np.arange(max_step - 1) for k in set(df.bus))
+    # # For each bus, the number of charging start-stop sequences should be less than or equal to charging_blocks
+    # model.addConstrs(quicksum(u[k, t] for t in np.arange(max_step)) <= charging_blocks for k in set(df.bus))
 
     # Sum of charging events at each time-step.
     model.addConstrs(y[t] == quicksum(x[k, t] for k in set(df.bus)) for t in np.arange(max_step))
