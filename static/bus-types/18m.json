@@ -1,0 +1,27 @@
+{
+  "p_ventilation": 500,
+  "p_other": 700,
+  "battery_capacity": 704000,
+
+  "intern_temperature": 18,
+  "orifice_coefficient": 0.5,
+  "orifice_height": 2,
+  "orifice_length": 3,
+  "stop_frequency": 360,
+
+  "length": 18.1,
+  "width": 2.55,
+  "height": 3.32,
+  "weight": 29000,
+
+  "n_seats": 80,
+  "rolling_resistance": 0.01,
+  "max_capacity": 113,
+  "occupancy": 0.5,
+
+  "drag_coefficient": 0.7,
+  "passage_rate": 0.25,
+
+  "bus_efficiency": 0.82,
+  "battery_efficiency": 0.9
+}
