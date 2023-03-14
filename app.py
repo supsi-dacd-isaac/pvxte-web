@@ -75,13 +75,15 @@ def get_sims_data(conn):
     return conn.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
                         "FROM sim WHERE id_user=%i" % session['id_user']).fetchall()
 
+
 def get_single_sim_data(conn, id_sim):
     cur = conn.cursor()
     cur.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
-                        "FROM sim WHERE id=%i" % int(id_sim))
+                "FROM sim WHERE id=%i" % int(id_sim))
 
     for row in cur.fetchall():
         return list(row)
+
 
 def get_buses_models_data(conn):
     cur = conn.cursor()
@@ -136,6 +138,7 @@ def delete_file_sim(file_path):
     except Exception as e:
         print('ERROR: Unable to delete file %s' % file_path)
 
+
 def delete_sim(conn, sim_metadata):
     conn.execute('DELETE FROM sim WHERE id = ?', (sim_metadata[0],))
     conn.commit()
@@ -156,6 +159,7 @@ def delete_bus_model(conn, bus_model_id):
     conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
 
+
 def get_lines_day_types_from_data_file(sim_file_path):
     lines = []
     days_types = []
@@ -174,8 +178,8 @@ def get_lines_day_types_from_data_file(sim_file_path):
         arrival_station = row['arrival_city']
     return lines, days_types, starting_station, arrival_station
 
-def run_sim_step2(main_cfg, pars):
 
+def run_sim_step2(main_cfg, pars):
     conn = get_db_connection()
     cur = conn.cursor()
 
@@ -200,7 +204,8 @@ def run_sim_step2(main_cfg, pars):
                                          p_max=max_charging_power,
                                          pd_max=float(pars['pd_max']),
                                          depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
-                                         optimize_for_each_bus=opt_all_flag)
+                                         optimize_for_each_bus=opt_all_flag,
+                                         bus_type=pars['btype'])
 
     e = Env("gurobi.log", params={'MemLimit': 30,
                                   'PreSparsify': 1,
@@ -759,6 +764,7 @@ def detail():
     else:
         return redirect(url_for('login'))
 
+
 @app.route('/new_sim_step1/', methods=('GET', 'POST'))
 def new_sim_step1():
     if is_logged():
@@ -774,7 +780,7 @@ def new_sim_step1():
                 request.files['data_file'].save(file_destination)
 
                 return redirect(url_for('new_sim_step2', id_bus_model=int(request.form.to_dict()['id_bus_model']),
-                                                                          data_file=file_destination))
+                                        data_file=file_destination))
             else:
                 buses_models = get_buses_models_data(conn)
                 conn.close()
@@ -786,6 +792,7 @@ def new_sim_step1():
             return render_template('new_sim_step1.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/new_sim_step2/', methods=('GET', 'POST'))
 def new_sim_step2():
