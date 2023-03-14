@@ -44,7 +44,7 @@ def num_buses_at_time(df):
 
 
 def configuration(csv_file_path, company, route_number, battery_size, charging_locations, day_type, t_horizon, p_max, pd_max,
-                  depot_charging, optimize_for_each_bus):
+                  depot_charging, optimize_for_each_bus, bus_type):
     # todo: battery size is read from the bus profile. So this line is redundant. Remove it and other related statements!
     if battery_size == -1:
         battery_size = 704
@@ -83,6 +83,9 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
         charging_locations = charging_locations.split(',')
         charging_locations = list(map(int, charging_locations))
 
+    with open(f'static/bus-types/{str(bus_type)}m.json', 'r') as f:
+        btype = json.load(f)
+
     config = {"route_id": f"{route_number}",
               "company": f"{company}",
               "#vehicles": len(vehicle_ids),
@@ -109,7 +112,8 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "service_energy": [],
               "charging_cost": [],
               "optimize_for_each_bus": optimize_for_each_bus,
-              "Battery pack size": 88
+              "Battery pack size": 88,
+              "bus_data": btype
               }
     trips = []
     charge = []
