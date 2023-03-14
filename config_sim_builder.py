@@ -67,6 +67,12 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
         data = json.load(f)
 
+    with open(f'static/elevations/{company}-elevation.json', 'r') as f:
+        elevation = json.load(f)
+
+    trips_times['starting_city_ele'] = trips_times["starting_city"].apply(lambda loc: elevation[loc])
+    trips_times['arrival_city_ele'] = trips_times["arrival_city"].apply(lambda loc: elevation[loc])
+
     txy, exy, num_nodes = data[0], data[1], data[2]
     txy = {eval(k): v for k, v in txy.items()}
     exy = {eval(k): v for k, v in exy.items()}
@@ -120,7 +126,11 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
                       'n_start': row.departure_node,
                       'n_end': row.arrival_node,
                       'energy': row.E_total if row.E_total is not np.nan else 0,
-                      'vehicle_id': row.bus_id})
+                      'vehicle_id': row.bus_id,
+                      'distance': row.distance,
+                      'start_elevation': row.starting_city_ele,
+                      'end_elevation': row.arrival_city_ele,
+                      'alpha': math.atan((row.arrival_city_ele - row.starting_city_ele) / row.distance)})
 
     config["trips_info"] = trips
 
