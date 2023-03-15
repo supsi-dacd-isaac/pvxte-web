@@ -156,35 +156,46 @@ def delete_bus_model(conn, bus_model_id):
     conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
 
-def get_lines_day_types_from_data_file(sim_file_path):
+def get_lines_daytypes_from_data_file(sim_file_path):
     lines = []
     days_types = []
-    flag_start = True
+    terminals = {}
     with open(sim_file_path) as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
-            if flag_start is True:
-                starting_station = row['starting_city']
-                flag_start = False
-
             if row['line_id'] not in lines:
                 lines.append(row['line_id'])
             if row['day_type'] not in days_types:
                 days_types.append(row['day_type'])
-        arrival_station = row['arrival_city']
-    return lines, days_types, starting_station, arrival_station
 
-def run_sim_step2(main_cfg, pars):
+            if row['line_id'] not in terminals.keys():
+                terminals[row['line_id']] = []
+    return sorted(lines), sorted(days_types)
+
+def get_terminals(sim_metadata):
+    lines = []
+    for k in sim_metadata.keys():
+        if len(k) > 5 and k[0:5] == 'line_':
+            lines.append(k[5:])
+    terminals = []
+    with open(sim_metadata['data_file']) as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            if row['line_id'] in lines:
+                terminals.append(row['arrival_city'])
+    return list(set(terminals))
+
+def run_sim(main_cfg, pars):
 
     conn = get_db_connection()
     cur = conn.cursor()
 
-    print(pars)
     bus_model_data = get_single_bus_model_data(conn, int(pars['bus_model_id']))
 
     # Set properly the main parameters
     company = session['company_user']
     line = pars['line']
+
     sim_file_path = pars['data_file']
     (id_user, ts) = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')
 
@@ -193,6 +204,7 @@ def run_sim_step2(main_cfg, pars):
 
     # Get user id and timestamp
     opt_all_flag = False
+    print('P0')
     sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize,
                                          charging_locations=[],
                                          day_type=pars['day_type'],
@@ -202,6 +214,7 @@ def run_sim_step2(main_cfg, pars):
                                          depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
                                          optimize_for_each_bus=opt_all_flag)
 
+    print('P1')
     e = Env("gurobi.log", params={'MemLimit': 30,
                                   'PreSparsify': 1,
                                   'MIPFocus': 3,
@@ -762,25 +775,28 @@ def detail():
 @app.route('/new_sim_step1/', methods=('GET', 'POST'))
 def new_sim_step1():
     if is_logged():
+        conn = get_db_connection()
         if request.method == 'POST':
             target = 'static/input-csv'
-            conn = get_db_connection()
-            cur = conn.cursor()
 
             ts = (datetime.datetime.now(tz=pytz.UTC).timestamp())
             if len(request.files['data_file'].filename) > 0:
                 file_name = '%i_%i.csv' % (session['id_user'], ts)
-                file_destination = '/'.join([target, file_name])
-                request.files['data_file'].save(file_destination)
+                data_file = '/'.join([target, file_name])
+                request.files['data_file'].save(data_file)
 
-                return redirect(url_for('new_sim_step2', id_bus_model=int(request.form.to_dict()['id_bus_model']),
-                                                                          data_file=file_destination))
+                id_bus_model = int(request.form.to_dict()['id_bus_model'])
+
+                conn = get_db_connection()
+                lines, days_types = get_lines_daytypes_from_data_file(data_file)
+                conn.close()
+                return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
+                                        id_bus_model=id_bus_model))
             else:
                 buses_models = get_buses_models_data(conn)
                 conn.close()
                 return render_template('new_sim_step1.html', error='No file uploaded', buses_models=buses_models)
         else:
-            conn = get_db_connection()
             buses_models = get_buses_models_data(conn)
             conn.close()
             return render_template('new_sim_step1.html', buses_models=buses_models)
@@ -793,29 +809,70 @@ def new_sim_step2():
         if request.method == 'POST':
             # Run the simulation and save the output in the DB
             try:
-                run_sim_step2(main_cfg=main_cfg, pars=request.form.to_dict())
-                return redirect(url_for('index'))
+                sim_metadata = request.form.to_dict()
+                return redirect(url_for('new_sim_step3', sim_metadata=sim_metadata))
             except Exception as e:
                 print('EXCEPTION: %s' % str(e))
                 conn = get_db_connection()
                 req_dict = request.args.to_dict()
-                lines, days_types, starting_station, arrival_station = get_lines_day_types_from_data_file(req_dict['data_file'])
+                lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
                 bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
                 conn.close()
                 return render_template('new_sim_step2.html',
                                        error='Data file has a wrong format! The simulation cannot be run',
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
-                                       bus_model_data=bus_model_data, starting_station=starting_station,
-                                       arrival_station=arrival_station)
+                                       bus_model_data=bus_model_data)
         else:
             conn = get_db_connection()
             req_dict = request.args.to_dict()
-            lines, days_types, starting_station, arrival_station = get_lines_day_types_from_data_file(req_dict['data_file'])
+            lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
             bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
             conn.close()
             return render_template('new_sim_step2.html', data_file=req_dict['data_file'], lines=lines,
-                                   days_types=days_types, bus_model_data=bus_model_data,
-                                   starting_station=starting_station, arrival_station=arrival_station)
+                                   days_types=days_types, bus_model_data=bus_model_data)
+    else:
+        return redirect(url_for('login'))
+
+@app.route('/new_sim_step3/', methods=('GET', 'POST'))
+def new_sim_step3():
+    if is_logged():
+        if request.method == 'POST':
+            # Run the simulation and save the output in the DB
+            try:
+                sim_pars = request.form.to_dict()
+
+                # Prepare the line string
+                sim_pars['line'] = ''
+                for elem in sim_pars.keys():
+                    if elem[0:5] == 'line_':
+                        sim_pars['line'] += ',' + elem[5:]
+                sim_pars['line'] = sim_pars['line'][1:]
+
+                run_sim(main_cfg=main_cfg, pars=sim_pars)
+                return redirect(url_for('index'))
+            except Exception as e:
+                print('EXCEPTION: %s' % str(e))
+                conn = get_db_connection()
+                terminals = get_terminals(sim_pars)
+                lines, days_types = get_lines_daytypes_from_data_file(sim_pars['data_file'])
+                # todo get terminals related to the lines selected in step 2, a new function is needed instead of get_lines_daytypes_from_data_file()
+                bus_model_data = get_single_bus_model_data(conn, int(sim_pars['bus_model_id']))
+                conn.close()
+                return render_template('new_sim_step3.html',
+                                       error='Data file has a wrong format! The simulation cannot be run',
+                                       sim_metadata=sim_pars, terminals=[], lines=lines)
+        else:
+            req_dict = request.args.to_dict()
+            str_metadata = json.dumps(req_dict['sim_metadata']).replace('\'', '\"')
+            sim_metadata = json.loads(str_metadata[1:-1])
+
+            terminals = get_terminals(sim_metadata)
+            lines = []
+            for elem in sim_metadata.keys():
+                if elem[0:5] == 'line_':
+                    lines.append(elem[5:])
+
+            return render_template('new_sim_step3.html', sim_metadata=sim_metadata, terminals=terminals, lines=lines)
     else:
         return redirect(url_for('login'))
 
@@ -866,49 +923,6 @@ def buses_models_list():
         return render_template('buses_models_list.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
-
-
-# @app.route('/<int:id_user>/<int:ts>/delete/', methods=('POST',))
-# def delete(id_user, ts):
-#     conn = get_db_connection()
-#     conn.execute('DELETE FROM sim WHERE id_user = ? AND created_at = ?', (id_user, ts))
-#     conn.commit()
-#     conn.close()
-#     flash('Successfully deleted!')
-#     return redirect(url_for('index'))
-
-# @app.route('/<int:id>/edit/', methods=('GET', 'POST'))
-# def edit(id):
-#
-#     if request.method == 'POST':
-#         title = request.form['title']
-#         content = request.form['content']
-#
-#         if not title:
-#             flash('Title is required!')
-#
-#         elif not content:
-#             flash('Content is required!')
-#
-#         else:
-#             conn = get_db_connection()
-#             conn.execute('UPDATE posts SET title = ?, content = ?'
-#                          ' WHERE id = ?',
-#                          (title, content, id))
-#             conn.commit()
-#             conn.close()
-#             return redirect(url_for('index'))
-#
-#     return render_template('edit.html', post=post)
-#
-# @app.route('/<int:id>/delete/', methods=('POST',))
-# def delete(id):
-#     conn = get_db_connection()
-#     conn.execute('DELETE FROM posts WHERE id = ?', (id,))
-#     conn.commit()
-#     conn.close()
-#     flash('"{}" was successfully deleted!'.format(post['title']))
-#     return redirect(url_for('index'))
 
 if __name__ == "__main__":
     app.run(debug=True)
