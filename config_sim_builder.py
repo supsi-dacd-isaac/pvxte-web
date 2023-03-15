@@ -44,7 +44,7 @@ def num_buses_at_time(df):
 
 
 def configuration(csv_file_path, company, route_number, battery_size, charging_locations, day_type, t_horizon, p_max, pd_max,
-                  depot_charging, optimize_for_each_bus):
+                  depot_charging, optimize_for_each_bus, bus_type):
     # todo: battery size is read from the bus profile. So this line is redundant. Remove it and other related statements!
     if battery_size == -1:
         battery_size = 704
@@ -67,6 +67,12 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
         data = json.load(f)
 
+    with open(f'static/elevations/{company}-elevation.json', 'r') as f:
+        elevation = json.load(f)
+
+    trips_times['starting_city_ele'] = trips_times["starting_city"].apply(lambda loc: elevation[loc])
+    trips_times['arrival_city_ele'] = trips_times["arrival_city"].apply(lambda loc: elevation[loc])
+
     txy, exy, num_nodes = data[0], data[1], data[2]
     txy = {eval(k): v for k, v in txy.items()}
     exy = {eval(k): v for k, v in exy.items()}
@@ -76,6 +82,9 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     else:
         charging_locations = charging_locations.split(',')
         charging_locations = list(map(int, charging_locations))
+
+    with open(f'static/bus-types/{str(bus_type)}m.json', 'r') as f:
+        btype = json.load(f)
 
     config = {"route_id": f"{route_number}",
               "company": f"{company}",
@@ -103,7 +112,8 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "service_energy": [],
               "charging_cost": [],
               "optimize_for_each_bus": optimize_for_each_bus,
-              "Battery pack size": 88
+              "Battery pack size": 88,
+              "bus_data": btype
               }
     trips = []
     charge = []
@@ -120,7 +130,11 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
                       'n_start': row.departure_node,
                       'n_end': row.arrival_node,
                       'energy': row.E_total if row.E_total is not np.nan else 0,
-                      'vehicle_id': row.bus_id})
+                      'vehicle_id': row.bus_id,
+                      'distance': row.distance,
+                      'start_elevation': row.starting_city_ele,
+                      'end_elevation': row.arrival_city_ele,
+                      'alpha': math.atan((row.arrival_city_ele - row.starting_city_ele) / row.distance)})
 
     config["trips_info"] = trips
 
