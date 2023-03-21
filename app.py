@@ -212,12 +212,17 @@ def run_sim(main_cfg, pars):
     sim_file_path = pars['data_file']
     (id_user, ts) = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')
 
-    bsize = float(bus_model_data['batt_pack_capacity'])
     max_charging_power = float(pars['p_max'])
 
     # Get user id and timestamp
     opt_all_flag = False
-    sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize,
+
+    elevations = {'Depot': int(pars['elevation_depo'])}
+    for k_par in pars.keys():
+        if 'elevation_terminal' in k_par:
+            elevations[k_par.replace('elevation_terminal_', '')] = int(pars[k_par])
+
+    sim_cfg_filename = csb.configuration(sim_file_path, company, line,
                                          charging_locations=[],
                                          day_type=pars['day_type'],
                                          t_horizon=main_cfg['simSettings']['modelTimesteps'],
@@ -225,7 +230,9 @@ def run_sim(main_cfg, pars):
                                          pd_max=float(pars['pd_max']),
                                          depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
                                          optimize_for_each_bus=opt_all_flag,
-                                         bus_type=pars['bus_model_code'])
+                                         bus_type=pars['bus_model_code'],
+                                         elevations=elevations,
+                                         bus_model_data=bus_model_data)
 
     e = Env("gurobi.log", params={'MemLimit': 30,
                                   'PreSparsify': 1,
@@ -291,8 +298,8 @@ def run_sim(main_cfg, pars):
     cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power, "
                 "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(id_user), int(ts), company, line, pars['day_type'], bsize, max_charging_power,
-                 int(pars['elevation_depo']), 0, 0))
+                (int(id_user), int(ts), company, line, pars['day_type'], float(bus_model_data['batt_pack_capacity']),
+                 max_charging_power, int(pars['elevation_depo']), 0, 0))
     conn.commit()
     conn.close()
     return True

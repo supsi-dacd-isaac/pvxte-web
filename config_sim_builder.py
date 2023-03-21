@@ -43,8 +43,10 @@ def num_buses_at_time(df):
     return result
 
 
-def configuration(csv_file_path, company, route_number, battery_size, charging_locations, day_type, t_horizon, p_max, pd_max,
-                  depot_charging, optimize_for_each_bus, bus_type):
+def configuration(csv_file_path, company, route_number, charging_locations, day_type, t_horizon, p_max, pd_max,
+                  depot_charging, optimize_for_each_bus, bus_type, elevations, bus_model_data):
+    battery_size = float(bus_model_data['batt_pack_capacity'])
+
     # Load data files
     route_num_split = route_number.split(',')
     route_number = '-'.join(route_num_split)
@@ -64,12 +66,8 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
         data = json.load(f)
 
-    # TODO: read from UI, elevations, maybe as a dictionary.
-    with open(f'static/elevations/{company}-elevation.json', 'r') as f:
-        elevation = json.load(f)
-
-    trips_times['starting_city_ele'] = trips_times["starting_city"].apply(lambda loc: elevation[loc])
-    trips_times['arrival_city_ele'] = trips_times["arrival_city"].apply(lambda loc: elevation[loc])
+    trips_times['starting_city_ele'] = trips_times["starting_city"].apply(lambda loc: elevations[loc])
+    trips_times['arrival_city_ele'] = trips_times["arrival_city"].apply(lambda loc: elevations[loc])
 
     txy, exy, num_nodes = data[0], data[1], data[2]
     txy = {eval(k): v for k, v in txy.items()}
@@ -84,6 +82,8 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     with open(f'static/bus-types/{str(bus_type)}.json', 'r') as f:
         btype = json.load(f)
 
+    print(bus_model_data)
+
     config = {"route_id": f"{route_number}",
               "company": f"{company}",
               "#vehicles": len(vehicle_ids),
@@ -91,7 +91,8 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "charging_locations": charging_locations,
               "#trips": len(trips_times),
               "#timesteps": t_horizon,
-              'battery_size': battery_size,
+              'battery_size': float(bus_model_data['batt_pack_capacity']) * float(bus_model_data['max_allowed_batt_packs']),
+              "Battery pack size": float(bus_model_data['batt_pack_capacity']),
               'soc_start': 1.0,
               "max_charging_power": p_max,
               "max_depot_charging_power": pd_max,
@@ -142,8 +143,6 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
 
         if t['n_end'] in charging_locations:
             config["charge_ids"].append(t['index'] + num_trips)
-
-    print('P3')
 
     for t in range(3 * num_trips, max_index):
         config["depot_origin"].append({'index': t, 'n_start': 0})
