@@ -60,6 +60,7 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     trips_times['departure_node'] = trips_times['starting_city'].apply(lambda x: node_map[x])
     trips_times['arrival_node'] = trips_times['arrival_city'].apply(lambda x: node_map[x])
 
+    # TODO: Use user input and profile information to set up this dictionary.
     with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
         data = json.load(f)
 
