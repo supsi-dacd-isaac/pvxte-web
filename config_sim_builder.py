@@ -45,10 +45,6 @@ def num_buses_at_time(df):
 
 def configuration(csv_file_path, company, route_number, battery_size, charging_locations, day_type, t_horizon, p_max, pd_max,
                   depot_charging, optimize_for_each_bus, bus_type):
-    # todo: battery size is read from the bus profile. So this line is redundant. Remove it and other related statements!
-    if battery_size == -1:
-        battery_size = 704
-
     # Load data files
     route_num_split = route_number.split(',')
     route_number = '-'.join(route_num_split)
@@ -94,10 +90,10 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "charging_locations": charging_locations,
               "#trips": len(trips_times),
               "#timesteps": t_horizon,
-              'battery_size': battery_size,  # TODO: read from UI, maximum battery size
+              'battery_size': battery_size,
               'soc_start': 1.0,
-              "max_charging_power": p_max,  # TODO: read from UI, max. charging power pantograph
-              "max_depot_charging_power": pd_max,  # TODO: read from UI, max. charging power depot
+              "max_charging_power": p_max,
+              "max_depot_charging_power": pd_max,
               "trips_info": [],
               "depot_origin": [],
               "depot_destination": [],
@@ -113,7 +109,6 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "service_energy": [],
               "charging_cost": [],
               "optimize_for_each_bus": optimize_for_each_bus,
-              "Battery pack size": 88,  # TODO: read from UI
               "bus_data": btype
               }
     trips = []
