@@ -67,6 +67,7 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
     with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
         data = json.load(f)
 
+    # TODO: read from UI, elevations, maybe as a dictionary.
     with open(f'static/elevations/{company}-elevation.json', 'r') as f:
         elevation = json.load(f)
 
@@ -93,10 +94,10 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "charging_locations": charging_locations,
               "#trips": len(trips_times),
               "#timesteps": t_horizon,
-              'battery_size': battery_size,
+              'battery_size': battery_size,  # TODO: read from UI, maximum battery size
               'soc_start': 1.0,
-              "max_charging_power": p_max,
-              "max_depot_charging_power": pd_max,
+              "max_charging_power": p_max,  # TODO: read from UI, max. charging power pantograph
+              "max_depot_charging_power": pd_max,  # TODO: read from UI, max. charging power depot
               "trips_info": [],
               "depot_origin": [],
               "depot_destination": [],
@@ -112,7 +113,7 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
               "service_energy": [],
               "charging_cost": [],
               "optimize_for_each_bus": optimize_for_each_bus,
-              "Battery pack size": 88,
+              "Battery pack size": 88,  # TODO: read from UI
               "bus_data": btype
               }
     trips = []
