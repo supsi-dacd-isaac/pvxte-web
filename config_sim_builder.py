@@ -83,7 +83,7 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
         charging_locations = charging_locations.split(',')
         charging_locations = list(map(int, charging_locations))
 
-    with open(f'static/bus-types/{str(bus_type)}m.json', 'r') as f:
+    with open(f'static/bus-types/{str(bus_type)}.json', 'r') as f:
         btype = json.load(f)
 
     config = {"route_id": f"{route_number}",
@@ -145,6 +145,8 @@ def configuration(csv_file_path, company, route_number, battery_size, charging_l
 
         if t['n_end'] in charging_locations:
             config["charge_ids"].append(t['index'] + num_trips)
+
+    print('P3')
 
     for t in range(3 * num_trips, max_index):
         config["depot_origin"].append({'index': t, 'n_start': 0})

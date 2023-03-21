@@ -1,4 +1,6 @@
 import csv
+import os
+
 import numpy as np
 import pandas as pd
 import sqlite3
@@ -85,26 +87,37 @@ def get_single_sim_data(conn, id_sim):
 
 def get_buses_models_data(conn):
     cur = conn.cursor()
-    cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id_user=%i ORDER BY name ASC" % session['id_user'])
+    cur.execute("SELECT id, code, name, features FROM bus_model ORDER BY id ASC")
     bus_data = []
     for row in cur.fetchall():
-        row_dict = json.loads(row[3])
+        if row[3] is not None:
+            row_dict = json.loads(row[3])
+        else:
+            row_dict = {}
         row_dict['id'] = row[0]
-        row_dict['id_user'] = row[1]
+        row_dict['code'] = row[1]
         row_dict['name'] = row[2]
         bus_data.append(row_dict)
     return bus_data
 
+def get_available_buses_models():
+    bm_files = []
+    for bm_file in glob.glob('static/bus-types/*.json', recursive=True):
+        bm_files.append(bm_file.split(os.sep)[-1].replace('.json', ''))
+    return bm_files
 
 def get_single_bus_model_data(conn, id_bus_model):
     cur = conn.cursor()
-    cur.execute("SELECT id, id_user, name, features FROM bus_model WHERE id=%i" % id_bus_model)
+    cur.execute("SELECT id, code, name, features FROM bus_model WHERE id=%i" % id_bus_model)
     for row in cur.fetchall():
-        row_dict = json.loads(row[3])
+        if row[3] is not None:
+            row_dict = json.loads(row[3])
+        else:
+            row_dict = {}
         row_dict['id'] = row[0]
-        row_dict['bus_model_id'] = row[0]
-        row_dict['id_user'] = row[1]
+        row_dict['code'] = row[1]
         row_dict['name'] = row[2]
+        break
     return row_dict
 
 
@@ -204,7 +217,6 @@ def run_sim(main_cfg, pars):
 
     # Get user id and timestamp
     opt_all_flag = False
-    print('P0')
     sim_cfg_filename = csb.configuration(sim_file_path, company, line, bsize,
                                          charging_locations=[],
                                          day_type=pars['day_type'],
@@ -212,9 +224,9 @@ def run_sim(main_cfg, pars):
                                          p_max=max_charging_power,
                                          pd_max=float(pars['pd_max']),
                                          depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
-                                         optimize_for_each_bus=opt_all_flag)
+                                         optimize_for_each_bus=opt_all_flag,
+                                         bus_type=pars['bus_model_code'])
 
-    print('P1')
     e = Env("gurobi.log", params={'MemLimit': 30,
                                   'PreSparsify': 1,
                                   'MIPFocus': 3,
@@ -234,7 +246,7 @@ def run_sim(main_cfg, pars):
 
     model = MILP(config=config_file,
                  env=e,
-                 charging_power=max_charging_power,
+                 # charging_power=max_charging_power,
                  opt_battery_for_each_bus=False,
                  default_assignment=True,
                  partial_assignment=[],
@@ -262,7 +274,7 @@ def run_sim(main_cfg, pars):
     battery_size = read_battery_size(res_file, sep=';')
 
     # Create the plot
-    schedule_plot(res_file, battery_size)
+    schedule_plot(res_file)
 
     # Create the final dataframe result
     schedule_drivers(res_file)
@@ -280,8 +292,7 @@ def run_sim(main_cfg, pars):
                 "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (int(id_user), int(ts), company, line, pars['day_type'], bsize, max_charging_power,
-                 int(pars['depo_elevation']), int(pars['starting_station_elevation']),
-                 int(pars['arrival_station_elevation'])))
+                 int(pars['elevation_depo']), 0, 0))
     conn.commit()
     conn.close()
     return True
@@ -294,18 +305,22 @@ def create_new_bus_model(pars):
     conn = get_db_connection()
     cur = conn.cursor()
 
-    cur.execute("INSERT INTO bus_model (id_user, name, features) "
+    with open('static/bus-types/%s.json' % pars['bus_type'], 'r') as f:
+        default_pars = json.load(f)
+    pars.update(default_pars)
+
+    cur.execute("INSERT INTO bus_model (code, name, features) "
                 "VALUES (?, ?, ?)",
-                (int(session['id_user']), bus_name, json.dumps(pars)))
+                (pars['bus_type'], bus_name, json.dumps(pars)))
     conn.commit()
     conn.close()
 
 
 def update_bus_model(conn, pars):
     bus_id = pars['id']
-    bus_name = pars['bus_name']
+    bus_name =  pars['name']
     del pars['id']
-    del pars['bus_name']
+    del pars['name']
     cur = conn.cursor()
 
     cur.execute("UPDATE bus_model SET name=?, features=? WHERE id=?",
@@ -847,7 +862,6 @@ def new_sim_step3():
                     if elem[0:5] == 'line_':
                         sim_pars['line'] += ',' + elem[5:]
                 sim_pars['line'] = sim_pars['line'][1:]
-
                 run_sim(main_cfg=main_cfg, pars=sim_pars)
                 return redirect(url_for('index'))
             except Exception as e:
@@ -855,7 +869,6 @@ def new_sim_step3():
                 conn = get_db_connection()
                 terminals = get_terminals(sim_pars)
                 lines, days_types = get_lines_daytypes_from_data_file(sim_pars['data_file'])
-                # todo get terminals related to the lines selected in step 2, a new function is needed instead of get_lines_daytypes_from_data_file()
                 bus_model_data = get_single_bus_model_data(conn, int(sim_pars['bus_model_id']))
                 conn.close()
                 return render_template('new_sim_step3.html',
@@ -884,7 +897,8 @@ def new_bus_model():
             create_new_bus_model(request.form.to_dict())
             return redirect(url_for('buses_models_list'))
         else:
-            return render_template('new_bus_model.html')
+            available_buses_models = get_available_buses_models()
+            return render_template('new_bus_model.html', available_buses_models=available_buses_models)
     else:
         return redirect(url_for('login'))
 
@@ -895,7 +909,12 @@ def edit_bus_model():
         conn = get_db_connection()
         if request.method == 'POST':
             # Update data on db
-            update_bus_model(conn, request.form.to_dict())
+            new_pars = request.form.to_dict()
+            bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
+            for k in bus_model_data.keys():
+                if k in new_pars.keys():
+                    bus_model_data[k] = new_pars[k]
+            update_bus_model(conn, bus_model_data)
 
             # Get data of bus model and pass them to the page
             bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
