@@ -45,7 +45,6 @@ def num_buses_at_time(df):
 
 def configuration(csv_file_path, company, route_number, charging_locations, day_type, t_horizon, p_max, pd_max,
                   depot_charging, optimize_for_each_bus, bus_type, elevations, bus_model_data):
-    battery_size = float(bus_model_data['batt_pack_capacity'])
 
     # Load data files
     route_num_split = route_number.split(',')
@@ -232,7 +231,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
 
     for v in vehicle_ids:
         config["vehicle_ids"].append(str(v))
-        config["vehicle_info"].append({'index': str(v), 'soc_start': 1.0, 'battery_capacity': battery_size})
+        config["vehicle_info"].append({'index': str(v), 'soc_start': 1.0, 'battery_capacity': config["battery_size"]})
 
     # Set up the energy matrix. From node to charging node represents charging and other arcs represent discharging.
     c1 = []
