@@ -198,33 +198,28 @@ def get_terminals(sim_metadata):
                 terminals.append(row['arrival_city'])
     return list(set(terminals))
 
-def run_sim(main_cfg, pars, terminals_selected, terminals_metadata, distances_matrix):
-
-    conn = get_db_connection()
+def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_metadata, distances_matrix):
     cur = conn.cursor()
 
-    bus_model_data = get_single_bus_model_data(conn, int(pars['bus_model_id']))
+    # Prepare the line string
+    str_routes = ''
+    for elem in pars.keys():
+        if elem[0:5] == 'line_':
+            str_routes += ',' + elem[5:]
+    str_routes = str_routes[1:]
 
-    # Set properly the main parameters
-    company = session['company_user']
-    line = pars['line']
+    ts = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')[-1]
 
-    sim_file_path = pars['data_file']
-    (id_user, ts) = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')
-
-    max_charging_power = float(pars['p_max'])
-
-    # Get user id and timestamp
-    opt_all_flag = False
-
-    sim_cfg_filename = csb.configuration(sim_file_path, company, line,
+    sim_cfg_filename = csb.configuration(csv_file_path=pars['data_file'],
+                                         company=session['company_user'],
+                                         route_number=str_routes,
                                          charging_locations=[],
                                          day_type=pars['day_type'],
                                          t_horizon=main_cfg['simSettings']['modelTimesteps'],
-                                         p_max=max_charging_power,
+                                         p_max=float(pars['p_max']),
                                          pd_max=float(pars['pd_max']),
                                          depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
-                                         optimize_for_each_bus=opt_all_flag,
+                                         optimize_for_each_bus=False,
                                          bus_model_data=bus_model_data,
                                          terminals_selected=terminals_selected,
                                          terminals_metadata=terminals_metadata,
@@ -240,16 +235,12 @@ def run_sim(main_cfg, pars, terminals_selected, terminals_metadata, distances_ma
                                   'NonConvex': 2,
                                   'MIPGap': 0.2})
 
-    start = datetime.datetime.now()
-    print("Generated configuration. Setting up optimization model: ", start)
-
     # Load data files
     with open(sim_cfg_filename, 'r') as f:
         config_file = json.load(f)
 
     model = MILP(config=config_file,
                  env=e,
-                 # charging_power=max_charging_power,
                  opt_battery_for_each_bus=False,
                  default_assignment=True,
                  partial_assignment=[],
@@ -262,19 +253,16 @@ def run_sim(main_cfg, pars, terminals_selected, terminals_metadata, distances_ma
 
     # Define the variables to save in the database
     res_var = ['bp', 'bs', 'bi', 'Ct', 'u', 'x', 'yd', 'SOC']
-    varInfo = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in res_var])]
+    var_info = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in res_var])]
 
     # Define the CSV output file path
-    csv_output_file = sim_file_path.replace('input-csv', 'output')
+    csv_output_file = pars['data_file'].replace('input-csv', 'output')
 
     # Write the simulation output in a CSV file
     res_file = csv_output_file.split(os.sep)[-1]
     with open(res_file, 'w', newline='') as f:
         wr = csv.writer(f, delimiter=";")
-        wr.writerows(varInfo)
-
-    # Read the battery size
-    battery_size = read_battery_size(res_file, sep=';')
+        wr.writerows(var_info)
 
     # Create the plot
     schedule_plot(res_file)
@@ -288,16 +276,13 @@ def run_sim(main_cfg, pars, terminals_selected, terminals_metadata, distances_ma
     os.unlink(res_file)
 
     end = datetime.datetime.now()
-    print("End time: ", end)
-    print('Solution time (seconds): ', (end - start).total_seconds())
 
     cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power, "
                 "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(id_user), int(ts), company, line, pars['day_type'], float(bus_model_data['batt_pack_capacity']),
-                 max_charging_power, 0, 0, 0))
+                (int(session['id_user']), int(ts), session['company_user'], str_routes, pars['day_type'],
+                 float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0))
     conn.commit()
-    conn.close()
     return True
 
 
@@ -757,6 +742,20 @@ def get_terminals_metadata(conn):
 def get_distances_matrix(conn):
     return conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
 
+def get_terminals_metadata_dict(conn):
+    terms = get_terminals_metadata(conn)
+    terms_dict = {}
+    for term in terms:
+        terms_dict[term[1]] = {'id': term[0], 'elevation': term[3], 'is_charging_station': term[4]}
+    return terms_dict
+
+def get_distances_matrix_dict(conn):
+    distances = get_distances_matrix(conn)
+    distances_dict = {}
+    for d in distances:
+        distances_dict[d[0], d[1]] = {'distance_km': d[2], 'avg_travel_time_min': d[3]}
+    return distances_dict
+
 # Route for handling the login page logic
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -829,7 +828,6 @@ def detail():
         data = dict(request.args)
         data['min_num_drivers'] = len(set(df_data["Driver#"]))
         data['df_bsize'] = df_bsize
-        print(sim_metadata)
         return render_template('detail.html', sim_metadata=sim_metadata, data=data)
     else:
         return redirect(url_for('login'))
@@ -848,8 +846,6 @@ def new_sim_step1():
                 request.files['data_file'].save(data_file)
 
                 id_bus_model = int(request.form.to_dict()['id_bus_model'])
-
-                conn = get_db_connection()
                 lines, days_types = get_lines_daytypes_from_data_file(data_file)
                 conn.close()
                 return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
@@ -868,10 +864,19 @@ def new_sim_step1():
 @app.route('/new_sim_step2/', methods=('GET', 'POST'))
 def new_sim_step2():
     if is_logged():
+        conn = get_db_connection()
         if request.method == 'POST':
             try:
-                sim_metadata = request.form.to_dict()
-                return redirect(url_for('new_sim_step3', sim_metadata=sim_metadata))
+                # Run the simulation and save the output in the DB
+                sim_pars = request.form.to_dict()
+                run_sim(conn=conn, main_cfg=main_cfg, pars=sim_pars,
+                        bus_model_data=get_single_bus_model_data(conn, int(sim_pars['bus_model_id'])),
+                        terminals_selected=get_terminals(sim_pars),
+                        terminals_metadata=get_terminals_metadata_dict(conn),
+                        distances_matrix=get_distances_matrix_dict(conn))
+
+                conn.close()
+                return redirect(url_for('index'))
             except Exception as e:
                 print('EXCEPTION: %s' % str(e))
                 conn = get_db_connection()
@@ -884,7 +889,6 @@ def new_sim_step2():
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
                                        bus_model_data=bus_model_data)
         else:
-            conn = get_db_connection()
             req_dict = request.args.to_dict()
             lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
             bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
@@ -893,64 +897,6 @@ def new_sim_step2():
                                    days_types=days_types, bus_model_data=bus_model_data)
     else:
         return redirect(url_for('login'))
-
-@app.route('/new_sim_step3/', methods=('GET', 'POST'))
-def new_sim_step3():
-    if is_logged():
-        conn = get_db_connection()
-        if request.method == 'POST':
-            # Run the simulation and save the output in the DB
-            try:
-                sim_pars = request.form.to_dict()
-                # Get the terminals metadata of the company from the DB
-                terms = get_terminals_metadata(conn)
-                terms_dict = {}
-                for term in terms:
-                    terms_dict[term[1]] = {'id': term[0], 'elevation': term[3], 'is_charging_station': term[4]}
-
-                # Get the distance matrix of the company from the DB
-                distances = get_distances_matrix(conn)
-                distances_dict = {}
-                for d in distances:
-                    distances_dict[d[0], d[1]] = {'distance_km': d[2], 'avg_travel_time_min': d[3]}
-
-                # Get terminals related to the selected lines from the input profile file
-                terminals_selected = get_terminals(sim_pars)
-
-                # Prepare the line string
-                sim_pars['line'] = ''
-                for elem in sim_pars.keys():
-                    if elem[0:5] == 'line_':
-                        sim_pars['line'] += ',' + elem[5:]
-                sim_pars['line'] = sim_pars['line'][1:]
-
-                run_sim(main_cfg=main_cfg, pars=sim_pars, terminals_selected=terminals_selected,
-                        terminals_metadata=terms_dict, distances_matrix=distances_dict)
-                conn.close()
-                return redirect(url_for('index'))
-            except Exception as e:
-                print('EXCEPTION: %s' % str(e))
-            
-                lines, days_types = get_lines_daytypes_from_data_file(sim_pars['data_file'])
-                conn.close()
-                return render_template('new_sim_step3.html',
-                                       error='Data file has a wrong format! The simulation cannot be run',
-                                       sim_metadata=sim_pars, lines=lines)
-        else:
-            req_dict = request.args.to_dict()
-            str_metadata = json.dumps(req_dict['sim_metadata']).replace('\'', '\"')
-            sim_metadata = json.loads(str_metadata[1:-1])
-
-            lines = []
-            for elem in sim_metadata.keys():
-                if elem[0:5] == 'line_':
-                    lines.append(elem[5:])
-
-            conn.close()
-            return render_template('new_sim_step3.html', sim_metadata=sim_metadata, lines=lines)
-    else:
-        return redirect(url_for('login'))
-
 
 @app.route('/new_bus_model', methods=('GET', 'POST'))
 def new_bus_model():
