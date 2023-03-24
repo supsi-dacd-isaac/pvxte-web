@@ -42,10 +42,11 @@ def num_buses_at_time(df):
             result[s] += 1
     return result
 
-def estimate_energy(bus_data, elevation_data, distances_matrix, starting_city, arrival_city, acceleration=0):
+
+def estimate_energy(bus_data, elevation_data, distances_matrix, starting_city, arrival_city, min_velocity=15, acceleration=0):
     if starting_city != arrival_city:
-        path_distance = distances_matrix[(starting_city, arrival_city)]['distance_km']*1e3
-        path_time = distances_matrix[(starting_city, arrival_city)]['avg_travel_time_min']*60
+        path_distance = distances_matrix[(starting_city, arrival_city)]['distance_km'] * 1e3
+        path_time = distances_matrix[(starting_city, arrival_city)]['avg_travel_time_min'] * 60
 
         alpha_average = math.atan((elevation_data[arrival_city] - elevation_data[starting_city]) / path_distance)
         if alpha_average >= 0:
@@ -58,10 +59,11 @@ def estimate_energy(bus_data, elevation_data, distances_matrix, starting_city, a
         avg_velocity = path_distance / path_time
         p_ldm = path_distance * (weight * gravity * math.sin(alpha_average) +
                                  weight * gravity * bus_data['rolling_resistance'] * math.cos(alpha_average) +
-                                 (air_density * avg_velocity ** 2 * front_area * bus_data['rolling_resistance']) / 2 + weight * acceleration)
+                                 (air_density * avg_velocity ** 2 * front_area * bus_data[
+                                     'rolling_resistance']) / 2 + weight * acceleration)
 
         if p_ldm < 0:
-            if avg_velocity < 15 / 3.6:
+            if avg_velocity < min_velocity / 3.6:
                 p_ldm = 0
             else:
                 p_ldm = 0.3 * p_ldm
@@ -69,10 +71,10 @@ def estimate_energy(bus_data, elevation_data, distances_matrix, starting_city, a
     else:
         return 0.0
 
+
 def configuration(csv_file_path, company, route_number, charging_locations, day_type, t_horizon, p_max, pd_max,
                   depot_charging, optimize_for_each_bus, bus_model_data, terminals_selected,
                   terminals_metadata, distances_matrix):
-
     # Get the elevations
     elevations = {}
     for ts in terminals_selected:
@@ -101,7 +103,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
     exy = {}
     for k in distances_matrix:
         txy[k] = distances_matrix[k]['avg_travel_time_min']
-        exy[k] = estimate_energy(bus_model_data, elevations_ids, distances_matrix, k[0], k[1], 0)
+        exy[k] = estimate_energy(bus_model_data, elevations_ids, distances_matrix, k[0], k[1], acceleration=0)
 
     if not charging_locations:
         charging_locations = []
