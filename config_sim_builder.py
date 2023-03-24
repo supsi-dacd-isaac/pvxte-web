@@ -103,7 +103,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
     exy = {}
     for k in distances_matrix:
         txy[k] = distances_matrix[k]['avg_travel_time_min']
-        exy[k] = estimate_energy(bus_model_data, elevations_ids, distances_matrix, k[0], k[1], 0)
+        exy[k] = estimate_energy(bus_model_data, elevations_ids, distances_matrix, k[0], k[1], acceleration=0)
 
     if not charging_locations:
         charging_locations = []
