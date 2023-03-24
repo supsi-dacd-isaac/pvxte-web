@@ -42,9 +42,45 @@ def num_buses_at_time(df):
             result[s] += 1
     return result
 
+def estimate_energy(bus_data, elevation_data, distances_matrix, starting_city, arrival_city, acceleration=0):
+    if starting_city != arrival_city:
+        path_distance = distances_matrix[(starting_city, arrival_city)]['distance_km']*1e3
+        path_time = distances_matrix[(starting_city, arrival_city)]['avg_travel_time_min']*60
+
+        alpha_average = math.atan((elevation_data[arrival_city] - elevation_data[starting_city]) / path_distance)
+        if alpha_average >= 0:
+            weight = bus_data['weight']
+        else:
+            weight = bus_data['weight'] - bus_data['max_capacity'] * 68
+        gravity = 9.81
+        air_density = 1.2
+        front_area = bus_data['length'] * bus_data['width']
+        avg_velocity = path_distance / path_time
+        p_ldm = path_distance * (weight * gravity * math.sin(alpha_average) +
+                                 weight * gravity * bus_data['rolling_resistance'] * math.cos(alpha_average) +
+                                 (air_density * avg_velocity ** 2 * front_area * bus_data['rolling_resistance']) / 2 + weight * acceleration)
+
+        if p_ldm < 0:
+            if avg_velocity < 15 / 3.6:
+                p_ldm = 0
+            else:
+                p_ldm = 0.3 * p_ldm
+        return p_ldm / bus_data['bus_efficiency'] / 1000
+    else:
+        return 0.0
 
 def configuration(csv_file_path, company, route_number, charging_locations, day_type, t_horizon, p_max, pd_max,
-                  depot_charging, optimize_for_each_bus, bus_type, elevations, bus_model_data):
+                  depot_charging, optimize_for_each_bus, bus_model_data, terminals_selected,
+                  terminals_metadata, distances_matrix):
+
+    # Get the elevations
+    elevations = {}
+    for ts in terminals_selected:
+        elevations[ts] = int(terminals_metadata[ts]['elevation'])
+
+    elevations_ids = {}
+    for ktm in terminals_metadata.keys():
+        elevations_ids[int(terminals_metadata[ktm]['id'])] = int(terminals_metadata[ktm]['elevation'])
 
     # Load data files
     route_num_split = route_number.split(',')
@@ -55,33 +91,23 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
 
     vehicle_ids = list(set(trips_times.bus_id.to_list()))
 
-    with open(f'static/node-map/{company}-node-map.json', 'r') as file:
-        node_map = json.load(file)
-
-    trips_times['departure_node'] = trips_times['starting_city'].apply(lambda x: node_map[x])
-    trips_times['arrival_node'] = trips_times['arrival_city'].apply(lambda x: node_map[x])
-
-    # TODO: Use user input and profile information to set up this dictionary.
-    with open(f'static/time-energy/{company}-time-energy.json', 'r') as f:
-        data = json.load(f)
+    trips_times['departure_node'] = trips_times['starting_city'].apply(lambda x: terminals_metadata[x]['id'])
+    trips_times['arrival_node'] = trips_times['arrival_city'].apply(lambda x: terminals_metadata[x]['id'])
 
     trips_times['starting_city_ele'] = trips_times["starting_city"].apply(lambda loc: elevations[loc])
     trips_times['arrival_city_ele'] = trips_times["arrival_city"].apply(lambda loc: elevations[loc])
 
-    txy, exy, num_nodes = data[0], data[1], data[2]
-    txy = {eval(k): v for k, v in txy.items()}
-    exy = {eval(k): v for k, v in exy.items()}
+    txy = {}
+    exy = {}
+    for k in distances_matrix:
+        txy[k] = distances_matrix[k]['avg_travel_time_min']
+        exy[k] = estimate_energy(bus_model_data, elevations_ids, distances_matrix, k[0], k[1], 0)
 
     if not charging_locations:
         charging_locations = []
     else:
         charging_locations = charging_locations.split(',')
         charging_locations = list(map(int, charging_locations))
-
-    with open(f'static/bus-types/{str(bus_type)}.json', 'r') as f:
-        btype = json.load(f)
-
-    print(bus_model_data)
 
     config = {"route_id": f"{route_number}",
               "company": f"{company}",
@@ -110,7 +136,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
               "service_energy": [],
               "charging_cost": [],
               "optimize_for_each_bus": optimize_for_each_bus,
-              "bus_data": btype
+              "bus_data": bus_model_data
               }
     trips = []
     charge = []
@@ -121,6 +147,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
 
     # Trip energy is in the E_total column of the dataframe.
     for index, row in trips_times.iterrows():
+        distance = distances_matrix[row.departure_node, row.arrival_node]['distance_km']
         trips.append({'index': index,
                       't_start': row.departure_timestep,
                       't_end': row.arrival_timestep,
@@ -128,10 +155,10 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
                       'n_end': row.arrival_node,
                       'energy': row.E_total if row.E_total is not np.nan else 0,
                       'vehicle_id': row.bus_id,
-                      'distance': row.distance,
+                      'distance': distance,
                       'start_elevation': row.starting_city_ele,
                       'end_elevation': row.arrival_city_ele,
-                      'alpha': math.atan((row.arrival_city_ele - row.starting_city_ele) / row.distance)})
+                      'alpha': math.atan((row.arrival_city_ele - row.starting_city_ele) / distance)})
 
     config["trips_info"] = trips
 
