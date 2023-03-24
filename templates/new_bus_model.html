@@ -17,8 +17,14 @@
                         <td><input type="text" class="form-control-sm" name="bus_name" value=""></td>
                     </tr>
                     <tr>
-                        <td>Length</td>
-                        <td><input type="text" class="form-control-sm" name="length" value="10">&nbsp;[m]</td>
+                        <td>Bus type</td>
+                        <td>
+                            <select class="form-select" name="bus_type">
+                                {% for abm in available_buses_models %}
+                                    <option value="{{ abm }}">{{ abm }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
                     </tr>
                     <tr>
                         <td>Maximum passengers capacity</td>
@@ -29,8 +35,8 @@
                         <td><input type="text" class="form-control-sm" name="min_required_batt_packs" value="1"></td>
                     </tr>
                     <tr>
-                        <td>Minimum allowed battery packs</td>
-                        <td><input type="text" class="form-control-sm" name="min_allowed_batt_packs" value="1"></td>
+                        <td>Maximum allowed battery packs</td>
+                        <td><input type="text" class="form-control-sm" name="max_allowed_batt_packs" value="1"></td>
                     </tr>
                     <tr>
                         <td>Capacity of a battery pack</td>
@@ -42,7 +48,7 @@
                     </tr>
                     <tr>
                         <td>Weight of a battery pack</td>
-                        <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="">&nbsp;[kg]</td>
+                        <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="1">&nbsp;[kg]</td>
                     </tr>
                     <tr>
                         <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are inserting a new bus model! Are you sure?')">Submit</button></td>

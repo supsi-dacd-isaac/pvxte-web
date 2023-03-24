@@ -9,17 +9,17 @@
         </ul>
     </nav>
     <form method="post" enctype = "multipart/form-data">
-        <input type="hidden" class="form-control-sm" name="id" value="{{ bus_model_data['bus_model_id'] }}">
+        <input type="hidden" class="form-control-sm" name="id" value="{{ bus_model_data['id'] }}">
         <fieldset>
             <table class="table-sm-form">
                 <tbody>
                     <tr>
                         <td>Name</td>
-                        <td><input type="text" class="form-control-sm" name="bus_name" value="{{ bus_model_data['name'] }}"></td>
+                        <td><input type="text" class="form-control-sm" name="name" value="{{ bus_model_data['name'] }}"></td>
                     </tr>
                     <tr>
-                        <td>Length</td>
-                        <td><input type="text" class="form-control-sm" name="length" value="{{ bus_model_data['length'] }}">&nbsp;[m]</td>
+                        <td>Type</td>
+                        <td>{{ bus_model_data['code'] }}</td>
                     </tr>
                     <tr>
                         <td>Maximum passengers capacity</td>
@@ -30,8 +30,8 @@
                         <td><input type="text" class="form-control-sm" name="min_required_batt_packs" value="{{ bus_model_data['min_required_batt_packs'] }}"></td>
                     </tr>
                     <tr>
-                        <td>Minimum allowed battery packs</td>
-                        <td><input type="text" class="form-control-sm" name="min_allowed_batt_packs" value="{{ bus_model_data['min_allowed_batt_packs'] }}"></td>
+                        <td>Maximum allowed battery packs</td>
+                        <td><input type="text" class="form-control-sm" name="min_allowed_batt_packs" value="{{ bus_model_data['max_allowed_batt_packs'] }}"></td>
                     </tr>
                     <tr>
                         <td>Capacity of a battery pack</td>

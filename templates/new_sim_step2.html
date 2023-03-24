@@ -10,26 +10,33 @@
     </nav>
     <form method="post" enctype = "multipart/form-data">
         <input type="hidden" class="form-control-sm" name="data_file" value="{{ data_file }}">
-        <input type="hidden" class="form-control-sm" name="bus_model_id" value="{{ bus_model_data['bus_model_id'] }}">
+        <input type="hidden" class="form-control-sm" name="bus_model_id" value="{{ bus_model_data['id'] }}">
+        <input type="hidden" class="form-control-sm" name="bus_model_code" value="{{ bus_model_data['code'] }}">
+        <input type="hidden" class="form-control-sm" name="bus_model_name" value="{{ bus_model_data['name'] }}">
         <fieldset>
             <table class="table-sm-form">
                 <tbody>
                     <tr>
-                        <td colspan="2">Bus model</td>
+                        <td>Bus model</td>
                         <td>{{ bus_model_data['name'] }}</td>
                     </tr>
                     <tr>
-                        <td colspan="2">Line</td>
+                        <td>Lines</td>
                         <td>
-                            <select class="form-select" name="line">
-                                {% for line in lines %}
-                                    <option value="{{line}}">{{ line }}</option>
-                                {% endfor %}
-                            </select>
+                            <table class="table-sm-form">
+                                <tbody>
+                                    {% for line in lines %}
+                                        <tr>
+                                            <td>{{ line }}</td>
+                                            <td><input type="checkbox" id="line_{{ line }}" name="line_{{ line }}"></td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2">Day type</td>
+                        <td>Day type</td>
                         <td>
                             <select class="form-select" name="day_type">
                                 {% for day_type in days_types %}
@@ -39,33 +46,15 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2">Maximum charging power pantograph </td>
-                        <td><input type="text" class="form-control-sm" name="p_max" value="0">&nbsp[kW]</td>
+                        <td>Maximum charging power pantograph </td>
+                        <td><input type="text" class="form-control-sm" name="p_max" value="450">&nbsp[kW]</td>
                     </tr>
                     <tr>
-                        <td colspan="2">Maximum charging power at deposit</td>
-                        <td><input type="text" class="form-control-sm" name="pd_max" value="0">&nbsp[kW]</td>
+                        <td>Maximum charging power at deposit</td>
+                        <td><input type="text" class="form-control-sm" name="pd_max" value="150">&nbsp[kW]</td>
                     </tr>
                     <tr>
-                        <td colspan="3" align="center"><b>Elevations:</b></td>
-                    </tr>
-                    <tr>
-                        <td>Deposit</td>
-                        <td></td>
-                        <td><input type="text" class="form-control-sm" name="depo_elevation" value="0">&nbsp[m]</td>
-                    </tr>
-                    <tr>
-                        <td>Starting station</td>
-                        <td>{{ starting_station }}</td>
-                        <td><input type="text" class="form-control-sm" name="starting_station_elevation" value="0">&nbsp;[m]</td>
-                    </tr>
-                    <tr>
-                        <td>Arrival station</td>
-                        <td>{{ arrival_station }}</td>
-                        <td><input type="text" class="form-control-sm" name="arrival_station_elevation" value="0">&nbsp;[m]</td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are launching a new simulation! Are you sure? It should take ~1 minute to finish!')">Run Simulation</button></td>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are launching a new simulation! Are you sure? It should take ~1 minute to finish!')">Run Simulation</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -75,4 +64,8 @@
     <br>
     <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
   {% endif %}
+
+
 {% endblock %}
+
+
