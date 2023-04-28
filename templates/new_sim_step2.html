@@ -46,12 +46,83 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Maximum charging power pantograph </td>
+                        <td>Pantograph maximum charging power</td>
                         <td><input type="text" class="form-control-sm" name="p_max" value="450">&nbsp[kW]</td>
                     </tr>
                     <tr>
                         <td>Maximum charging power at deposit</td>
                         <td><input type="text" class="form-control-sm" name="pd_max" value="150">&nbsp[kW]</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><b>CAPEX section</b></td>
+                    </tr>
+                    <tr>
+                        <td>Bus cost</td>
+                        <td><input type="text" class="form-control-sm" name="capex_bus_cost" value="440000">&nbsp[CHF]</td>
+                    </tr>                    <tr>
+                    <td>Bus lifetime</td>
+                        <td><input type="text" class="form-control-sm" name="capex_bus_lifetime" value="12">&nbsp[years]</td>
+                    </tr>
+                    <tr>
+                        <td>Battery cost</td>
+                        <td><input type="text" class="form-control-sm" name="capex_battery_cost" value="122000">&nbsp[CHF]</td>
+                    </tr>
+                    <td>Battery lifetime</td>
+                        <td><input type="text" class="form-control-sm" name="capex_battery_lifetime" value="6">&nbsp[years]</td>
+                    </tr>
+                    <tr>
+                        <td>Charger cost</td>
+                        <td><input type="text" class="form-control-sm" name="capex_charger_cost" value="350000">&nbsp[CHF]</td>
+                    </tr>
+                    <td>Charger lifetime</td>
+                        <td><input type="text" class="form-control-sm" name="capex_charger_lifetime" value="10">&nbsp[years]</td>
+                    </tr>
+                    <tr>
+                        <td>Company fee</td>
+                        <td><input type="text" class="form-control-sm" name="capex_additional_fee" value="28800">&nbsp[CHF]</td>
+                    </tr>
+                    <tr>
+                        <td>Interest rate</td>
+                        <td><input type="text" class="form-control-sm" name="capex_interest_rate" value="3">&nbsp[%]</td>
+                    </tr>
+<!--                    <tr>-->
+<!--                        <td>Buses number</td>-->
+<!--                        <td><input type="text" class="form-control-sm" name="capex_number_buses" value="1"></td>-->
+<!--                    </tr>-->
+<!--                    <tr>-->
+<!--                        <td>Chargers number</td>-->
+<!--                        <td><input type="text" class="form-control-sm" name="capex_number_chargers" value="1"></td>-->
+<!--                    </tr>-->
+                    <tr>
+                        <td colspan="2" align="center"><b>OPEX section</b></td>
+                    </tr>
+                    <tr>
+                        <td>Buses efficiency</td>
+                        <td><input type="text" class="form-control-sm" name="opex_buses_efficiency" value="1.15">&nbsp[kWh/km]</td>
+                    </tr>
+                    <tr>
+                        <td>Buses maintainance</td>
+                        <td><input type="text" class="form-control-sm" name="opex_buses_maintainance" value="0.21">&nbsp[CHF/km]</td>
+                    </tr>
+                    <tr>
+                        <td>Charging efficiency</td>
+                        <td><input type="text" class="form-control-sm" name="opex_charging_efficiency" value="2">&nbsp[%]</td>
+                    </tr>
+                    <tr>
+                        <td>Annual usage per single bus</td>
+                        <td><input type="text" class="form-control-sm" name="opex_annual_usage" value="100000">&nbsp[Km/year]</td>
+                    </tr>
+                    <tr>
+                        <td>Energy tariff</td>
+                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff" value="0.3">&nbsp[CHF/kWh]</td>
+                    </tr>
+                    <tr>
+                        <td>Energy tariff increase per year</td>
+                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff_yearly_increase" value="1">&nbsp[%]</td>
+                    </tr>
+                    <tr>
+                        <td>Power tariff</td>
+                        <td><input type="text" class="form-control-sm" name="opex_power_tariff" value="1000">&nbsp[CHF/kW]</td>
                     </tr>
                     <tr>
                         <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are launching a new simulation! Are you sure? It should take ~1 minute to finish!')">Run Simulation</button></td>

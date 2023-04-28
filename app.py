@@ -8,6 +8,7 @@ import datetime
 import json
 import zipfile
 import pytz
+import glob
 
 from collections import defaultdict
 from itertools import combinations
@@ -169,21 +170,51 @@ def delete_bus_model(conn, bus_model_id):
     conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
 
+def calc_a(i, t):
+    q = 1 + i
+    return (np.power(q, t) * i) / (np.power(q, t) - 1)
+
+def calculate_economical_parameters(capex_features, opex_features):
+    # Calculate the CAPEX costs
+    interest_rate = float(capex_features['capex_interest_rate'])/1e2
+    a_bus = calc_a(interest_rate, float(capex_features['capex_bus_lifetime']))
+    a_batt = calc_a(interest_rate, float(capex_features['capex_battery_lifetime']))
+    a_char = calc_a(interest_rate, float(capex_features['capex_charger_lifetime']))
+
+    capex_cost = a_bus * float(capex_features['capex_bus_cost']) * float(capex_features['capex_number_buses']) + \
+                 a_batt * float(capex_features['capex_battery_cost']) * float(capex_features['capex_number_buses']) + \
+                 a_char * float(capex_features['capex_charger_cost']) * float(capex_features['capex_number_chargers']) + \
+                 float(capex_features['capex_additional_fee'])
+
+    # Calculate the OPEX costs
+    # todo OPEX still to check
+    opex_cost = (float(opex_features['opex_buses_maintainance']) +
+                 float(opex_features['opex_buses_efficiency']) * float(opex_features['opex_energy_tariff'])) * \
+                 float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
+
+    return capex_cost, opex_cost
+
 def get_lines_daytypes_from_data_file(sim_file_path):
-    lines = []
-    days_types = []
+    lines = set()
+    days_types = set()
     terminals = {}
+
     with open(sim_file_path) as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
-            if row['line_id'] not in lines:
-                lines.append(row['line_id'])
-            if row['day_type'] not in days_types:
-                days_types.append(row['day_type'])
+            line_id = row['line_id']
+            day_type = row['day_type']
+            lines.add(line_id)
+            days_types.add(day_type)
+            if (line_id, day_type) not in terminals:
+                terminals[(line_id, day_type)] = set()
+            terminals[(line_id, day_type)].add(row['starting_city'])
+            terminals[(line_id, day_type)].add(row['arrival_city'])
 
-            if row['line_id'] not in terminals.keys():
-                terminals[row['line_id']] = []
-    return sorted(lines), sorted(days_types)
+    lines = sorted(list(lines))
+    days_types = sorted(list(days_types))
+    return lines, days_types
+
 
 def get_terminals(sim_metadata):
     lines = []
@@ -198,8 +229,18 @@ def get_terminals(sim_metadata):
                 terminals.append(row['arrival_city'])
     return list(set(terminals))
 
+def filter_pars(pars, filter_string):
+    res = {}
+    for k in pars.keys():
+        if filter_string in k:
+            res[k] = pars[k]
+    return res
+
 def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_metadata, distances_matrix):
     cur = conn.cursor()
+
+    capex_pars = filter_pars(pars, 'capex')
+    opex_pars = filter_pars(pars, 'opex')
 
     # Prepare the line string
     str_routes = ''
@@ -247,7 +288,6 @@ def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_
                  non_overlap_charging=False)
 
     model.optimize()
-
     if model.status == GRB.INFEASIBLE:
         return False
 
@@ -265,7 +305,7 @@ def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_
         wr.writerows(var_info)
 
     # Create the plot
-    schedule_plot(res_file)
+    ret_plot_data = schedule_plot(res_file)
 
     # Create the final dataframe result
     schedule_drivers(res_file)
@@ -275,13 +315,19 @@ def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_
         zip.write(res_file)
     os.unlink(res_file)
 
-    end = datetime.datetime.now()
+    # Update CAPEX and OPEX parameters with some output given by the simulation
+    df_bsize_filename = 'static/output-bsize/%s_%s.csv' % (session['id_user'], ts)
+    df_bsize = pd.read_csv(df_bsize_filename)
+    capex_pars['capex_number_buses'] = len(df_bsize)
+    # We assume that number of chargers is equal to the number of buses
+    capex_pars['capex_number_chargers'] = len(df_bsize)
 
     cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power, "
-                "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "elevation_deposit, elevation_starting_station, elevation_arrival_station, capex_pars, opex_pars, "
+                "max_charging_powers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 (int(session['id_user']), int(ts), session['company_user'], str_routes, pars['day_type'],
-                 float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0))
+                 float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0, json.dumps(capex_pars),
+                 json.dumps(opex_pars), json.dumps(ret_plot_data['df_charge'])))
     conn.commit()
     return True
 
@@ -377,6 +423,7 @@ def read_battery_size(solution_file_path, sep=';'):
 
 
 def schedule_plot(solution_file_path, charging_blocks=3):
+    returned_data = {}
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
     with open(config_name, 'r') as f:
         c = json.load(f)
@@ -404,18 +451,6 @@ def schedule_plot(solution_file_path, charging_blocks=3):
             df.at[index, 'start'] = t_start[n1]
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
-
-    # for index, row in df.iterrows():
-    #     if int(row.n1) in depot_start:
-    #         n1 = int(row.n1)
-    #         df.at[index, 'end'] = t_start[int(row.n2)]
-    #         df.at[index, 'duration'] = times[n1, int(row.n2)]
-    #         df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
-    #     else:
-    #         n1 = int(row.n1)
-    #         df.at[index, 'start'] = t_start[n1]
-    #         df.at[index, 'duration'] = times[n1, int(row.n2)]
-    #         df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
 
     if not dfc.empty:
         dfc['start'] = 0
@@ -447,6 +482,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     for b in set(df.bus):
         b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery packs'].values[0] * c["Battery pack size"]
         df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size * 60 / c['max_depot_charging_power'])
+    returned_data['df_charge'] = df_charge
 
     model = Model('charge')
     # Bus i charges at time j.
@@ -587,6 +623,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     plt.savefig(plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
                 facecolor='auto', edgecolor='auto', backend=None)
 
+    return returned_data
 
 def generate_graph(nodes_list, edges_list):
     graph = nx.Graph()
@@ -828,7 +865,16 @@ def detail():
         data = dict(request.args)
         data['min_num_drivers'] = len(set(df_data["Driver#"]))
         data['df_bsize'] = df_bsize
-        return render_template('detail.html', sim_metadata=sim_metadata, data=data)
+
+        # Calculate CAPEX and OPEX costs
+        capex_features = json.loads(sim_metadata[11])
+        opex_features = json.loads(sim_metadata[12])
+        capex, opex = calculate_economical_parameters(capex_features=capex_features, opex_features=opex_features)
+        capex_features['capex_cost'] = int(capex/1e3)
+        opex_features['opex_cost'] = int(opex/1e3)
+
+        return render_template('detail.html', sim_metadata=sim_metadata, data=data, capex_features=capex_features,
+                               opex_features=opex_features)
     else:
         return redirect(url_for('login'))
 
@@ -874,7 +920,6 @@ def new_sim_step2():
                         terminals_selected=get_terminals(sim_pars),
                         terminals_metadata=get_terminals_metadata_dict(conn),
                         distances_matrix=get_distances_matrix_dict(conn))
-
                 conn.close()
                 return redirect(url_for('index'))
             except Exception as e:
@@ -903,7 +948,7 @@ def new_bus_model():
     if is_logged():
         if request.method == 'POST':
             create_new_bus_model(request.form.to_dict())
-            return redirect(url_for('buses_models_list'))
+            return redirect(url_for('company_manager'))
         else:
             available_buses_models = get_available_buses_models()
             return render_template('new_bus_model.html', available_buses_models=available_buses_models)

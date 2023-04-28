@@ -10906,4 +10906,13 @@ textarea.form-control-lg {
   }
 }
 
+/* DSTREPPA part*/
+.container {
+  display: flex;
+}
+
+.left, .center, .right {
+  flex-basis: 33.33%;
+}
+
 /*# sourceMappingURL=bootstrap.css.map */
