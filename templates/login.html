@@ -8,20 +8,20 @@
 <body>
 {% block content %}
     <div class="container">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <ul class="navbar-nav">
-                  <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('index') }}">Home</span></a>
-                  </li>
-            </ul>
-        </nav>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <ul class="navbar-nav">
+              <li class="nav-item active">
+                <a class="nav-link" href="{{ url_for('index') }}">Home</span></a>
+              </li>
+        </ul>
+    </div>
+    <div class="container">
             <ul class="navbar-nav">
                   <li class="nav-item active">
                     <a class="nav-link"><h3>Login</h3></a>
                   </li>
             </ul>
-        </nav>
+    </div>
+    <div class="container">
         <form action="" method="post">
           <fieldset>
             <table class="table-sm-form">
@@ -47,10 +47,12 @@
         {% if signup_info %}
         <p class="info"><strong>Registration:</strong> {{ signup_info }}
         {% else %}
-        <br>
+    </div>
+    <br>
+    <div class="container">
         <a class="link-dark" href="{{ url_for('signup') }}">Not registered? Please sign up ;)</a>
         {% endif %}
     </div>
-    </div>
+
 {% endblock %}
 </body>
