@@ -674,14 +674,16 @@ def generate_shift_assignment_graph(c, data_frame):
     for n0 in nodes:
         graph.add_node(n0)
 
-    for x, y in c.items():
-        n1, n2 = x.split('_')
-        earliest_start[y].append(data_frame.loc[(data_frame.n1 == n1) & (data_frame.n2 == n2), 'start'].values[0])
-        latest_end[y].append(data_frame.loc[(data_frame.n1 == n1) & (data_frame.n2 == n2), 'end'].values[0])
+    for node, color in c.items():
+        n1, n2 = node.split('_')
+        earliest_start[color].append(data_frame.loc[(data_frame.n1 == n1) & (data_frame.n2 == n2), 'start'].values[0])
+        latest_end[color].append(data_frame.loc[(data_frame.n1 == n1) & (data_frame.n2 == n2), 'end'].values[0])
 
     for p1, p2 in itertools.product(earliest_start.keys(), earliest_start.keys()):
         if p1 != p2:
-            if np.abs(max(latest_end[p1]) - min(earliest_start[p2])) >= 45:
+            range_1 = set(range(min(earliest_start[p1]), max(latest_end[p1])))
+            range_2 = range(min(earliest_start[p2]), max(latest_end[p2]))
+            if (np.abs(max(latest_end[p1]) - min(earliest_start[p2])) >= 45) and not range_1.intersection(range_2):
                 pass
             else:
                 graph.add_edge(p1, p2)
