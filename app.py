@@ -181,10 +181,11 @@ def calculate_economical_parameters(capex_features, opex_features):
     a_batt = calc_a(interest_rate, float(capex_features['capex_battery_lifetime']))
     a_char = calc_a(interest_rate, float(capex_features['capex_charger_lifetime']))
 
+    # todo Capex_additional_fee is the cost for the connection to the grid for a charger (TBD)
     capex_cost = a_bus * float(capex_features['capex_bus_cost']) * float(capex_features['capex_number_buses']) + \
                  a_batt * float(capex_features['capex_battery_cost']) * float(capex_features['capex_number_buses']) + \
                  a_char * float(capex_features['capex_charger_cost']) * float(capex_features['capex_number_chargers']) + \
-                 float(capex_features['capex_additional_fee'])
+                 (float(capex_features['capex_additional_fee']) * float(capex_features['capex_number_chargers']))
 
     # Calculate the OPEX costs
     # todo OPEX still to check
