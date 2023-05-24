@@ -194,7 +194,7 @@ def MILP(env,
             model.addConstr(mx[i, k] == 1)
             model.addConstr(u[k] == 1)
 
-    # Bus k serves at most one trip j that is either follows trip i, origin depot, or one of the charging nodes.
+    # Bus k serves at most one trip j that either follows trip i, origin depot, or one of the charging nodes.
     # At most condition is set by mx being a binary variable.
     model.addConstrs(mx[j, k] == quicksum(x[i, j, k] for i in trip_indices + depot_charge_indices + charge_indices + depot_origin)
                      for j in trip_indices
@@ -203,28 +203,32 @@ def MILP(env,
     # Total number of vehicles should be less than the available number.
     model.addConstr(quicksum(u[k] for k in vehicle_indices) <= config["#vehicles"] + len(slack_v))
 
-    # If arc (i, j) is served by vehicle k, it must be active.
-    model.addConstrs(u[k] >= x[i, j, k]
-                     for i in nodes
-                     for j in nodes
-                     for k in vehicle_indices)
+    # The arc (i, j) can be assigned to only one type of vehicle
+    model.addConstrs(quicksum(x[i, j, k] for k in vehicle_indices) <= 1 for i in nodes for j in nodes)
 
     # Each trip node is visited exactly once.
-    # A trip node can be visited from depot origin and depot destination node can be visited from any trip node.
-    # Charge nodes can be visited trip nodes.
-    model.addConstrs(quicksum(x[i, j, k] for i in depot_origin + trip_indices for k in vehicle_indices) +
-                     quicksum(x[i, j, k] for i in charge_indices for k in vehicle_indices if i + len(trip_indices) != j) +
-                     quicksum(x[i, j, k] for i in depot_charge_indices for k in vehicle_indices if i - 2 * len(trip_indices) != j) == 1
-                     for j in trip_indices)
-
+    model.addConstrs(quicksum(x[i, j, k] for i in depot_origin + trip_indices + charge_indices + depot_charge_indices
+                              for k in vehicle_indices) == 1 for j in trip_indices)
     model.addConstrs(quicksum(x[i, j, k] for j in trip_indices + charge_indices + depot_charge_indices + depot_destination
                               for k in vehicle_indices) == 1 for i in trip_indices)
 
-    # If vehicle k is in use, it has to start from the depot and end at the depot.
-    model.addConstrs(u[k] == quicksum(x[i, j, k] for j in trip_indices) for i in depot_origin for k in vehicle_indices)
-    model.addConstrs(u[k] == quicksum(x[i, j, k] for i in trip_indices + charge_indices)
-                     for k in vehicle_indices
-                     for j in depot_destination)
+    # Depot origin and depot destination are visited exactly once.
+    model.addConstrs(quicksum(x[i, j, k] for j in nodes for k in vehicle_indices) <= 1 for i in depot_origin)
+    model.addConstrs(quicksum(x[i, j, k] for i in nodes for k in vehicle_indices) <= 1 for j in depot_destination)
+
+    # If vehicle k is in use, it has to start from a depot and end at a depot.
+    model.addConstrs(u[k] == quicksum(x[i, j, k] for i in depot_origin for j in nodes) for k in vehicle_indices)
+    model.addConstrs(u[k] == quicksum(x[i, j, k] for i in nodes for j in depot_destination) for k in vehicle_indices)
+
+    # Number of vehicles in the simulation is equal to the number of trip sequences starting from the depot.
+    model.addConstr(quicksum(u[k] for k in vehicle_indices) == quicksum(x[i, j, k] for i in depot_origin
+                                                                        for j in trip_indices for k in vehicle_indices))
+
+    # Consecutive arcs must be served by the same vehicle.
+    for j in trip_indices + depot_charge_indices + charge_indices:
+        for k in vehicle_indices:
+            model.addConstr(quicksum(x[i, j, k] for i in trip_indices + depot_origin +
+                                     depot_charge_indices + charge_indices) == quicksum(x[j, p, k] for p in nodes))
 
     # From an active charge node, you can only reach a trip node or the destination node.
     if charge_indices:
@@ -235,12 +239,6 @@ def MILP(env,
     if depot_charge_indices:
         model.addConstrs(quicksum(x[i, j, k] for j in trip_indices for k in vehicle_indices) == yd[i - 2 * len(trip_indices)]
                          for i in depot_charge_indices)
-
-    # Consecutive arcs must be served by the same vehicle.
-    model.addConstrs(quicksum(x[i, j, k] for i in trip_indices + charge_indices + depot_origin + depot_charge_indices) ==
-                     quicksum(x[j, p, k] for p in nodes)
-                     for j in trip_indices + charge_indices + depot_charge_indices
-                     for k in vehicle_indices)
 
     if depot_charge_indices:
         # Depot charging time must be less than or equal to the time window between two trips.
