@@ -217,6 +217,9 @@ def MILP(env,
                      quicksum(x[i, j, k] for i in depot_charge_indices for k in vehicle_indices if i - 2 * len(trip_indices) != j) == 1
                      for j in trip_indices)
 
+    model.addConstrs(quicksum(x[i, j, k] for j in trip_indices + charge_indices + depot_charge_indices + depot_destination
+                              for k in vehicle_indices) == 1 for i in trip_indices)
+
     # If vehicle k is in use, it has to start from the depot and end at the depot.
     model.addConstrs(u[k] == quicksum(x[i, j, k] for j in trip_indices) for i in depot_origin for k in vehicle_indices)
     model.addConstrs(u[k] == quicksum(x[i, j, k] for i in trip_indices + charge_indices)
