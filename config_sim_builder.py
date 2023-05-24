@@ -145,7 +145,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
 
     num_trips = config["#trips"]
     num_depots = config["#depot"]
-    max_index = num_depots + 3 * num_trips
+    max_index = 3 * num_trips + 2 * len(vehicle_ids)
 
     # Trip energy is in the E_total column of the dataframe.
     for index, row in trips_times.iterrows():
@@ -172,9 +172,10 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
         if t['n_end'] in charging_locations:
             config["charge_ids"].append(t['index'] + num_trips)
 
-    for t in range(3 * num_trips, max_index):
+    for t in range(3 * num_trips, 3 * num_trips + len(vehicle_ids)):
         config["depot_origin"].append({'index': t, 'n_start': 0})
-        config["depot_destination"].append({'index': t + config["#depot"], 'n_start': 0})
+    for t in range(3 * num_trips + len(vehicle_ids), max_index):
+        config["depot_destination"].append({'index': t, 'n_start': 0})
 
     for t in config["depot_origin"]:
         config["depot_origin_ids"].append(t['index'])
@@ -204,7 +205,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
             t2.append((x, y, time))
         else:
             service_time_x = config["trips_info"][x]['t_end'] - config["trips_info"][x]['t_start']
-            relocation_time = txy[config["trips_info"][x]['n_end'], config["depot_destination"][y - 3 * num_trips - 1]['n_start']]
+            relocation_time = txy[config["trips_info"][x]['n_end'], config["depot_destination"][y - 3 * num_trips - len(vehicle_ids)]['n_start']]
             t2.append((x, y, service_time_x + relocation_time))
 
     # Set up cost matrix between a node and the corresponding charging node.
@@ -287,7 +288,7 @@ def configuration(csv_file_path, company, route_number, charging_locations, day_
             en = exy[config["depot_origin"][x - 3 * num_trips]['n_start'], config["trips_info"][y]['n_start']]
             c2.append((x, y, -en))
         else:
-            en = exy[config["trips_info"][x]['n_end'], config["depot_destination"][y - 3 * num_trips - 1]['n_start']]
+            en = exy[config["trips_info"][x]['n_end'], config["depot_destination"][y - 3 * num_trips - len(vehicle_ids)]['n_start']]
             c2.append((x, y, -en))
 
     c3 = []
