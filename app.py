@@ -17,6 +17,7 @@ import networkx as nx
 
 from cryptography.fernet import Fernet
 import matplotlib.pyplot as plt
+import matplotlib.colors
 
 from model import MILP
 from gurobipy import *
@@ -78,13 +79,15 @@ def get_sims_data(conn):
     return conn.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
                         "FROM sim WHERE id_user=%i" % session['id_user']).fetchall()
 
+
 def get_single_sim_data(conn, id_sim):
     cur = conn.cursor()
     cur.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
-                        "FROM sim WHERE id=%i" % int(id_sim))
+                "FROM sim WHERE id=%i" % int(id_sim))
 
     for row in cur.fetchall():
         return list(row)
+
 
 def get_buses_models_data(conn):
     cur = conn.cursor()
@@ -101,11 +104,13 @@ def get_buses_models_data(conn):
         bus_data.append(row_dict)
     return bus_data
 
+
 def get_available_buses_models():
     bm_files = []
     for bm_file in glob.glob('static/bus-types/*.json', recursive=True):
         bm_files.append(bm_file.split(os.sep)[-1].replace('.json', ''))
     return bm_files
+
 
 def get_single_bus_model_data(conn, id_bus_model):
     cur = conn.cursor()
@@ -150,6 +155,7 @@ def delete_file_sim(file_path):
     except Exception as e:
         print('ERROR: Unable to delete file %s' % file_path)
 
+
 def delete_sim(conn, sim_metadata):
     conn.execute('DELETE FROM sim WHERE id = ?', (sim_metadata[0],))
     conn.commit()
@@ -170,13 +176,15 @@ def delete_bus_model(conn, bus_model_id):
     conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
 
+
 def calc_a(i, t):
     q = 1 + i
     return (np.power(q, t) * i) / (np.power(q, t) - 1)
 
+
 def calculate_economical_parameters(capex_features, opex_features):
     # Calculate the CAPEX costs
-    interest_rate = float(capex_features['capex_interest_rate'])/1e2
+    interest_rate = float(capex_features['capex_interest_rate']) / 1e2
     a_bus = calc_a(interest_rate, float(capex_features['capex_bus_lifetime']))
     a_batt = calc_a(interest_rate, float(capex_features['capex_battery_lifetime']))
     a_char = calc_a(interest_rate, float(capex_features['capex_charger_lifetime']))
@@ -191,9 +199,10 @@ def calculate_economical_parameters(capex_features, opex_features):
     # todo OPEX still to check
     opex_cost = (float(opex_features['opex_buses_maintainance']) +
                  float(opex_features['opex_buses_efficiency']) * float(opex_features['opex_energy_tariff'])) * \
-                 float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
+                float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
 
     return capex_cost, opex_cost
+
 
 def get_lines_daytypes_from_data_file(sim_file_path):
     lines = set()
@@ -230,12 +239,14 @@ def get_terminals(sim_metadata):
                 terminals.append(row['arrival_city'])
     return list(set(terminals))
 
+
 def filter_pars(pars, filter_string):
     res = {}
     for k in pars.keys():
         if filter_string in k:
             res[k] = pars[k]
     return res
+
 
 def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_metadata, distances_matrix):
     cur = conn.cursor()
@@ -353,7 +364,7 @@ def create_new_bus_model(pars):
 
 def update_bus_model(conn, pars):
     bus_id = pars['id']
-    bus_name =  pars['name']
+    bus_name = pars['name']
     del pars['id']
     del pars['name']
     cur = conn.cursor()
@@ -482,16 +493,15 @@ def schedule_plot(solution_file_path, charging_blocks=3):
 
     for b in set(df.bus):
         b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery packs'].values[0] * c["Battery pack size"]
-        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size * 60 / c['max_depot_charging_power'])
-    returned_data['df_charge'] = df_charge
+        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size)  # * 60 / c['max_depot_charging_power'])
 
     model = Model('charge')
     # Bus i charges at time j.
     x = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='x')
     # Total charging events at time j.
     y = model.addVars(np.arange(max_step), lb=0, name='y')
-    # Bus i is charging at timestep j but not j + 1
-    indicator = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='indicator')
+    # Charging power of bus i at timestep j
+    p = model.addVars(set(df.bus), np.arange(max_step), lb=1e-6, ub=150, name='p')
     z2 = model.addVar(name='z2')
 
     cost = model.addVar(name='cost')
@@ -499,18 +509,17 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     for k, v in step_mask.items():
         model.addConstrs(x[k, t] == 0 for t in range(len(v)) if v[t] == 0)
 
-    # Sum of charging time-steps should be equal to the min. number of time-steps each bus should charge.
-    model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) <= df_charge[k] for k in set(df.bus))
-    model.addConstrs(quicksum(x[k, t] for t in np.arange(max_step)) >= df_charge[k] for k in set(df.bus))
-    # Charging stop is indicated by an active node at time t and inactive node at time t + 1
-    model.addConstrs(x[k, t] - x[k, t + 1] <= indicator[k, t] for t in np.arange(max_step - 1) for k in set(df.bus))
-    # For each bus, the number of charging start-stop sequences should be less than or equal to charging_blocks
-    model.addConstrs(quicksum(indicator[k, t] for t in np.arange(max_step)) <= charging_blocks for k in set(df.bus))
+    # Every bus should charge to 100% SOC
+    model.addConstrs(quicksum(x[k, t] * p[k, t] for t in np.arange(max_step)) == df_charge[k] * 60 for k in set(df.bus))
 
-    # Sum of charging events at each time-step.
-    model.addConstrs(y[t] == quicksum(x[k, t] for k in set(df.bus)) for t in np.arange(max_step))
+    # Total charging power at time t
+    model.addConstrs(y[t] == quicksum(x[k, t] * p[k, t] for k in set(df.bus)) for t in np.arange(max_step))
+    # Maximum rate of change of charging power is 1kW per second
+    model.addConstrs(p[k, t] * x[k, t] - p[k, t + 1] * x[k, t + 1] <= 10 for t in np.arange(max_step - 1) for k in set(df.bus))
+    model.addConstrs(p[k, t] * x[k, t] - p[k, t + 1] * x[k, t + 1] >= -10 for t in np.arange(max_step - 1) for k in set(df.bus))
 
-    model.addConstr(z2 == max_(y))
+    # Upper bound on the sum of charging power
+    model.addConstrs(z2 >= quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(max_step))
 
     model.addConstr(cost == z2)
     model.setObjective(cost, sense=GRB.MINIMIZE)
@@ -519,9 +528,11 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     if model.status == GRB.INFEASIBLE:
         print("Model is infeasible!!!!")
 
-    res_var = ['x']
-    varInfo = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in res_var])]
-    solution = pd.DataFrame(varInfo, columns=['var', 'val'])
+    sol_x = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in ['x']])]
+    solution = pd.DataFrame(sol_x, columns=['var', 'val'])
+
+    sol_p = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in ['p']])]
+    power = pd.DataFrame(sol_p, columns=['var', 'val'])
 
     solution[['var', 'index1', 'index2']] = solution['var'].str.split(r'\[|\]', expand=True, regex=True)
     solution[['bus', 'start']] = solution['index1'].str.split(',', expand=True)
@@ -530,6 +541,11 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     solution['duration'] = solution['val'].astype('int')
     solution['end'] = solution['start'] + solution['duration']
     solution = pd.concat([solution, dfc], axis=0, ignore_index=True)
+
+    power[['var', 'index1', 'index2']] = power['var'].str.split(r'\[|\]', expand=True, regex=True)
+    power[['bus', 'start']] = power['index1'].str.split(',', expand=True)
+    power = power.reset_index()[['var', 'bus', 'start', 'val']]
+    power['start'] = power['start'].astype('int')
 
     temp_x = pd.DataFrame(columns=df.columns)
 
@@ -554,7 +570,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
                 df.loc[(df.n2 == str(depot_end[0])) & (df.bus == bus_id), "end"] = max_t + \
                                                                                    df.loc[(df.n2 == str(depot_end[0])) & (df.bus ==
                                                                                                                           bus_id),
-                                                                                          "duration"]
+                                                                                   "duration"]
 
     j = 0
     for index, row in df.iterrows():
@@ -607,8 +623,19 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     x_ticks = [i * 30 for i in range(49)]
 
     plt.figure(figsize=(12, 4.5))
-    plt.barh(y=df_depot_charge.bus, left=df_depot_charge.start, width=df_depot_charge.duration, color='#F5CBA7', label='Depot Charging',
-             height=0.8)
+    # Define the color gradient from white to red
+    colors = ['#FFFFFF', '#FF0000']
+    values = [0, 150]
+    color_dict = {value: color for value, color in zip(values, colors)}
+    colormap = matplotlib.colors.LinearSegmentedColormap.from_list('white_to_red', list(color_dict.values()))
+
+    buses = sorted(list(set(df_depot_charge.bus)))
+    for b in buses:
+        for s in df_depot_charge.loc[df_depot_charge.bus == b, 'start'].values:
+            for t in range(int(df_depot_charge.loc[(df_depot_charge.bus == b) & (df_depot_charge.start == s), 'duration'].values[0])):
+                ci = power.loc[(power.bus == b) & (power.start == s + t), 'val'].values[0]
+                plt.barh(y=b, left=s + t, width=1, height=0.8, color=colormap(ci))
+
     plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455',
              label='Pantograph Charging',
              height=0.8)
@@ -624,7 +651,17 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     plt.savefig(plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
                 facecolor='auto', edgecolor='auto', backend=None)
 
+    plt.figure(figsize=(12, 4.5))
+    plt.plot(power.groupby(['start'])['val'].sum().values, '-r', label='Power')
+    plt.xlabel('Timestep')
+    plt.ylabel("Power (kW)")
+    plt.savefig(r"./img/charge_profile.png", dpi=300, format=None, metadata=None,
+                bbox_inches=None, pad_inches=0.1,
+                facecolor='auto', edgecolor='auto',
+                backend=None)
+
     return returned_data
+
 
 def generate_graph(nodes_list, edges_list):
     graph = nx.Graph()
@@ -642,6 +679,7 @@ def create_edge_list(edges, data_frame, start, end):
     for i, j in edges:
         bus_i = data_frame.loc[data_frame.n1 == i.split('_')[0], 'bus'].values[0]
         bus_j = data_frame.loc[data_frame.n1 == j.split('_')[0], 'bus'].values[0]
+
         # If (i, j) or (j, i) is in node_pairs there is no edge.
         if 'S' in i.split('_')[0]:
             tsi = data_frame.loc[data_frame.n1 == i.split('_')[0], 'start'].values[0]
@@ -737,15 +775,18 @@ def schedule_drivers(solution_file_path):
     df_res.to_csv(df_file_name)
     print(f'Minimum number of drivers required: {len(set(df_res["Driver#"]))}')
 
+
 def clean_terminals(conn):
     cur = conn.cursor()
     cur.execute("DELETE FROM terminal WHERE company='%s'" % session['company_user'])
     conn.commit()
 
+
 def clean_distances(conn):
     cur = conn.cursor()
     cur.execute("DELETE FROM distance WHERE company='%s'" % session['company_user'])
     conn.commit()
+
 
 def update_terminals(conn, terminals_file_path):
     df = pd.read_csv(terminals_file_path)
@@ -761,6 +802,7 @@ def update_terminals(conn, terminals_file_path):
         terms_dict[term[1]] = term[0]
     return terms_dict
 
+
 def update_distances(conn, distances_file_path, terms_dict):
     df = pd.read_csv(distances_file_path)
     starting_stations_ids = []
@@ -773,14 +815,17 @@ def update_distances(conn, distances_file_path, terms_dict):
     df = df.assign(id_arrival_station=arrival_stations_ids)
     df = df.assign(company=np.array([session['company_user'] for _ in range(len(df.index))]))
     df = df.drop(['starting_station', 'arrival_station'], axis=1)
-    df = df.reindex(columns=['id_starting_station', 'id_arrival_station', 'distance_km',  'avg_travel_time_min', 'company'])
+    df = df.reindex(columns=['id_starting_station', 'id_arrival_station', 'distance_km', 'avg_travel_time_min', 'company'])
     df.to_sql('distance', conn, if_exists='replace', index=False)
+
 
 def get_terminals_metadata(conn):
     return conn.execute("SELECT * FROM terminal WHERE company='%s'" % session['company_user']).fetchall()
 
+
 def get_distances_matrix(conn):
     return conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
+
 
 def get_terminals_metadata_dict(conn):
     terms = get_terminals_metadata(conn)
@@ -789,12 +834,14 @@ def get_terminals_metadata_dict(conn):
         terms_dict[term[1]] = {'id': term[0], 'elevation': term[3], 'is_charging_station': term[4]}
     return terms_dict
 
+
 def get_distances_matrix_dict(conn):
     distances = get_distances_matrix(conn)
     distances_dict = {}
     for d in distances:
         distances_dict[d[0], d[1]] = {'distance_km': d[2], 'avg_travel_time_min': d[3]}
     return distances_dict
+
 
 # Route for handling the login page logic
 @app.route('/login', methods=['GET', 'POST'])
@@ -873,13 +920,14 @@ def detail():
         capex_features = json.loads(sim_metadata[11])
         opex_features = json.loads(sim_metadata[12])
         capex, opex = calculate_economical_parameters(capex_features=capex_features, opex_features=opex_features)
-        capex_features['capex_cost'] = int(capex/1e3)
-        opex_features['opex_cost'] = int(opex/1e3)
+        capex_features['capex_cost'] = int(capex / 1e3)
+        opex_features['opex_cost'] = int(opex / 1e3)
 
         return render_template('detail.html', sim_metadata=sim_metadata, data=data, capex_features=capex_features,
                                opex_features=opex_features)
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/new_sim_step1/', methods=('GET', 'POST'))
 def new_sim_step1():
@@ -909,6 +957,7 @@ def new_sim_step1():
             return render_template('new_sim_step1.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/new_sim_step2/', methods=('GET', 'POST'))
 def new_sim_step2():
@@ -945,6 +994,7 @@ def new_sim_step2():
                                    days_types=days_types, bus_model_data=bus_model_data)
     else:
         return redirect(url_for('login'))
+
 
 @app.route('/new_bus_model', methods=('GET', 'POST'))
 def new_bus_model():
@@ -997,9 +1047,11 @@ def buses_models_list():
         conn.close()
         return render_template('buses_models_list.html', buses_models=buses_models)
     else:
-        return redirect(url_for('login'))\
+        return redirect(url_for('login')) \
+ \
+            @ app.route('/company_manager', methods=('GET', 'POST'))
 
-@app.route('/company_manager', methods=('GET', 'POST'))
+
 def company_manager():
     if is_logged():
         conn = get_db_connection()
@@ -1023,6 +1075,7 @@ def company_manager():
         return render_template('company_manager.html', buses_models=buses_models)
     else:
         return redirect(url_for('login'))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
