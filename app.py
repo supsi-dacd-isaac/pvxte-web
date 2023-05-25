@@ -494,6 +494,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     for b in set(df.bus):
         b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery packs'].values[0] * c["Battery pack size"]
         df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size)  # * 60 / c['max_depot_charging_power'])
+    returned_data['df_charge'] = df_charge
 
     model = Model('charge')
     # Bus i charges at time j.
@@ -647,18 +648,17 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     plt.legend(fontsize=10, loc='lower left')
     plt.tick_params(axis='y', which='major', pad=6)
 
-    plot_file_name = 'static/plot/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.png')
-    plt.savefig(plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
+    scheduling_plot_file_name = 'static/plot/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.png')
+    plt.savefig(scheduling_plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
                 facecolor='auto', edgecolor='auto', backend=None)
 
     plt.figure(figsize=(12, 4.5))
     plt.plot(power.groupby(['start'])['val'].sum().values, '-r', label='Power')
     plt.xlabel('Timestep')
     plt.ylabel("Power (kW)")
-    plt.savefig(r"./img/charge_profile.png", dpi=300, format=None, metadata=None,
-                bbox_inches=None, pad_inches=0.1,
-                facecolor='auto', edgecolor='auto',
-                backend=None)
+    cp_plot_file_name = scheduling_plot_file_name.replace('.png', '_charge_profile.png')
+    plt.savefig(cp_plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
+                facecolor='auto', edgecolor='auto', backend=None)
 
     return returned_data
 
@@ -1048,10 +1048,9 @@ def buses_models_list():
         return render_template('buses_models_list.html', buses_models=buses_models)
     else:
         return redirect(url_for('login')) \
- \
-            @ app.route('/company_manager', methods=('GET', 'POST'))
 
 
+@app.route('/company_manager', methods=('GET', 'POST'))
 def company_manager():
     if is_logged():
         conn = get_db_connection()
