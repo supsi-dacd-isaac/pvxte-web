@@ -629,8 +629,6 @@ def schedule_plot(solution_file_path, charging_blocks=3):
         if power.at[index, 'start'] > 1440:
             power.at[index, 'start'] = power.at[index, 'start'] - 1440
 
-    power = power.groupby(['bus', 'start']).agg({'val': sum}).reset_index()
-
     df = pd.concat([df, temp_x], axis=0, ignore_index=True)
     df_charge = pd.concat([solution, temp_y], axis=0, ignore_index=True)
     df_depot_charge = df_charge[df_charge['var'].isin(['Dt', 'x'])]
