@@ -422,12 +422,12 @@ def read_battery_size(solution_file_path, sep=';'):
 
     if 'optimize_for_each_bus' in c.keys() and c['optimize_for_each_bus']:
         dfb = dfb[dfb['index1'].isin(c["vehicle_ids"])]
-        dfb.columns = ['Bus id', 'Battery side (kWh)']
-        dfb["Battery packs"] = dfb['Battery side (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
+        dfb.columns = ['Bus id', 'Battery size (kWh)']
+        dfb["Battery packs"] = dfb['Battery size (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
     else:
         size = dfb.val.values[0]
-        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns=['Bus id', 'Battery side (kWh)'])
-        dfb["Battery packs"] = dfb['Battery side (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
+        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns=['Bus id', 'Battery size (kWh)'])
+        dfb["Battery packs"] = dfb['Battery size (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
 
     df_file_name = 'static/output-bsize/%s' % solution_file_path.split(os.sep)[-1]
     dfb.to_csv(df_file_name)
