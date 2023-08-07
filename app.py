@@ -524,11 +524,11 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     model.addConstrs(y[t] == quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(1440))
 
     # Maximum rate of change of charging power is 1kW per second
-    model.addConstrs(p[k, t] - p[k, t + 1] <= 10 for t in np.arange(1339) for k in set(df.bus))
-    model.addConstrs(p[k, t] - p[k, t + 1] >= -10 for t in np.arange(1339) for k in set(df.bus))
+    model.addConstrs(p[k, t] - p[k, t + 1] <= 20 for t in np.arange(1439) for k in set(df.bus))
+    model.addConstrs(p[k, t] - p[k, t + 1] >= -20 for t in np.arange(1439) for k in set(df.bus))
 
     # Upper bound on the sum of charging power
-    model.addConstrs(z2 >= quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(max_step))
+    model.addConstrs(z2 >= quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(1440))
 
     model.addConstr(cost == z2)
     model.setObjective(cost, sense=GRB.MINIMIZE)
