@@ -517,7 +517,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
 
     bus_start_finish['n2'] = bus_start_finish.apply(lambda x: _f(x, sequence), axis=1)
     bus_start_finish = bus_start_finish.drop(['var', 'end', 'duration'], axis=1)
-    bus_start_finish['end'] = bus_start_finish.apply(lambda x: _g(x, dfx), axis=1)
+    bus_start_finish['end'] = bus_start_finish.apply(lambda x: _g(x, df), axis=1)
 
     max_step = 2 * 1440
     step_mask = {}
