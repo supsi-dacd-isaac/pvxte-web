@@ -394,7 +394,7 @@ def read_solution(solution_file_path, sep=';'):
     if not dfc.empty:
         dfc[['n1']] = dfc['index1'].str.split(',', expand=True)
         dfc = dfc.reset_index()[['var', 'n1', 'val']]
-    return dfx, dfs, dfc
+    return dfx[dfx.val >= 0.8], dfs, dfc
 
 
 def read_time_windows(fname):
@@ -433,8 +433,42 @@ def read_battery_size(solution_file_path, sep=';'):
     dfb.to_csv(df_file_name)
     return dfb
 
+def assemble_sequences(df_start, df_rest, depot_end):
+    seq = defaultdict(list)
+    n1_values = df_start['n1'].values
+    n2_values = df_start['n2'].values
+    df_rest = df_rest.set_index('n1')
+
+    depot_end = set(depot_end)
+
+    for index, (n1, n2) in enumerate(zip(n1_values, n2_values)):
+        trip = (n1, n2)
+        seq[index].append(trip)
+
+        while True:
+            n3 = df_rest.loc[n2, 'n2']
+            seq[index].append((n2, n3))
+            n2 = n3
+
+            if n3 in depot_end:
+                break
+    seq = {k: [t[1] for t in v] for k, v in seq.items()}
+    return seq
 
 def schedule_plot(solution_file_path, charging_blocks=3):
+    def _f(x, s):
+        return s[x.name][-1]
+
+    def _g(x, u):
+        n = x.n2
+        return u[u.n2 == n]['end'].values[0]
+
+    def _h(x, s):
+        n = x.n2
+        for k, v in s.items():
+            if n in v:
+                return k
+
     returned_data = {}
     config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
     with open(config_name, 'r') as f:
@@ -448,6 +482,8 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     df['start'] = 0
     df['end'] = 0
     df['duration'] = 0
+    df['n1'] = df['n1'].astype(int)
+    df['n2'] = df['n2'].astype(int)
 
     for index, row in df.iterrows():
         if int(row.n1) in depot_start:
@@ -456,10 +492,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
         else:
-            if int(row.n1) < c['#trips']:
-                n1 = int(row.n1)
-            else:
-                n1 = int(row.n1) - c['#trips']
+            n1 = int(row.n1)
             df.at[index, 'start'] = t_start[n1]
             df.at[index, 'duration'] = times[n1, int(row.n2)]
             df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
@@ -478,34 +511,42 @@ def schedule_plot(solution_file_path, charging_blocks=3):
         dfc = dfc[['var', 'bus', 'start', 'val', 'duration', 'end']]
 
     df = df.sort_values(['bus', 'start', 'end']).reset_index().drop(['index'], axis=1)
+    bus_start_finish = df[df.n1.isin(depot_start)].reset_index().drop(['index'], axis=1)
+    bus_rest = df[~df.n1.isin(depot_start)].reset_index().drop(['index'], axis=1)
+    sequence = assemble_sequences(bus_start_finish, bus_rest, depot_end)
+
+    bus_start_finish['n2'] = bus_start_finish.apply(lambda x: _f(x, sequence), axis=1)
+    bus_start_finish = bus_start_finish.drop(['var', 'end', 'duration'], axis=1)
+    bus_start_finish['end'] = bus_start_finish.apply(lambda x: _g(x, dfx), axis=1)
+
     max_step = 2 * 1440
     step_mask = {}
+    bus_indices = set(bus_start_finish.bus)
 
-    for bus in set(df.bus):
+    for bus in bus_indices:
         step_mask[bus] = np.ones(max_step, )
 
-    for bus in set(df.bus):
-        earliest_start = min(df[(df.bus == bus)]['start'])
-        latest_finish = max(df[(df.bus == bus)]['end'])
-        step_mask[bus][earliest_start: latest_finish] = 0
-        step_mask[bus][earliest_start + 1440: min(latest_finish + 1440, 1440 * 2)] = 0
+    for bus in bus_indices:
+        earliest_start = bus_start_finish[(bus_start_finish['bus'] == bus)]['start'].values[0]
+        latest_finish = bus_start_finish[(bus_start_finish['bus'] == bus)]['end'].values[0]
+        step_mask[bus][int(earliest_start): int(latest_finish)] = 0
 
     df_charge = {}
 
     for b in set(df.bus):
-        b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery packs'].values[0] * c["Battery pack size"]
+        b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery size (kWh)'].values[0]
         df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size)  # * 60 / c['max_depot_charging_power'])
     returned_data['df_charge'] = df_charge
 
     model = Model('charge')
     # Bus i charges at time j.
-    x = model.addVars(set(df.bus), np.arange(max_step), vtype=GRB.BINARY, name='x')
+    x = model.addVars(bus_indices, np.arange(max_step), vtype=GRB.BINARY, name='x')
     # Total charging events at time j.
     y = model.addVars(np.arange(1440), lb=0, name='y')
     # Charging power of bus i at timestep j
-    p_ = model.addVars(set(df.bus), np.arange(max_step), lb=1, ub=150, name='p_')
+    p_ = model.addVars(bus_indices, np.arange(max_step), lb=1, ub=150, name='p_')
     # Charging power of bus i at timestep j
-    p = model.addVars(set(df.bus), np.arange(1440), lb=0, ub=150, name='p')
+    p = model.addVars(bus_indices, np.arange(1440), lb=0, ub=150, name='p')
     z2 = model.addVar(name='z2')
 
     cost = model.addVar(name='cost')
@@ -513,19 +554,22 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     for k, v in step_mask.items():
         model.addConstrs(x[k, t] == 0 for t in range(len(v)) if v[t] == 0)
 
+    # Repeatability constraint
+    model.addConstrs(x[k, int(t % 1440)] == x[k, t] for k in bus_indices for t in np.arange(max_step))
+
     for t in np.arange(max_step):
-        model.addConstrs(p[k, int(t % 1440)] == p_[k, int(t % 1440)] * x[k, int(t % 1440)] +
-                         p_[k, 1440 + int(t % 1440)] * x[k, 1440 + int(t % 1440)] for k in set(df.bus))
+        model.addConstrs(p[k, int(t % 1440)] == p_[k, int(t % 1440)] * x[k, int(t % 1440)] + p_[k, t] * x[k, t] for k in bus_indices)
+        model.addConstrs(p_[k, int(t % 1440)] * x[k, int(t % 1440)] == p_[k, t] * x[k, t] for k in bus_indices)
 
     # Every bus should charge to 100% SOC
-    model.addConstrs(quicksum(p[k, t] for t in np.arange(1440)) == df_charge[k] * 60 for k in set(df.bus))
+    model.addConstrs(quicksum(p[k, t] for t in np.arange(1440)) == df_charge[k] * 60 for k in bus_indices)
 
     # Total charging power at time t
     model.addConstrs(y[t] == quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(1440))
 
     # Maximum rate of change of charging power is 1kW per second
-    model.addConstrs(p[k, t] - p[k, t + 1] <= 20 for t in np.arange(1439) for k in set(df.bus))
-    model.addConstrs(p[k, t] - p[k, t + 1] >= -20 for t in np.arange(1439) for k in set(df.bus))
+    model.addConstrs(p[k, t] - p[k, t + 1] <= 20 for t in np.arange(1439) for k in bus_indices)
+    model.addConstrs(p[k, t] - p[k, t + 1] >= -20 for t in np.arange(1439) for k in bus_indices)
 
     # Upper bound on the sum of charging power
     model.addConstrs(z2 >= quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(1440))
@@ -546,18 +590,23 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     sol_max = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['z2']])]
     max_p = pd.DataFrame(sol_max, columns=['var', 'val']).val.values[0]
 
-    solution[['var', 'index1', 'index2']] = solution['var'].str.split(r'\[|\]', expand=True, regex=True)
-    solution[['bus', 'start']] = solution['index1'].str.split(',', expand=True)
-    solution = solution.reset_index()[['var', 'bus', 'start', 'val']]
+    sol_x[['var', 'index1', 'index2']] = sol_x['var'].str.split(r'\[|\]', expand=True, regex=True)
+    sol_x[['bus', 'start']] = sol_x['index1'].str.split(',', expand=True)
+
+    solution = sol_x.reset_index()[['var', 'bus', 'start', 'val']]
     solution['start'] = solution['start'].astype('int')
     solution['duration'] = solution['val'].astype('int')
     solution['end'] = solution['start'] + solution['duration']
     solution = pd.concat([solution, dfc], axis=0, ignore_index=True)
 
-    power[['var', 'index1', 'index2']] = power['var'].str.split(r'\[|\]', expand=True, regex=True)
-    power[['bus', 'start']] = power['index1'].str.split(',', expand=True)
-    power = power.reset_index()[['var', 'bus', 'start', 'val']]
+    sol_p[['var', 'index1', 'index2']] = sol_p['var'].str.split(r'\[|\]', expand=True, regex=True)
+    sol_p[['bus', 'start']] = sol_p['index1'].str.split(',', expand=True)
+
+    power = sol_p.reset_index()[['var', 'bus', 'start', 'val']]
+    power.columns = ['p', 'bus', 'time', 'power']
     power['start'] = power['start'].astype('int')
+
+    solution = pd.merge(solution, power, left_on=['bus', 'start'], right_on=['bus', 'time'], how='inner')
 
     temp_x = pd.DataFrame(columns=df.columns)
 
@@ -626,13 +675,13 @@ def schedule_plot(solution_file_path, charging_blocks=3):
             j += 1
 
     for index, row in power.iterrows():
-        if power.at[index, 'start'] > 1440:
-            power.at[index, 'start'] = power.at[index, 'start'] - 1440
+        if power.at[index, 'time'] >= 1440:
+            power.at[index, 'time'] = power.at[index, 'time'] - 1440
 
     df = pd.concat([df, temp_x], axis=0, ignore_index=True)
     df_charge = pd.concat([solution, temp_y], axis=0, ignore_index=True)
     df_depot_charge = df_charge[df_charge['var'].isin(['Dt', 'x'])]
-    df_panto_charge = df_charge[df_charge['var'].isin(['Ct'])]
+    # df_panto_charge = df_charge[df_charge['var'].isin(['Ct'])]
 
     df_trips = df[(df.n1 != str(depot_start[0])) & (df.n2 != str(depot_end[0])) & (~df['n1'].isna())]
     df_dead = df[((df.n1 == str(depot_start[0])) | (df.n2 == str(depot_end[0]))) & (~df['n1'].isna())]
@@ -649,12 +698,12 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     for b in buses:
         for s in df_depot_charge.loc[df_depot_charge.bus == b, 'start'].values:
             for t in range(int(df_depot_charge.loc[(df_depot_charge.bus == b) & (df_depot_charge.start == s), 'duration'].values[0])):
-                ci = power.loc[(power.bus == b) & (power.start == s + t), 'val'].values[0]
+                ci = power.loc[(power.bus == b) & (power.start == s + t), 'power'].values[0]
                 plt.barh(y=b, left=s + t, width=1, height=0.8, color=colormap(ci))
 
-    plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455',
-             label='Pantograph Charging',
-             height=0.8)
+    # plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455',
+    #          label='Pantograph Charging',
+    #          height=0.8)
     plt.barh(y=df_dead.bus, left=df_dead.start, width=df_dead.duration, color='grey', label='Dead-heading', height=0.8)
     plt.barh(y=df_trips.bus, left=df_trips.start, width=df_trips.duration, color='black', label='Trips', height=0.8)
     plt.gca().invert_yaxis()
@@ -668,7 +717,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
                 facecolor='auto', edgecolor='auto', backend=None)
 
     plt.figure(figsize=(12, 4.5))
-    plt.plot(power.groupby(['start'])['val'].sum().values, '-r', label='Power')
+    plt.plot(power.groupby(['time'])['power'].sum().values, '-r', label='Power')
     plt.xlabel('Timestep')
     plt.ylabel("Power (kW)")
     cp_plot_file_name = scheduling_plot_file_name.replace('.png', '_charge_profile.png')
