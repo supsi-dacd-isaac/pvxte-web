@@ -581,11 +581,11 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     if model.status == GRB.INFEASIBLE:
         print("Model is infeasible!!!!")
 
-    sol_x = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['x']])]
-    solution = pd.DataFrame(sol_x, columns=['var', 'val'])
+    x_var = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['x']])]
+    sol_x = pd.DataFrame(x_var, columns=['var', 'val'])
 
-    sol_p = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['px']])]
-    power = pd.DataFrame(sol_p, columns=['var', 'val'])
+    p_var = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['px']])]
+    sol_p = pd.DataFrame(p_var, columns=['var', 'val'])
 
     sol_max = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['z2']])]
     max_p = pd.DataFrame(sol_max, columns=['var', 'val']).val.values[0]
