@@ -57,29 +57,29 @@
                         <td colspan="2" align="center"><b>CAPEX section</b></td>
                     </tr>
                     <tr>
-                        <td>Bus cost</td>
-                        <td><input type="text" class="form-control-sm" name="capex_bus_cost" value="440000">&nbsp[CHF/bus]</td>
+                        <td>Bus cost</td>"
+                        <td><input type="text" class="form-control-sm" name="capex_bus_cost" value={{ default_costs['bus'] }}>&nbsp[CHF/bus]</td>
                     </tr>                    <tr>
                     <td>Bus lifetime</td>
                         <td><input type="text" class="form-control-sm" name="capex_bus_lifetime" value="12">&nbsp[years]</td>
                     </tr>
                     <tr>
                         <td>Battery cost</td>
-                        <td><input type="text" class="form-control-sm" name="capex_battery_cost" value="122000">&nbsp[CHF/battery]</td>
+                        <td><input type="text" class="form-control-sm" name="capex_battery_cost" value="{{ default_costs['battery'] }}">&nbsp[CHF/battery]</td>
                     </tr>
                     <td>Battery lifetime</td>
                         <td><input type="text" class="form-control-sm" name="capex_battery_lifetime" value="6">&nbsp[years]</td>
                     </tr>
                     <tr>
                         <td>Charger cost</td>
-                        <td><input type="text" class="form-control-sm" name="capex_charger_cost" value="350000">&nbsp[CHF/charger]</td>
+                        <td><input type="text" class="form-control-sm" name="capex_charger_cost" value="{{ default_costs['charger'] }}">&nbsp[CHF/charger]</td>
                     </tr>
                     <td>Charger lifetime</td>
                         <td><input type="text" class="form-control-sm" name="capex_charger_lifetime" value="10">&nbsp[years]</td>
                     </tr>
                     <tr>
                         <td>Connection cost</td>
-                        <td><input type="text" class="form-control-sm" name="capex_additional_fee" value="30000">&nbsp[CHF/charger]</td>
+                        <td><input type="text" class="form-control-sm" name="capex_additional_fee" value="{{ default_costs['connection_fee'] }}">&nbsp[CHF/charger]</td>
                     </tr>
                     <tr>
                         <td>Interest rate</td>

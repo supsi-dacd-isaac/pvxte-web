@@ -248,6 +248,29 @@ def filter_pars(pars, filter_string):
     return res
 
 
+def calculate_default_costs(input_data, length):
+    # Not discrete costs
+    step = 100
+    default_costs =  {
+        "battery": round((main_cfg['defaultCosts']['battery']['slope'] * float(input_data['battery_capacity']) + main_cfg['defaultCosts']['battery']['intercept']) / step) * step,
+        "charger": round((main_cfg['defaultCosts']['charger']['slope'] * float(input_data['charger_power']) + main_cfg['defaultCosts']['charger']['intercept']) / step) * step,
+        "connection_fee": round((main_cfg['defaultCosts']['connectionFee']['slope'] * float(input_data['fee_connection_power']) + main_cfg['defaultCosts']['connectionFee']['intercept']) / step) * step
+    }
+
+    # Discrete costs
+    # Basically we have only 3 options (8, 12, 18 meters) (12 is managed by the ELSE case)
+    if length == 8:
+        default_costs['bus'] = main_cfg['defaultCosts']['bus']['8']
+    elif length == 12:
+        default_costs['bus'] = main_cfg['defaultCosts']['bus']['12']
+    elif length == 18:
+        default_costs['bus'] = main_cfg['defaultCosts']['bus']['18']
+    else:
+        default_costs['bus'] = main_cfg['defaultCosts']['bus']['else']
+
+    return default_costs
+
+
 def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_metadata, distances_matrix):
     cur = conn.cursor()
 
@@ -546,7 +569,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     # Charging power of bus i at timestep j
     p_ = model.addVars(bus_indices, np.arange(max_step), lb=1, ub=150, name='p_')
     # Charging power of bus i at timestep j
-    p = model.addVars(bus_indices, np.arange(1440), lb=0, ub=150, name='p')
+    p = model.addVars(bus_indices, np.arange(1440), lb=0, ub=150, name='px')
     z2 = model.addVar(name='z2')
 
     cost = model.addVar(name='cost')
@@ -604,7 +627,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
 
     power = sol_p.reset_index()[['var', 'bus', 'start', 'val']]
     power.columns = ['p', 'bus', 'time', 'power']
-    power['start'] = power['start'].astype('int')
+    power['time'] = power['time'].astype('int')
 
     solution = pd.merge(solution, power, left_on=['bus', 'start'], right_on=['bus', 'time'], how='inner')
 
@@ -698,7 +721,7 @@ def schedule_plot(solution_file_path, charging_blocks=3):
     for b in buses:
         for s in df_depot_charge.loc[df_depot_charge.bus == b, 'start'].values:
             for t in range(int(df_depot_charge.loc[(df_depot_charge.bus == b) & (df_depot_charge.start == s), 'duration'].values[0])):
-                ci = power.loc[(power.bus == b) & (power.start == s + t), 'power'].values[0]
+                ci = power.loc[(power.bus == b) & (power.time == s + t), 'power'].values[0]
                 plt.barh(y=b, left=s + t, width=1, height=0.8, color=colormap(ci))
 
     # plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455',
@@ -1006,11 +1029,14 @@ def new_sim_step1():
                 data_file = '/'.join([target, file_name])
                 request.files['data_file'].save(data_file)
 
-                id_bus_model = int(request.form.to_dict()['id_bus_model'])
+                main_input_data = request.form.to_dict()
                 lines, days_types = get_lines_daytypes_from_data_file(data_file)
                 conn.close()
                 return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
-                                        id_bus_model=id_bus_model))
+                                        id_bus_model=main_input_data['id_bus_model'],
+                                        battery_capacity=main_input_data['battery_capacity'],
+                                        charger_power=main_input_data['charger_power'],
+                                        fee_connection_power=main_input_data['fee_connection_power']))
             else:
                 buses_models = get_buses_models_data(conn)
                 conn.close()
@@ -1048,14 +1074,16 @@ def new_sim_step2():
                 return render_template('new_sim_step2.html',
                                        error='Data file has a wrong format! The simulation cannot be run',
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
-                                       bus_model_data=bus_model_data)
+                                       bus_model_data=bus_model_data,
+                                       default_costs=calculate_default_costs(req_dict, bus_model_data['length']))
         else:
             req_dict = request.args.to_dict()
             lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
             bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
             conn.close()
             return render_template('new_sim_step2.html', data_file=req_dict['data_file'], lines=lines,
-                                   days_types=days_types, bus_model_data=bus_model_data)
+                                   days_types=days_types, bus_model_data=bus_model_data,
+                                   default_costs=calculate_default_costs(req_dict, bus_model_data['length']))
     else:
         return redirect(url_for('login'))
 

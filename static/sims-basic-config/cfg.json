@@ -3,7 +3,18 @@
         "modelTimesteps": 1400,
         "chargingAtDeposit": true
     },
-    "appSecretKey": "8EuPLSnVQ47U1XcymcUcadLdk9H7P3Cg5tWH5Pc1aj27GtHsFt"
+    "appSecretKey": "8EuPLSnVQ47U1XcymcUcadLdk9H7P3Cg5tWH5Pc1aj27GtHsFt",
+    "defaultCosts": {
+        "battery": {"slope":  350.0, "intercept":  0.0},
+        "charger": {"slope":  384.6, "intercept":  33076.9},
+        "connectionFee": {"slope":  225.8, "intercept":  1798.4},
+        "bus": {
+            "8":  390000,
+            "12": 440000,
+            "18": 690000,
+            "else": 500000
+        }
+    }
 }
 
 
