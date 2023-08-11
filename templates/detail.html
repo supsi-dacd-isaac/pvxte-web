@@ -28,7 +28,7 @@
                     {% for bsize in data['df_bsize'].iterrows() %}
                         <tr>
                             <td>{{ bsize[1]['Bus id']|int }}</td>
-                            <td>{{ bsize[1]['Battery size (kWh)']|int }}</td>
+                            <td>{{ bsize[1]['Battery side (kWh)']|int }}</td>
                             <td>{{ bsize[1]['Battery packs']|int }}</td>
                         </tr>
                     {% endfor %}

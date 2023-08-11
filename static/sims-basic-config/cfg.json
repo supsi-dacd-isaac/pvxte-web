@@ -14,7 +14,8 @@
             "18": 690000,
             "else": 500000
         }
-    }
+    },
+    "simulatorUrl": "http://localhost:8000/send-sim-data"
 }
 
 
