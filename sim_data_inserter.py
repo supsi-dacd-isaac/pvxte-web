@@ -50,6 +50,8 @@ if __name__ == "__main__":
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
+    logger.info('Start program')
+
     input_folder = '%s/input' % args.i
     tmp_folder = '%s/tmp' % args.i
     for sim_results_file in os.listdir(input_folder):
@@ -102,4 +104,5 @@ if __name__ == "__main__":
 
         logger.info('Simulation %s: Data management ending' % sim_id)
 
+    logger.info('End program')
     conn.close()
