@@ -123,10 +123,10 @@ def is_logged():
         return False
 
 
-def insert_user(conn, username, email, password):
+def insert_user(conn, username, email, password, company):
     cur = conn.cursor()
-    res = cur.execute("INSERT INTO user (username, email, password) VALUES (?, ?, ?)",
-                      (username, email, encrypt(password)))
+    res = cur.execute("INSERT INTO user (username, email, password, company) VALUES (?, ?, ?, ?)",
+                      (username, email, encrypt(password), company))
     conn.commit()
     return res
 
@@ -459,7 +459,7 @@ def signup():
     error = None
     if request.method == 'POST':
         conn = get_db_connection()
-        insert_user(conn, request.form['username'], request.form['email'], request.form['password'])
+        insert_user(conn, request.form['username'], request.form['email'], request.form['password'], request.form['company'])
         conn.close()
         return redirect(url_for('login'))
     return render_template('signup.html', error=error)
