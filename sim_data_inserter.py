@@ -6,7 +6,11 @@ import zipfile
 import sqlite3
 import logging
 import sys
+import smtplib
+import datetime
 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from tendo.singleton import SingleInstance
 
 def get_user_email(conn, user_id):
@@ -29,9 +33,17 @@ if __name__ == "__main__":
     # Configuration file
     # --------------------------------------------------------------------------- #
     arg_parser = argparse.ArgumentParser()
-    arg_parser.add_argument("-i", help="input folder")
+    arg_parser.add_argument("-c", help="configuration file")
     arg_parser.add_argument("-l", help="log file (optional, if empty log redirected on stdout)")
     args = arg_parser.parse_args()
+
+    # Load the main parameters
+    config_file = args.c
+    if os.path.isfile(config_file) is False:
+        print('\nATTENTION! Unable to open configuration file %s\n' % config_file)
+        sys.exit(1)
+
+    cfg = json.loads(open(args.c).read())
 
     # --------------------------------------------------------------------------- #
     # Set logging object
@@ -52,8 +64,8 @@ if __name__ == "__main__":
 
     logger.info('Start program')
 
-    input_folder = '%s/input' % args.i
-    tmp_folder = '%s/tmp' % args.i
+    input_folder = '%s/input' % cfg['inputFolder']
+    tmp_folder = '%s/tmp' % cfg['inputFolder']
     for sim_results_file in os.listdir(input_folder):
         shutil.copy('%s/%s' % (input_folder, sim_results_file), '%s/%s' % (tmp_folder, sim_results_file))
         sim_id = sim_results_file.replace('.zip', '')
@@ -95,14 +107,39 @@ if __name__ == "__main__":
 
         # Delete the files and folders from tmp and input directories
         shutil.rmtree(target_folder)
-        os.unlink('%s/%s' % (input_folder, sim_results_file))
-        os.unlink('%s/%s' % (tmp_folder, sim_results_file))
+        # os.unlink('%s/%s' % (input_folder, sim_results_file))
+        # os.unlink('%s/%s' % (tmp_folder, sim_results_file))
 
-        # todo Send the notification email to the user that launched the simulation
+        # Send the notification email to the user that launched the simulation
         user_email = get_user_email(conn, int(id_user))
-        logger.info('Simulation %s: Send email notification to %s' % (sim_id, user_email))
+        logger.info('Simulation %s: Send email notification to %s '
+                    '(server: %s; port: %i)' % (sim_id, user_email, cfg['email']['host'], cfg['email']['port']))
+
+        ts = int(sim_id.split('_')[1])
+        dt = datetime.datetime.fromtimestamp(ts)
+        dt_str = dt.strftime('%Y-%m-%d %H:%M:%S')
+        text = ('Dear user,<br>the simulation you launched at %s is now completed and its results available at '
+                '<a href="https://pvxte.isaac.supsi.ch">PVXTE web tool</a>') % dt_str
+
+        try:
+            smtp_server = smtplib.SMTP(cfg['email']['host'], cfg['email']['port'])
+            smtp_server.starttls()
+            smtp_server.login(cfg['email']['user'], cfg['email']['password'])
+
+            message = MIMEMultipart()
+            message['From'] = 'PVXTE-email-notifier'
+            message['To'] = user_email
+            message['Subject'] = 'PVXTE web tool: Simulation launched at %s completed' % dt_str
+            message.attach(MIMEText(text, 'html'))
+            res = smtp_server.sendmail(cfg['email']['user'], user_email, message.as_string())
+            logger.info("Email sent successfully!")
+        except Exception as e:
+            logger.error("An error occurred: %s", str(e))
+        finally:
+            smtp_server.quit()  # Close the connection
 
         logger.info('Simulation %s: Data management ending' % sim_id)
 
     logger.info('End program')
     conn.close()
+    # print(cfg['email'])

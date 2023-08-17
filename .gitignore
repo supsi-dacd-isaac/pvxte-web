@@ -8,3 +8,4 @@ key.key
 *.log
 *.sql
 init_db.py
+conf
