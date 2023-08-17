@@ -107,8 +107,8 @@ if __name__ == "__main__":
 
         # Delete the files and folders from tmp and input directories
         shutil.rmtree(target_folder)
-        # os.unlink('%s/%s' % (input_folder, sim_results_file))
-        # os.unlink('%s/%s' % (tmp_folder, sim_results_file))
+        os.unlink('%s/%s' % (input_folder, sim_results_file))
+        os.unlink('%s/%s' % (tmp_folder, sim_results_file))
 
         # Send the notification email to the user that launched the simulation
         user_email = get_user_email(conn, int(id_user))
