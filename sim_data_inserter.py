@@ -132,7 +132,6 @@ if __name__ == "__main__":
             message['Subject'] = 'PVXTE web tool: Simulation launched at %s completed' % dt_str
             message.attach(MIMEText(text, 'html'))
             res = smtp_server.sendmail(cfg['email']['user'], user_email, message.as_string())
-            logger.info("Email sent successfully!")
         except Exception as e:
             logger.error("An error occurred: %s", str(e))
         finally:
