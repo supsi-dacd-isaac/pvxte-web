@@ -655,7 +655,8 @@ def company_manager():
             os.unlink(terminals_file_path)
             os.unlink(distances_file_path)
 
-        return render_template('company_manager.html', buses_models=buses_models)
+        return render_template('company_manager.html', buses_models=buses_models,
+                               company=session['company_user'])
     else:
         return redirect(url_for('login'))
 
