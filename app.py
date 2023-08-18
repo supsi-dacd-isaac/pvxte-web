@@ -699,27 +699,48 @@ def company_manager():
         conn = get_db_connection()
         buses_models = get_buses_models_data(conn)
 
-        terminals_raw_data = get_terminals_metadata(conn)
-        terminals_data = handle_terminals_metadata(terminals_raw_data)
-
+        err = None
         if request.method == 'POST':
-            target = 'static/tmp'
-            terminals_file_path = '/'.join([target, '%i_terminals.csv' % session['id_user']])
-            request.files['terminals_file'].save(terminals_file_path)
-            distances_file_path = '/'.join([target, '%i_distances.csv' % session['id_user']])
-            request.files['distances_file'].save(distances_file_path)
+            try:
+                target = 'static/tmp'
+                terminals_file_path = '/'.join([target, '%i_terminals.csv' % session['id_user']])
+                request.files['terminals_file'].save(terminals_file_path)
+                distances_file_path = '/'.join([target, '%i_distances.csv' % session['id_user']])
+                request.files['distances_file'].save(distances_file_path)
 
-            clean_distances(conn)
-            clean_terminals(conn)
+                clean_distances(conn)
+                clean_terminals(conn)
 
-            terms_dict = update_terminals(conn, terminals_file_path)
-            update_distances(conn, distances_file_path, terms_dict)
+                # Update the DB
+                terms_dict = update_terminals(conn, terminals_file_path)
+                update_distances(conn, distances_file_path, terms_dict)
 
-            os.unlink(terminals_file_path)
-            os.unlink(distances_file_path)
+                # Delete the uploaded files
+                os.unlink(terminals_file_path)
+                os.unlink(distances_file_path)
+
+                # Get the new data from the DB
+                terminals_raw_data = get_terminals_metadata(conn)
+                terminals_data = handle_terminals_metadata(terminals_raw_data)
+
+            except Exception as e:
+                # Delete the uploaded files
+                os.unlink(terminals_file_path)
+                os.unlink(distances_file_path)
+
+                # Get the new data from the DB
+                terminals_raw_data = get_terminals_metadata(conn)
+                terminals_data = handle_terminals_metadata(terminals_raw_data)
+
+                print('Exception: %s' % str(e))
+                err = 'The uploaded files have not the right folder, please check the examples files and upload them again'
+
+        elif request.method == 'GET':
+            terminals_raw_data = get_terminals_metadata(conn)
+            terminals_data = handle_terminals_metadata(terminals_raw_data)
 
         return render_template('company_manager.html', buses_models=buses_models,
-                               company=session['company_user'], terminals_data=terminals_data)
+                               company=session['company_user'], terminals_data=terminals_data, error=err)
     else:
         return redirect(url_for('login'))
 

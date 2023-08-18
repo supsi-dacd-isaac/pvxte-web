@@ -1,0 +1,9 @@
+terminal_station,elevation_m,is_charging_station
+Depot,230,TRUE
+Chiasso_Stazione,230,FALSE
+Cantine_di_Sotto,200,FALSE
+Crocione,241,FALSE
+Serfontana,267,FALSE
+Seseglio,269,FALSE
+Morbio_Posta,346,FALSE
+Vacallo,317,FALSE
