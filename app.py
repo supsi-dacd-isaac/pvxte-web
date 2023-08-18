@@ -434,7 +434,7 @@ def get_terminals_metadata(conn):
 def handle_terminals_metadata(raw_data):
     res_data = []
     for rd in raw_data:
-        res_data.append({'name': rd[1], 'company': rd[2], 'elevation': rd[3]})
+        res_data.append({'name': rd[1], 'company': rd[2], 'elevation': rd[3], 'is_charging_station': rd[4]})
     return res_data
 
 def get_distances_matrix(conn):
