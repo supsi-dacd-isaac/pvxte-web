@@ -78,6 +78,32 @@ def get_single_sim_data(conn, id_sim):
         return list(row)
 
 
+def get_user_data(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM user WHERE id=%i" % int(session['id_user']))
+    row = cur.fetchone()
+    column_names = [d[0] for d in cur.description]
+    return dict(zip(column_names, row))
+
+
+def update_user_data(conn, new_data):
+    cur = conn.cursor()
+    cur.execute("UPDATE user SET username=?, email=? WHERE id=?",
+                (new_data['username'], new_data['email'], session['id_user']))
+    session['username'] = new_data['username']
+    session['email'] = new_data['email']
+    conn.commit()
+
+def change_user_password(conn, new_data):
+    if new_data['password'] == new_data['confirm']:
+        cur = conn.cursor()
+        cur.execute("UPDATE user SET password=? WHERE id=?",
+                    (encrypt(new_data['password']), session['id_user']))
+        conn.commit()
+        return True
+    else:
+        return False
+
 def get_buses_models_data(conn):
     cur = conn.cursor()
     cur.execute("SELECT id, code, name, features FROM bus_model ORDER BY id ASC")
@@ -405,6 +431,11 @@ def update_distances(conn, distances_file_path, terms_dict):
 def get_terminals_metadata(conn):
     return conn.execute("SELECT * FROM terminal WHERE company='%s'" % session['company_user']).fetchall()
 
+def handle_terminals_metadata(raw_data):
+    res_data = []
+    for rd in raw_data:
+        res_data.append({'name': rd[1], 'company': rd[2], 'elevation': rd[3]})
+    return res_data
 
 def get_distances_matrix(conn):
     return conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
@@ -619,6 +650,34 @@ def edit_bus_model():
         return redirect(url_for('login'))
 
 
+@app.route('/edit_user', methods=('GET', 'POST'))
+def edit_user():
+    if is_logged():
+        err = None
+        conn = get_db_connection()
+        if request.method == 'POST':
+            form_data = request.form.to_dict()
+            if form_data['type'] == 'change_settings':
+                # Update main settings
+                update_user_data(conn, form_data)
+            elif form_data['type'] == 'change_pwd':
+                # Update password
+                res = change_user_password(conn, form_data)
+                if res is False:
+                    err = 'New password failed the retype checking'
+            # Get data from DB
+            user_data = get_user_data(conn)
+            conn.close()
+            return render_template('edit_user.html', user_data=user_data, error=err)
+        else:
+            # Get data from DB
+            user_data = get_user_data(conn)
+            conn.close()
+            return render_template('edit_user.html', user_data=user_data)
+    else:
+        return redirect(url_for('login'))
+
+
 @app.route('/buses_models_list', methods=('GET', 'POST'))
 def buses_models_list():
     if is_logged():
@@ -639,6 +698,10 @@ def company_manager():
     if is_logged():
         conn = get_db_connection()
         buses_models = get_buses_models_data(conn)
+
+        terminals_raw_data = get_terminals_metadata(conn)
+        terminals_data = handle_terminals_metadata(terminals_raw_data)
+
         if request.method == 'POST':
             target = 'static/tmp'
             terminals_file_path = '/'.join([target, '%i_terminals.csv' % session['id_user']])
@@ -656,7 +719,7 @@ def company_manager():
             os.unlink(distances_file_path)
 
         return render_template('company_manager.html', buses_models=buses_models,
-                               company=session['company_user'])
+                               company=session['company_user'], terminals_data=terminals_data)
     else:
         return redirect(url_for('login'))
 

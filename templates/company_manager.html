@@ -77,12 +77,45 @@
                         <td><input class="form-control" type="file" name="distances_file" /></td>
                     </tr>
                     <tr>
-                        <td colspan="3" align="center"><button type="submit" class="btn btn-dark">Load</button></td>
+                        <td colspan="3" align="center"><button type="submit" class="btn btn-dark">Upload terminal and distances files</button></td>
                     </tr>
                 </tbody>
             </table>
         </fieldset>
     </form>
+    </div>
+
+    <br><br>
+    <div>
+        <table class="table-sm-list">
+        <thead>
+            <tr>
+                <td colspan="2"><h3>Terminals section:</h3></td>
+            </tr>
+        </thead>
+    {% if terminals_data|length > 0 %}
+            <thead>
+                <tr>
+                    <td>Name</td>
+                    <td>Elevation [m]</td>
+                </tr>
+            </thead>
+            {% for terminal_data in terminals_data %}
+                <tbody>
+                    <tr>
+                        <td>{{ terminal_data['name'] }}</td>
+                        <td>{{ terminal_data['elevation']|int }}</td>
+                    </tr>
+                </tbody>
+            {% endfor %}
+    {% else %}
+        <tbody>
+            <tr>
+                <td colspan="2"><b>No data available</b></td>
+            </tr>
+        </tbody>
+    {% endif %}
+        </table>
     </div>
 
     {% endif %}
