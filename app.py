@@ -429,7 +429,7 @@ def update_distances(conn, distances_file_path, terms_dict):
 
 
 def get_terminals_metadata(conn):
-    return conn.execute("SELECT * FROM terminal WHERE company='%s'" % session['company_user']).fetchall()
+    return conn.execute("SELECT * FROM terminal WHERE company='%s' ORDER BY name" % session['company_user']).fetchall()
 
 def handle_terminals_metadata(raw_data):
     res_data = []
