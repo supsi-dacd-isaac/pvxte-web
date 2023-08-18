@@ -11,6 +11,4 @@ static/output-df/*.csv
 static/plot/*.png
 key.key
 *.log
-*.sql
-init_db.py
 conf
