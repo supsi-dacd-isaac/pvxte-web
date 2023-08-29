@@ -1,0 +1,10 @@
+terminal_station,elevation_m,is_charging_station
+Depot,218,TRUE
+Piazza_Castello,201,FALSE
+Stazione,208,FALSE
+Gordola,198.5,FALSE
+Brione,427.6,FALSE
+Lido,200.6,FALSE
+Caserma,247,FALSE
+Losone,226,FALSE
+Delta_Maggia,202,FALSE
