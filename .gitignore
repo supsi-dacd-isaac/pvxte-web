@@ -1,10 +1,14 @@
 venv
 .idea
 database.db
+data_files_to_upload/*.csv
 static/input-csv/*.csv
+static/json-input-pars/*.json
 static/sim-config/*.json
 static/output/*.zip
+static/output-bsize/*.csv
+static/output-df/*.csv
+static/plot/*.png
 key.key
 *.log
-*.sql
-init_db.py
+conf

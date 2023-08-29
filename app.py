@@ -1,31 +1,20 @@
 import csv
+import http
 import os
-
-import numpy as np
-import pandas as pd
 import sqlite3
 import datetime
 import json
-import zipfile
 import pytz
 import glob
+import requests
 
-from collections import defaultdict
-from itertools import combinations
-
+import numpy as np
+import pandas as pd
 import networkx as nx
 
+from collections import defaultdict
 from cryptography.fernet import Fernet
-import matplotlib.pyplot as plt
-import matplotlib.colors
-
-from model import MILP
-from gurobipy import *
 from flask import Flask, render_template, request, url_for, redirect, session, flash
-
-import config_sim_builder as csb
-
-import utils as u
 
 # Get main conf
 with open('static/sims-basic-config/cfg.json', 'r') as f:
@@ -89,6 +78,32 @@ def get_single_sim_data(conn, id_sim):
         return list(row)
 
 
+def get_user_data(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM user WHERE id=%i" % int(session['id_user']))
+    row = cur.fetchone()
+    column_names = [d[0] for d in cur.description]
+    return dict(zip(column_names, row))
+
+
+def update_user_data(conn, new_data):
+    cur = conn.cursor()
+    cur.execute("UPDATE user SET username=?, email=? WHERE id=?",
+                (new_data['username'], new_data['email'], session['id_user']))
+    session['username'] = new_data['username']
+    session['email'] = new_data['email']
+    conn.commit()
+
+def change_user_password(conn, new_data):
+    if new_data['password'] == new_data['confirm']:
+        cur = conn.cursor()
+        cur.execute("UPDATE user SET password=? WHERE id=?",
+                    (encrypt(new_data['password']), session['id_user']))
+        conn.commit()
+        return True
+    else:
+        return False
+
 def get_buses_models_data(conn):
     cur = conn.cursor()
     cur.execute("SELECT id, code, name, features FROM bus_model ORDER BY id ASC")
@@ -134,10 +149,10 @@ def is_logged():
         return False
 
 
-def insert_user(conn, username, email, password):
+def insert_user(conn, username, email, password, company):
     cur = conn.cursor()
-    res = cur.execute("INSERT INTO user (username, email, password) VALUES (?, ?, ?)",
-                      (username, email, encrypt(password)))
+    res = cur.execute("INSERT INTO user (username, email, password, company) VALUES (?, ?, ?, ?)",
+                      (username, email, encrypt(password), company))
     conn.commit()
     return res
 
@@ -240,14 +255,6 @@ def get_terminals(sim_metadata):
     return list(set(terminals))
 
 
-def filter_pars(pars, filter_string):
-    res = {}
-    for k in pars.keys():
-        if filter_string in k:
-            res[k] = pars[k]
-    return res
-
-
 def calculate_default_costs(input_data, length):
     # Not discrete costs
     step = 100
@@ -271,99 +278,48 @@ def calculate_default_costs(input_data, length):
     return default_costs
 
 
-def run_sim(conn, main_cfg, pars, bus_model_data, terminals_selected, terminals_metadata, distances_matrix):
+def launch_sim_instance(conn, main_cfg, pars):
     cur = conn.cursor()
-
-    capex_pars = filter_pars(pars, 'capex')
-    opex_pars = filter_pars(pars, 'opex')
-
-    # Prepare the line string
-    str_routes = ''
-    for elem in pars.keys():
-        if elem[0:5] == 'line_':
-            str_routes += ',' + elem[5:]
-    str_routes = str_routes[1:]
 
     ts = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')[-1]
 
-    sim_cfg_filename = csb.configuration(csv_file_path=pars['data_file'],
-                                         company=session['company_user'],
-                                         route_number=str_routes,
-                                         charging_locations=[],
-                                         day_type=pars['day_type'],
-                                         t_horizon=main_cfg['simSettings']['modelTimesteps'],
-                                         p_max=float(pars['p_max']),
-                                         pd_max=float(pars['pd_max']),
-                                         depot_charging=main_cfg['simSettings']['chargingAtDeposit'],
-                                         optimize_for_each_bus=False,
-                                         bus_model_data=bus_model_data,
-                                         terminals_selected=terminals_selected,
-                                         terminals_metadata=terminals_metadata,
-                                         distances_matrix=distances_matrix)
+    bus_model_data = get_single_bus_model_data(conn, int(pars['bus_model_id']))
+    terminals_selected = get_terminals(pars)
+    terminals_metadata = get_terminals_metadata_dict(conn)
+    distances_matrix = get_distances_matrix_dict(conn)
 
-    e = Env("gurobi.log", params={'MemLimit': 30,
-                                  'PreSparsify': 1,
-                                  'MIPFocus': 3,
-                                  'NodefileStart': 0.5,
-                                  'Heuristics': 0.3,
-                                  'Presolve': 1,
-                                  'NoRelHeurTime': 60,
-                                  'NonConvex': 2,
-                                  'MIPGap': 0.2})
+    distances_matrix = {str(key): value for key, value in distances_matrix.items()}
+    form_data = {
+        "id": session['id_user'],
+        "company": session['company_user'],
+        "main_cfg": main_cfg,
+        "pars": pars,
+        "bus_model_data": bus_model_data,
+        "terminals_selected": terminals_selected,
+        "terminals_metadata": terminals_metadata,
+        "distances_matrix": distances_matrix
+    }
 
-    # Load data files
-    with open(sim_cfg_filename, 'r') as f:
-        config_file = json.load(f)
+    input_pars_file = pars['data_file'].replace('input-csv', 'json-input-pars').replace('csv', 'json')
+    with open(input_pars_file, "w") as fw:
+        json.dump(form_data, fw)
 
-    model = MILP(config=config_file,
-                 env=e,
-                 opt_battery_for_each_bus=False,
-                 default_assignment=True,
-                 partial_assignment=[],
-                 non_overlap_charging=False)
+    files_to_send = {
+        "input_pars_file": open(input_pars_file, 'rb'),
+        "input_data_file": open(pars['data_file'], 'rb')
+    }
 
-    model.optimize()
-    if model.status == GRB.INFEASIBLE:
-        return False
+    # Send the POST request
+    response = requests.post(main_cfg['simulatorUrl'], files=files_to_send)
+    data_response = json.loads(response.text)
 
-    # Define the variables to save in the database
-    res_var = ['bp', 'bs', 'bi', 'Ct', 'u', 'x', 'yd', 'SOC']
-    var_info = [(v.varName, v.X) for v in model.getVars() if (v.X != 0) and any([v.varName.startswith(s) for s in res_var])]
-
-    # Define the CSV output file path
-    csv_output_file = pars['data_file'].replace('input-csv', 'output')
-
-    # Write the simulation output in a CSV file
-    res_file = csv_output_file.split(os.sep)[-1]
-    with open(res_file, 'w', newline='') as f:
-        wr = csv.writer(f, delimiter=";")
-        wr.writerows(var_info)
-
-    # Create the plot
-    ret_plot_data = schedule_plot(res_file)
-
-    # Create the final dataframe result
-    schedule_drivers(res_file)
-
-    # Archive the CSV file in a zip
-    with zipfile.ZipFile(csv_output_file.replace('.csv', '.zip'), 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-        zip.write(res_file)
-    os.unlink(res_file)
-
-    # Update CAPEX and OPEX parameters with some output given by the simulation
-    df_bsize_filename = 'static/output-bsize/%s_%s.csv' % (session['id_user'], ts)
-    df_bsize = pd.read_csv(df_bsize_filename)
-    capex_pars['capex_number_buses'] = len(df_bsize)
-    # We assume that number of chargers is equal to the number of buses
-    capex_pars['capex_number_chargers'] = len(df_bsize)
-
-    cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power, "
-                "elevation_deposit, elevation_starting_station, elevation_arrival_station, capex_pars, opex_pars, "
-                "max_charging_powers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                (int(session['id_user']), int(ts), session['company_user'], str_routes, pars['day_type'],
-                 float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0, json.dumps(capex_pars),
-                 json.dumps(opex_pars), json.dumps(ret_plot_data['df_charge'])))
-    conn.commit()
+    if response.status_code == http.HTTPStatus.OK and data_response['error'] is False:
+        cur.execute("INSERT INTO sim (id_user, created_at, company, day_type, battery_size, max_charging_power, "
+                    "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (int(session['id_user']), int(ts), session['company_user'], pars['day_type'],
+                     float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0))
+        conn.commit()
     return True
 
 
@@ -396,66 +352,6 @@ def update_bus_model(conn, pars):
                 (bus_name, json.dumps(pars), bus_id))
     conn.commit()
 
-
-def read_solution(solution_file_path, sep=';'):
-    file = os.path.join(solution_file_path)
-    df = pd.read_csv(file, sep=sep, header=None)
-
-    df.columns = ['var', 'val']
-
-    df[['var', 'index1', 'index2']] = df['var'].str.split(r'\[|\]', expand=True, regex=True)
-    dfx = df[df['var'] == 'x'].copy()
-
-    dfx[['n1', 'n2', 'bus']] = dfx['index1'].str.split(',', expand=True)
-    dfx = dfx.reset_index()[['var', 'bus', 'n1', 'n2', 'val']]
-    dfs = df[df['var'] == 'SOC'].copy()
-
-    dfs[['bus', 'node']] = dfs['index1'].str.split(',', expand=True)
-    dfs = dfs.reset_index()[['var', 'bus', 'node', 'val']]
-
-    dfc = df[df['var'] == 'Ct'].copy()
-    if not dfc.empty:
-        dfc[['n1']] = dfc['index1'].str.split(',', expand=True)
-        dfc = dfc.reset_index()[['var', 'n1', 'val']]
-    return dfx[dfx.val >= 0.8], dfs, dfc
-
-
-def read_time_windows(fname):
-    # Load data files
-    with open(f"{fname}", "r") as f:
-        c = json.load(f)
-    service_start = {i["index"]: i["t_start"] for i in c['trips_info']}
-    service_end = {i["index"]: i["t_end"] for i in c['trips_info']}
-    service_relocation_time = np.array(c['service_time'])
-    depot_origin = {i["index"]: i["n_start"] for i in c['depot_origin']}
-    depot_destination = {i["index"]: i["n_start"] for i in c['depot_destination']}
-    return service_start, service_end, service_relocation_time, list(depot_origin.keys()), list(depot_destination.keys())
-
-
-def read_battery_size(solution_file_path, sep=';'):
-    config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
-    with open(config_name, 'r') as f:
-        c = json.load(f)
-
-    df = pd.read_csv(solution_file_path, sep=sep, header=None)
-    df.columns = ['var', 'val']
-    df[['var', 'index1', 'index2']] = df['var'].str.split(r'\[|\]', expand=True, regex=True)
-    dfb = df[df['var'] == 'bp'].copy().reset_index()
-    dfb = dfb[['index1', 'val']]
-
-    if 'optimize_for_each_bus' in c.keys() and c['optimize_for_each_bus']:
-        dfb = dfb[dfb['index1'].isin(c["vehicle_ids"])]
-        dfb.columns = ['Bus id', 'Battery size (kWh)']
-        dfb["Battery packs"] = dfb['Battery size (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
-    else:
-        size = dfb.val.values[0]
-        dfb = pd.DataFrame(list(zip(c["vehicle_ids"], [size for _ in c["vehicle_ids"]])), columns=['Bus id', 'Battery size (kWh)'])
-        dfb["Battery packs"] = dfb['Battery size (kWh)'].apply(lambda x: math.ceil(x / c["Battery pack size"]))
-
-    df_file_name = 'static/output-bsize/%s' % solution_file_path.split(os.sep)[-1]
-    dfb.to_csv(df_file_name)
-    return dfb
-
 def assemble_sequences(df_start, df_rest, depot_end):
     seq = defaultdict(list)
     n1_values = df_start['n1'].values
@@ -478,277 +374,6 @@ def assemble_sequences(df_start, df_rest, depot_end):
     seq = {k: [t[1] for t in v] for k, v in seq.items()}
     return seq
 
-def schedule_plot(solution_file_path, charging_blocks=3):
-    def _f(x, s):
-        return s[x.name][-1]
-
-    def _g(x, u):
-        n = x.n2
-        return u[u.n2 == n]['end'].values[0]
-
-    def _h(x, s):
-        n = x.n2
-        for k, v in s.items():
-            if n in v:
-                return k
-
-    returned_data = {}
-    config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
-    with open(config_name, 'r') as f:
-        c = json.load(f)
-
-    df, df_soc, dfc = read_solution(solution_file_path)
-    t_start, t_end, times, depot_start, depot_end = read_time_windows(config_name)
-    bat_size = read_battery_size(solution_file_path)
-    df_final = df_soc[df_soc.node == str(depot_end[0])]
-
-    df['start'] = 0
-    df['end'] = 0
-    df['duration'] = 0
-    df['n1'] = df['n1'].astype(int)
-    df['n2'] = df['n2'].astype(int)
-
-    for index, row in df.iterrows():
-        if int(row.n1) in depot_start:
-            n1 = int(row.n1)
-            df.at[index, 'end'] = t_start[int(row.n2)]
-            df.at[index, 'duration'] = times[n1, int(row.n2)]
-            df.at[index, 'start'] = t_start[int(row.n2)] - times[n1, int(row.n2)]
-        else:
-            n1 = int(row.n1)
-            df.at[index, 'start'] = t_start[n1]
-            df.at[index, 'duration'] = times[n1, int(row.n2)]
-            df.at[index, 'end'] = t_start[n1] + times[n1, int(row.n2)]
-
-    if not dfc.empty:
-        dfc['start'] = 0
-        dfc['duration'] = dfc['val']
-        dfc = dfc.merge(df[['n1', 'bus']], how='left', on=['n1'])
-
-        for index, row in dfc.iterrows():
-            rem = int(row.n1) // c['#trips']
-            dfc.at[index, 'start'] = t_end[int(row.n1) - rem * c['#trips']]
-            dfc.at[index, 'var'] = "Dt" if rem == 2 else "Ct"
-
-        dfc['end'] = dfc['start'] + dfc['duration']
-        dfc = dfc[['var', 'bus', 'start', 'val', 'duration', 'end']]
-
-    df = df.sort_values(['bus', 'start', 'end']).reset_index().drop(['index'], axis=1)
-    bus_start_finish = df[df.n1.isin(depot_start)].reset_index().drop(['index'], axis=1)
-    bus_rest = df[~df.n1.isin(depot_start)].reset_index().drop(['index'], axis=1)
-    sequence = assemble_sequences(bus_start_finish, bus_rest, depot_end)
-
-    bus_start_finish['n2'] = bus_start_finish.apply(lambda x: _f(x, sequence), axis=1)
-    bus_start_finish = bus_start_finish.drop(['var', 'end', 'duration'], axis=1)
-    bus_start_finish['end'] = bus_start_finish.apply(lambda x: _g(x, df), axis=1)
-
-    max_step = 2 * 1440
-    step_mask = {}
-    bus_indices = set(bus_start_finish.bus)
-
-    for bus in bus_indices:
-        step_mask[bus] = np.ones(max_step, )
-
-    for bus in bus_indices:
-        earliest_start = bus_start_finish[(bus_start_finish['bus'] == bus)]['start'].values[0]
-        latest_finish = bus_start_finish[(bus_start_finish['bus'] == bus)]['end'].values[0]
-        step_mask[bus][int(earliest_start): int(latest_finish)] = 0
-
-    df_charge = {}
-
-    for b in set(df.bus):
-        b_size = bat_size.loc[bat_size['Bus id'] == b, 'Battery size (kWh)'].values[0]
-        df_charge[b] = np.ceil((1 - float(df_final[df_final.bus == b]['val'].values[0])) * b_size)  # * 60 / c['max_depot_charging_power'])
-    returned_data['df_charge'] = df_charge
-
-    model = Model('charge')
-    # Bus i charges at time j.
-    x = model.addVars(bus_indices, np.arange(max_step), vtype=GRB.BINARY, name='x')
-    # Total charging events at time j.
-    y = model.addVars(np.arange(1440), lb=0, name='y')
-    # Charging power of bus i at timestep j
-    p_ = model.addVars(bus_indices, np.arange(max_step), lb=1, ub=150, name='p_')
-    # Charging power of bus i at timestep j
-    p = model.addVars(bus_indices, np.arange(1440), lb=0, ub=150, name='px')
-    z2 = model.addVar(name='z2')
-
-    cost = model.addVar(name='cost')
-
-    for k, v in step_mask.items():
-        model.addConstrs(x[k, t] == 0 for t in range(len(v)) if v[t] == 0)
-
-    # Repeatability constraint
-    model.addConstrs(x[k, int(t % 1440)] == x[k, t] for k in bus_indices for t in np.arange(max_step))
-
-    for t in np.arange(max_step):
-        model.addConstrs(p[k, int(t % 1440)] == p_[k, int(t % 1440)] * x[k, int(t % 1440)] + p_[k, t] * x[k, t] for k in bus_indices)
-        model.addConstrs(p_[k, int(t % 1440)] * x[k, int(t % 1440)] == p_[k, t] * x[k, t] for k in bus_indices)
-
-    # Every bus should charge to 100% SOC
-    model.addConstrs(quicksum(p[k, t] for t in np.arange(1440)) == df_charge[k] * 60 for k in bus_indices)
-
-    # Total charging power at time t
-    model.addConstrs(y[t] == quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(1440))
-
-    # Maximum rate of change of charging power is 1kW per second
-    model.addConstrs(p[k, t] - p[k, t + 1] <= 20 for t in np.arange(1439) for k in bus_indices)
-    model.addConstrs(p[k, t] - p[k, t + 1] >= -20 for t in np.arange(1439) for k in bus_indices)
-
-    # Upper bound on the sum of charging power
-    model.addConstrs(z2 >= quicksum(p[k, t] for k in set(df.bus)) for t in np.arange(1440))
-
-    model.addConstr(cost == z2)
-    model.setObjective(cost, sense=GRB.MINIMIZE)
-    model.optimize()
-
-    if model.status == GRB.INFEASIBLE:
-        print("Model is infeasible!!!!")
-
-    x_var = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['x']])]
-    sol_x = pd.DataFrame(x_var, columns=['var', 'val'])
-
-    p_var = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['px']])]
-    sol_p = pd.DataFrame(p_var, columns=['var', 'val'])
-
-    sol_max = [(v.varName, v.X) for v in model.getVars() if any([v.varName.startswith(s) for s in ['z2']])]
-    max_p = pd.DataFrame(sol_max, columns=['var', 'val']).val.values[0]
-
-    sol_x[['var', 'index1', 'index2']] = sol_x['var'].str.split(r'\[|\]', expand=True, regex=True)
-    sol_x[['bus', 'start']] = sol_x['index1'].str.split(',', expand=True)
-
-    solution = sol_x.reset_index()[['var', 'bus', 'start', 'val']]
-    solution['start'] = solution['start'].astype('int')
-    solution['duration'] = solution['val'].astype('int')
-    solution['end'] = solution['start'] + solution['duration']
-    solution = pd.concat([solution, dfc], axis=0, ignore_index=True)
-
-    sol_p[['var', 'index1', 'index2']] = sol_p['var'].str.split(r'\[|\]', expand=True, regex=True)
-    sol_p[['bus', 'start']] = sol_p['index1'].str.split(',', expand=True)
-
-    power = sol_p.reset_index()[['var', 'bus', 'start', 'val']]
-    power.columns = ['p', 'bus', 'time', 'power']
-    power['time'] = power['time'].astype('int')
-
-    solution = pd.merge(solution, power, left_on=['bus', 'start'], right_on=['bus', 'time'], how='inner')
-
-    temp_x = pd.DataFrame(columns=df.columns)
-
-    for index, row in df.iterrows():
-        if df.at[index, 'end'] > 1440:
-            bus_id = df.at[index, 'bus']
-
-            if len(df[(df.bus == bus_id) & (df.end < 200)]) > 0:
-                max_t = max(df[(df.bus == bus_id) & (df.end < 200)]['end'])
-                min_t = min(df[(df.bus == bus_id) & (df.start > 200)]['start'])
-
-                # Change a time of dead-heading from depot origin
-                df.loc[(df.n1 == str(depot_start[0])) & (df.bus == bus_id), "start"] = min_t - df.loc[
-                    (df.n1 == str(depot_start[0])) & (df.bus == bus_id), "duration"]
-
-                df.loc[(df.n1 == str(depot_start[0])) & (df.bus == bus_id), "end"] = \
-                    df.loc[(df.n1 == str(depot_start[0])) & (df.bus == bus_id), "start"] + df.loc[
-                        (df.n1 == str(depot_start[0])) & (df.bus == bus_id), "duration"]
-
-                # Change dead-heading time to depot
-                df.loc[(df.n2 == str(depot_end[0])) & (df.bus == bus_id), "start"] = max_t
-                df.loc[(df.n2 == str(depot_end[0])) & (df.bus == bus_id), "end"] = max_t + \
-                                                                                   df.loc[(df.n2 == str(depot_end[0])) & (df.bus ==
-                                                                                                                          bus_id),
-                                                                                   "duration"]
-
-    j = 0
-    for index, row in df.iterrows():
-        if df.at[index, 'end'] > 1440:
-            bus_id = df.at[index, 'bus']
-            rem = df.at[index, 'end'] - 1440
-            df.at[index, 'end'] = 1440
-            df.at[index, 'duration'] = 1440 - df.at[index, 'start'] if df.at[index, 'start'] < 1440 else 0
-
-            temp_x.at[j, 'var'] = df.at[index, 'var']
-            temp_x.at[j, 'bus'] = df.at[index, 'bus']
-            temp_x.at[j, 'n1'] = df.at[index, 'n1']
-            temp_x.at[j, 'n2'] = df.at[index, 'n2']
-            temp_x.at[j, 'val'] = df.at[index, 'val']
-            temp_x.at[j, 'start'] = 0
-            temp_x.at[j, 'end'] = rem
-            temp_x.at[j, 'duration'] = rem
-            j += 1
-
-    j = 0
-    temp_y = pd.DataFrame(columns=solution.columns)
-
-    for index, row in solution.iterrows():
-        if solution.at[index, 'end'] > 1440:
-            rem = solution.at[index, 'end'] - 1440
-
-            if solution.at[index, 'start'] > 1440:
-                solution.at[index, 'start'] = solution.at[index, 'start'] - 1440
-                solution.at[index, 'end'] = solution.at[index, 'end'] - 1440
-                solution.at[index, 'duration'] = solution.at[index, 'end'] - solution.at[index, 'start']
-            else:
-                solution.at[index, 'end'] = 1440
-                solution.at[index, 'duration'] = 1440 - solution.at[index, 'start']
-
-                temp_y.at[j, 'var'] = solution.at[index, 'var']
-                temp_y.at[j, 'bus'] = solution.at[index, 'bus']
-                temp_y.at[j, 'val'] = solution.at[index, 'val']
-                temp_y.at[j, 'start'] = 0
-                temp_y.at[j, 'end'] = rem
-                temp_y.at[j, 'duration'] = rem
-            j += 1
-
-    for index, row in power.iterrows():
-        if power.at[index, 'time'] >= 1440:
-            power.at[index, 'time'] = power.at[index, 'time'] - 1440
-
-    df = pd.concat([df, temp_x], axis=0, ignore_index=True)
-    df_charge = pd.concat([solution, temp_y], axis=0, ignore_index=True)
-    df_depot_charge = df_charge[df_charge['var'].isin(['Dt', 'x'])]
-    # df_panto_charge = df_charge[df_charge['var'].isin(['Ct'])]
-
-    df_trips = df[(df.n1 != str(depot_start[0])) & (df.n2 != str(depot_end[0])) & (~df['n1'].isna())]
-    df_dead = df[((df.n1 == str(depot_start[0])) | (df.n2 == str(depot_end[0]))) & (~df['n1'].isna())]
-    x_ticks = [i * 30 for i in range(49)]
-
-    plt.figure(figsize=(12, 4.5))
-    # Define the color gradient from white to red
-    colors = ['#FFFFFF', '#FF0000']
-    values = [0, 150]
-    color_dict = {value: color for value, color in zip(values, colors)}
-    colormap = matplotlib.colors.LinearSegmentedColormap.from_list('white_to_red', list(color_dict.values()), N=150)
-
-    buses = sorted(list(set(df_depot_charge.bus)))
-    for b in buses:
-        for s in df_depot_charge.loc[df_depot_charge.bus == b, 'start'].values:
-            for t in range(int(df_depot_charge.loc[(df_depot_charge.bus == b) & (df_depot_charge.start == s), 'duration'].values[0])):
-                ci = power.loc[(power.bus == b) & (power.time == s + t), 'power'].values[0]
-                plt.barh(y=b, left=s + t, width=1, height=0.8, color=colormap(ci))
-
-    # plt.barh(y=df_panto_charge.bus, left=df_panto_charge.start, width=df_panto_charge.duration, color='#FFB455',
-    #          label='Pantograph Charging',
-    #          height=0.8)
-    plt.barh(y=df_dead.bus, left=df_dead.start, width=df_dead.duration, color='grey', label='Dead-heading', height=0.8)
-    plt.barh(y=df_trips.bus, left=df_trips.start, width=df_trips.duration, color='black', label='Trips', height=0.8)
-    plt.gca().invert_yaxis()
-    plt.xticks(ticks=x_ticks[::3], fontsize=12)
-    plt.yticks(fontsize=12)
-    plt.legend(fontsize=10, loc='lower left')
-    plt.tick_params(axis='y', which='major', pad=6)
-
-    scheduling_plot_file_name = 'static/plot/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.png')
-    plt.savefig(scheduling_plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
-                facecolor='auto', edgecolor='auto', backend=None)
-
-    plt.figure(figsize=(12, 4.5))
-    plt.plot(power.groupby(['time'])['power'].sum().values, '-r', label='Power')
-    plt.xlabel('Timestep')
-    plt.ylabel("Power (kW)")
-    cp_plot_file_name = scheduling_plot_file_name.replace('.png', '_charge_profile.png')
-    plt.savefig(cp_plot_file_name, dpi=300, format=None, metadata=None, bbox_inches=None, pad_inches=0.1,
-                facecolor='auto', edgecolor='auto', backend=None)
-
-    return returned_data
-
 
 def generate_graph(nodes_list, edges_list):
     graph = nx.Graph()
@@ -759,109 +384,6 @@ def generate_graph(nodes_list, edges_list):
         for e in v:
             graph.add_edge(k, e)
     return graph
-
-
-def create_edge_list(edges, data_frame, start, end):
-    e_list = defaultdict(list)
-    for i, j in edges:
-        bus_i = data_frame.loc[data_frame.n1 == i.split('_')[0], 'bus'].values[0]
-        bus_j = data_frame.loc[data_frame.n1 == j.split('_')[0], 'bus'].values[0]
-
-        # If (i, j) or (j, i) is in node_pairs there is no edge.
-        if 'S' in i.split('_')[0]:
-            tsi = data_frame.loc[data_frame.n1 == i.split('_')[0], 'start'].values[0]
-            tei = data_frame.loc[data_frame.n1 == i.split('_')[0], 'end'].values[0]
-        else:
-            tsi = start[int(i.split('_')[0])]
-            tei = end[int(i.split('_')[0])]
-
-        if 'S' in j.split('_')[0]:
-            tsj = data_frame.loc[data_frame.n1 == j.split('_')[0], 'start'].values[0]
-        else:
-            tsj = start[int(j.split('_')[0])]
-
-        if 'E' in j.split('_')[-1]:
-            tej = data_frame.loc[data_frame.n2 == j.split('_')[-1], 'end'].values[0]
-        else:
-            tej = end[int(j.split('_')[-1])]
-
-        if (np.abs(tej - tsi) >= 270) or (tsj < tei) or ('E' in i) or ('S' in j) or (bus_i != bus_j):
-            e_list[i].append(j)
-    return e_list
-
-
-def generate_shift_assignment_graph(c, data_frame):
-    nodes = list(set(c.values()))
-    earliest_start = defaultdict(list)
-    latest_end = defaultdict(list)
-
-    graph = nx.Graph()
-    for n0 in nodes:
-        graph.add_node(n0)
-
-    for node, color in c.items():
-        n1, n2 = node.split('_')
-        earliest_start[color].append(data_frame.loc[(data_frame.n1 == n1) & (data_frame.n2 == n2), 'start'].values[0])
-        latest_end[color].append(data_frame.loc[(data_frame.n1 == n1) & (data_frame.n2 == n2), 'end'].values[0])
-
-    for p1, p2 in itertools.product(earliest_start.keys(), earliest_start.keys()):
-        if p1 != p2:
-            range_1 = set(range(min(earliest_start[p1]), max(latest_end[p1])))
-            range_2 = range(min(earliest_start[p2]), max(latest_end[p2]))
-            if (np.abs(max(latest_end[p1]) - min(earliest_start[p2])) >= 45) and not range_1.intersection(range_2):
-                pass
-            else:
-                graph.add_edge(p1, p2)
-
-    return graph
-
-
-def schedule_drivers(solution_file_path):
-    config_name = 'static/sim-config/%s' % solution_file_path.split(os.sep)[-1].replace('.csv', '.json')
-
-    df = u.read_schedule_from_solution(solution_file_path)
-    t_start, t_end, times, depot_start, depot_end = read_time_windows(config_name)
-    df = u.merge_time_schedule(df, t_start, times, depot_start)
-
-    for index, row in df.iterrows():
-        if int(row.n1) in depot_start:
-            df.at[index, 'n1'] = 'S' + row.bus
-        if int(row.n2) in depot_end:
-            df.at[index, 'n2'] = 'E' + row.bus
-
-    # Create a list of all (n1, n2) pairs in df
-    node_list = []  # These are the nodes in the graph
-    for index, row in df.iterrows():
-        node_list.append((row.n1 + "_" + row.n2))
-
-    # Set up edge list of the graph
-    edges = list(combinations(node_list, 2))
-
-    # There is an edge between two nodes if those two trips cannot co-exist in the same work shift.
-    edge_list = create_edge_list(edges=edges, start=t_start, end=t_end, data_frame=df)
-    G = generate_graph(node_list, edge_list)
-    color = nx.coloring.greedy_color(G)
-
-    # Number of colors represent the minimum number of valid shifts required to cover all the trips.
-    # Now we need to assign each trip to a driver, given there is a 45-min interval between two shifts for the same driver.
-    Gd = generate_shift_assignment_graph(color, df)
-    color_drivers = nx.coloring.greedy_color(Gd)
-
-    df_res = df.copy()
-    df_res['shifts'] = None
-    df_res['driver'] = None
-
-    for index, row in df_res.iterrows():
-        df_res.at[index, 'shifts'] = int(color[row.n1 + "_" + row.n2])
-
-    df_res['driver'] = df_res.shifts.apply(lambda x: color_drivers[x])
-    df_res = df_res[['bus', 'n1', 'start', 'n2', 'end', 'driver']]
-    df_res.columns = ['bus#', 'Terminal start', 'Start time', 'Terminal end', 'End time', 'Driver#']
-
-    df_file_name = 'static/output-df/%s' % solution_file_path.split(os.sep)[-1]
-    df_res.to_csv(df_file_name)
-    print(f'Minimum number of drivers required: {len(set(df_res["Driver#"]))}')
-
 
 def clean_terminals(conn):
     cur = conn.cursor()
@@ -907,8 +429,13 @@ def update_distances(conn, distances_file_path, terms_dict):
 
 
 def get_terminals_metadata(conn):
-    return conn.execute("SELECT * FROM terminal WHERE company='%s'" % session['company_user']).fetchall()
+    return conn.execute("SELECT * FROM terminal WHERE company='%s' ORDER BY name" % session['company_user']).fetchall()
 
+def handle_terminals_metadata(raw_data):
+    res_data = []
+    for rd in raw_data:
+        res_data.append({'name': rd[1], 'company': rd[2], 'elevation': rd[3], 'is_charging_station': rd[4]})
+    return res_data
 
 def get_distances_matrix(conn):
     return conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
@@ -963,7 +490,7 @@ def signup():
     error = None
     if request.method == 'POST':
         conn = get_db_connection()
-        insert_user(conn, request.form['username'], request.form['email'], request.form['password'])
+        insert_user(conn, request.form['username'], request.form['email'], request.form['password'], request.form['company'])
         conn.close()
         return redirect(url_for('login'))
     return render_template('signup.html', error=error)
@@ -1057,11 +584,7 @@ def new_sim_step2():
             try:
                 # Run the simulation and save the output in the DB
                 sim_pars = request.form.to_dict()
-                run_sim(conn=conn, main_cfg=main_cfg, pars=sim_pars,
-                        bus_model_data=get_single_bus_model_data(conn, int(sim_pars['bus_model_id'])),
-                        terminals_selected=get_terminals(sim_pars),
-                        terminals_metadata=get_terminals_metadata_dict(conn),
-                        distances_matrix=get_distances_matrix_dict(conn))
+                launch_sim_instance(conn=conn, main_cfg=main_cfg, pars=sim_pars)
                 conn.close()
                 return redirect(url_for('index'))
             except Exception as e:
@@ -1127,6 +650,34 @@ def edit_bus_model():
         return redirect(url_for('login'))
 
 
+@app.route('/edit_user', methods=('GET', 'POST'))
+def edit_user():
+    if is_logged():
+        err = None
+        conn = get_db_connection()
+        if request.method == 'POST':
+            form_data = request.form.to_dict()
+            if form_data['type'] == 'change_settings':
+                # Update main settings
+                update_user_data(conn, form_data)
+            elif form_data['type'] == 'change_pwd':
+                # Update password
+                res = change_user_password(conn, form_data)
+                if res is False:
+                    err = 'New password failed the retype checking'
+            # Get data from DB
+            user_data = get_user_data(conn)
+            conn.close()
+            return render_template('edit_user.html', user_data=user_data, error=err)
+        else:
+            # Get data from DB
+            user_data = get_user_data(conn)
+            conn.close()
+            return render_template('edit_user.html', user_data=user_data)
+    else:
+        return redirect(url_for('login'))
+
+
 @app.route('/buses_models_list', methods=('GET', 'POST'))
 def buses_models_list():
     if is_logged():
@@ -1147,23 +698,49 @@ def company_manager():
     if is_logged():
         conn = get_db_connection()
         buses_models = get_buses_models_data(conn)
+
+        err = None
         if request.method == 'POST':
-            target = 'static/tmp'
-            terminals_file_path = '/'.join([target, '%i_terminals.csv' % session['id_user']])
-            request.files['terminals_file'].save(terminals_file_path)
-            distances_file_path = '/'.join([target, '%i_distances.csv' % session['id_user']])
-            request.files['distances_file'].save(distances_file_path)
+            try:
+                target = 'static/tmp'
+                terminals_file_path = '/'.join([target, '%i_terminals.csv' % session['id_user']])
+                request.files['terminals_file'].save(terminals_file_path)
+                distances_file_path = '/'.join([target, '%i_distances.csv' % session['id_user']])
+                request.files['distances_file'].save(distances_file_path)
 
-            clean_distances(conn)
-            clean_terminals(conn)
+                clean_distances(conn)
+                clean_terminals(conn)
 
-            terms_dict = update_terminals(conn, terminals_file_path)
-            update_distances(conn, distances_file_path, terms_dict)
+                # Update the DB
+                terms_dict = update_terminals(conn, terminals_file_path)
+                update_distances(conn, distances_file_path, terms_dict)
 
-            os.unlink(terminals_file_path)
-            os.unlink(distances_file_path)
+                # Delete the uploaded files
+                os.unlink(terminals_file_path)
+                os.unlink(distances_file_path)
 
-        return render_template('company_manager.html', buses_models=buses_models)
+                # Get the new data from the DB
+                terminals_raw_data = get_terminals_metadata(conn)
+                terminals_data = handle_terminals_metadata(terminals_raw_data)
+
+            except Exception as e:
+                # Delete the uploaded files
+                os.unlink(terminals_file_path)
+                os.unlink(distances_file_path)
+
+                # Get the new data from the DB
+                terminals_raw_data = get_terminals_metadata(conn)
+                terminals_data = handle_terminals_metadata(terminals_raw_data)
+
+                print('Exception: %s' % str(e))
+                err = 'The uploaded files have not the right folder, please check the examples files and upload them again'
+
+        elif request.method == 'GET':
+            terminals_raw_data = get_terminals_metadata(conn)
+            terminals_data = handle_terminals_metadata(terminals_raw_data)
+
+        return render_template('company_manager.html', buses_models=buses_models,
+                               company=session['company_user'], terminals_data=terminals_data, error=err)
     else:
         return redirect(url_for('login'))
 
