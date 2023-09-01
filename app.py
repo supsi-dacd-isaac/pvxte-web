@@ -386,14 +386,12 @@ def generate_graph(nodes_list, edges_list):
     return graph
 
 def clean_terminals(conn):
-    cur = conn.cursor()
-    cur.execute("DELETE FROM terminal WHERE company='%s'" % session['company_user'])
+    conn.execute("DELETE FROM terminal WHERE company = ?", (session['company_user'],))
     conn.commit()
 
 
 def clean_distances(conn):
-    cur = conn.cursor()
-    cur.execute("DELETE FROM distance WHERE company='%s'" % session['company_user'])
+    conn.execute("DELETE FROM distance WHERE company = ?", (session['company_user'],))
     conn.commit()
 
 
@@ -402,8 +400,8 @@ def update_terminals(conn, terminals_file_path):
     df = df.assign(id=df.index)
     df = df.assign(company=np.array([session['company_user'] for _ in range(len(df.index))]))
     df = df.rename(columns={'terminal_station': 'name'})
-    df = df.reindex(columns=['id', 'name', 'company', 'elevation_m', 'is_charging_station'])
-    df.to_sql('terminal', conn, if_exists='replace', index=False)
+    df = df.reindex(columns=['name', 'company', 'elevation_m', 'is_charging_station'])
+    df.to_sql('terminal', conn, if_exists='append', index=False)
 
     terms = get_terminals_metadata(conn)
     terms_dict = {}
@@ -425,7 +423,7 @@ def update_distances(conn, distances_file_path, terms_dict):
     df = df.assign(company=np.array([session['company_user'] for _ in range(len(df.index))]))
     df = df.drop(['starting_station', 'arrival_station'], axis=1)
     df = df.reindex(columns=['id_starting_station', 'id_arrival_station', 'distance_km', 'avg_travel_time_min', 'company'])
-    df.to_sql('distance', conn, if_exists='replace', index=False)
+    df.to_sql('distance', conn, if_exists='append', index=False)
 
 
 def get_terminals_metadata(conn):
