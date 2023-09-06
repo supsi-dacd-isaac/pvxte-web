@@ -5,7 +5,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>{{ company }} management section:</h3></a>
+                <a class="nav-link"><h3>{{ company }} - {{ gettext('management section') }}:</h3></a>
               </li>
         </ul>
     </nav>
@@ -13,19 +13,19 @@
         <table class="table-sm-list">
         <thead>
             <tr>
-                <td colspan="6"><h3>Buses models list</h3></td>
-                <td colspan="1"><a class="nav-link" href="{{ url_for('new_bus_model') }}">Add new</span></a></td>
+                <td colspan="6"><h3>{{ gettext('Buses models list') }}</h3></td>
+                <td colspan="1"><a class="nav-link" href="{{ url_for('new_bus_model') }}">{{ gettext('Add new') }}</span></a></td>
             </tr>
         </thead>
         <thead>
             <tr>
-                <td>Name</td>
-                <td>Length</td>
-                <td>Cost</td>
+                <td>{{ gettext('Name') }}</td>
+                <td>{{ gettext('Length') }}</td>
+                <td>{{ gettext('Cost') }}</td>
 <!--                <td>Passengers capacity</td>-->
-                <td>Battery pack capacity</td>
-                <td>Minimum required packs</td>
-                <td>Maximum allowed packs</td>
+                <td>{{ gettext('Battery pack capacity') }}</td>
+                <td>{{ gettext('Minimum required packs') }}</td>
+                <td>{{ gettext('Maximum allowed packs') }}</td>
 <!--                <td>Empty weight of a bus without battery</td>-->
 <!--                <td>Weight of a battery pack</td>-->
                 <td></td>
@@ -44,7 +44,7 @@
 <!--                    <td>{{ bus_model['empty_bus_weight'] }}</td>-->
 <!--                    <td>{{ bus_model['batt_pack_weight'] }}</td>-->
                     <td>
-                        <a class="link-dark" href="{{ url_for('buses_models_list', id_bus_model=bus_model['id'], del='y') }}" onclick="return confirm('Are you sure you want to delete the bus model?')">
+                        <a class="link-dark" href="{{ url_for('buses_models_list', id_bus_model=bus_model['id'], del='y') }}" onclick="return confirm('{{ gettext('Are you sure you want to delete the bus model?') }}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
                                 <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm2.121.707a1 1 0 0 0-1.414 0L4.16 7.547l5.293 5.293 4.633-4.633a1 1 0 0 0 0-1.414l-3.879-3.879zM8.746 13.547 3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z"/>
                             </svg>
@@ -62,14 +62,14 @@
             <table class="table-sm-form">
                 <thead>
                     <tr>
-                        <td colspan="4" align="center"><h3>Company setup:</h3></td>
+                        <td colspan="4" align="center"><h3>{{ gettext('Terminals and distances setting') }}:</h3></td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Terminals file:</td>
+                        <td>{{ gettext('Terminals file') }}:</td>
                         <td><input class="form-control" type="file" name="terminals_file" /></td>
-                        <td>Example file:</td>
+                        <td>{{ gettext('Example file') }}:</td>
                         <td>
                             <a class="link-dark" href="static/company_file_examples/terminals.csv">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
@@ -80,9 +80,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Distances file:</td>
+                        <td>{{ gettext('Distances file') }}:</td>
                         <td><input class="form-control" type="file" name="distances_file" /></td>
-                        <td>Example file:</td>
+                        <td>{{ gettext('Example file') }}:</td>
                         <td>
                             <a class="link-dark" href="static/company_file_examples/distances.csv">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
@@ -93,7 +93,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('Have you checked the files format before uploading them?')">Upload terminal and distances files</button></td>
+                        <td colspan="4" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('Have you checked the files format before uploading them?') }}')">Upload terminal and distances files</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -106,15 +106,15 @@
         <table class="table-sm-list">
         <thead>
             <tr>
-                <td colspan="3"><h3>Terminals section:</h3></td>
+                <td colspan="3"><h3>{{ gettext('Terminals section') }}:</h3></td>
             </tr>
         </thead>
     {% if terminals_data|length > 0 %}
             <thead>
                 <tr>
-                    <td>Name</td>
-                    <td>Elevation [m]</td>
-                    <td>Charging station</td>
+                    <td>{{ gettext('Name') }}</td>
+                    <td>{{ gettext('Elevation') }} [m]</td>
+                    <td>{{ gettext('Charging station') }}</td>
                 </tr>
             </thead>
             {% for terminal_data in terminals_data %}

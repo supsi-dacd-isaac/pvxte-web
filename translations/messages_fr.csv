@@ -1,0 +1,120 @@
+msgid,msgstr
+,
+PVXTE Web GUI,PVXTE Web GUI
+Simulations,Simulations
+Create simulation,Créer une simulation
+Company management,Gestion de l'entreprise
+User,Utilisateur
+Are you sure to logout?,Êtes-vous sûr de vouloir vous déconnecter ?
+Logout,Déconnexion
+Buses models list,Liste des modèles de bus
+Name,Nom
+Length,Longueur
+Maximum passengers capacity,Capacité maximale de passagers
+Minimum required battery packs,Packs de batteries minimums requis
+Maximum allowed battery packs,Nombre maximal de batteries autorisé
+Capacity of a battery pack,Capacité d'une batterie
+Empty weight of a bus without battery,Poids à vide d'un autobus sans batterie
+Weight of a battery pack,Poids d'une batterie
+Delete,Supprimer
+management section,section de gestion
+Add new,Ajouter une nouvelle section
+Cost,Coût
+Battery pack capacity,Capacité des batteries
+Minimum required packs,Packs minimums requis
+Maximum allowed packs,Nombre maximum de packs autorisés
+Are you sure you want to delete the bus model?,Êtes-vous sûr de vouloir supprimer le modèle de bus ?
+Terminals and distances setting,Paramétrage des bornes et des distances
+Terminals file,Fichier de bornes
+Example file,Fichier d'exemples
+Distances file,Fichier de distances
+Have you checked the files format before uploading them?,Avez-vous vérifié le format des fichiers avant de les télécharger ?
+Terminals section,Section des bornes
+Elevation,Elévation
+Charging station,Station de recharge
+Simulation results,Résultats de la simulation
+Buses and batteries sizing,Dimensionnement des bus et des batteries
+Bus id,Identité du bus
+Battery size,Taille de la batterie
+Battery packs,Packs de batteries
+Drivers sizing,Dimensionnement des conducteurs
+Minimum number,Nombre minimum
+Investment costs,Coûts d'investissement
+Lifetime,Durée de vie
+years,années
+Bus,Bus
+Battery,Batterie
+Charger,Chargeur
+Interest rate,Taux d'intérêt
+Additional fee,Frais supplémentaires
+CAPEX,CAPEX
+year,année
+Operational costs,Coûts opérationnels
+Energy tariff,Tarif de l'énergie
+Buses maintenance,Entretien des bus
+Buses efficiency,Efficacité des bus
+Annual usage,Utilisation annuelle
+OPEX,OPEX
+Plot section,Tracer la section
+Download section,Section de téléchargement
+Results,Résultats
+Raw data,Données brutes
+Edit bus model,Modifier le modèle de bus
+Type,Type de données
+xxx,xxx
+User management,Gestion des utilisateurs
+Main settings,Paramètres principaux
+Email,Courriel
+Language,Langue
+You are updating your profile settings! Are you sure?,Vous mettez à jour les paramètres de votre profil ! Êtes-vous sûr de vous ?
+Update,Mise à jour
+New password,Nouveau mot de passe
+Retype New password,Confirmer le nouveau mot de passe
+You are changing your password! Are you sure?,Vous modifiez votre mot de passe ! Êtes-vous sûr ?
+Change password,Modifier le mot de passe
+Created at,Créé à
+Company,Entreprise
+Bus Line,Ligne de bus
+Day Type,Type de jour
+Max. Charge,Max. Frais
+Detail,Détail
+Are you sure you want to delete the simulation?,Etes-vous sûr de vouloir supprimer la simulation ?
+Username,Nom d'utilisateur
+Password,Mot de passe
+Error,Erreur
+Registration,Inscription
+New bus model,Nouveau modèle de bus
+Bus type,Type de bus
+You are inserting a new bus model! Are you sure?,Vous insérez un nouveau modèle de bus ! Etes-vous sûr ?
+Submit,Soumettre
+New simulation - step1,Nouvelle simulation - étape 1
+Bus model,Modèle de bus
+Timetable/line file,Horaire/fichier de ligne
+Battery capacity,Capacité de la batterie
+Charging power,Puissance de charge
+Fee connection power,Puissance de connexion
+Go to step 2,Aller à l'étape 2
+New simulation - step2,Nouvelle simulation - étape 2
+Lines,Lignes
+Day type,Type de jour
+Pantograph maximum charging power,Puissance de charge maximale du pantographe
+Maximum charging power at deposit,Puissance de charge maximale au dépôt
+CAPEX section,Section CAPEX
+Bus cost,Coût du bus
+Bus lifetime,Durée de vie du bus
+Battery cost,Coût de la batterie
+battery,batterie
+Battery lifetime,Durée de vie de la batterie
+Charger cost,Coût du chargeur
+charger,chargeur
+Charger lifetime,Durée de vie du chargeur
+Connection cost,Coût de connexion
+OPEX section,Section OPEX
+Buses maintainance,Entretien des bus
+Charging efficiency,Efficacité de la charge
+Annual usage per single bus,Utilisation annuelle par bus
+Energy tariff increase per year,Augmentation du tarif de l'énergie par an
+Power tariff,Tarif de l'électricité
+Launch Simulation,Simulation de lancement
+Home,Accueil
+Signup,S'inscrire

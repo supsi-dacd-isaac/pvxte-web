@@ -5,7 +5,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>Buses models list:</h3></a>
+                <a class="nav-link"><h3>{{ gettext('Buses models list') }}:</h3></a>
               </li>
         </ul>
     </nav>
@@ -13,15 +13,15 @@
         <table class="table-sm-list">
         <thead>
             <tr>
-                <td>Name:</td>
-                <td>Length [m]:</td>
-                <td>Maximum passengers capacity:</td>
-                <td>Minimum required battery packs:</td>
-                <td>Maximum allowed battery packs:</td>
-                <td>Capacity of a battery pack:</td>
-                <td>Empty weight of a bus without battery:</td>
-                <td>Weight of a battery pack:</td>
-                <td>Delete</td>
+                <td>{{ gettext('Name') }}:</td>
+                <td>{{ gettext('Length') }} [m]:</td>
+                <td>{{ gettext('Maximum passengers capacity') }}:</td>
+                <td>{{ gettext('Minimum required battery packs') }}:</td>
+                <td>{{ gettext('Maximum allowed battery packs') }}:</td>
+                <td>{{ gettext('Capacity of a battery pack') }}:</td>
+                <td>{{ gettext('Empty weight of a bus without battery') }}:</td>
+                <td>{{ gettext('Weight of a battery pack') }}:</td>
+                <td>{{ gettext('Delete') }}</td>
             </tr>
         </thead>
         {% for bus_model in buses_models %}

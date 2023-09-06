@@ -4,7 +4,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>New simulation - step1</h3></a>
+                <a class="nav-link"><h3>{{ gettext('New simulation - step1') }}</h3></a>
               </li>
         </ul>
     </nav>
@@ -13,7 +13,7 @@
             <table class="table-sm-form">
                 <tbody>
                     <tr>
-                        <td>Bus model</td>
+                        <td>{{ gettext('Bus model') }}</td>
                         <td>
                             <select class="form-select" name="id_bus_model">
                                 {% for bus_model in buses_models %}
@@ -23,23 +23,23 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Timetable/line file:</td>
+                        <td>{{ gettext('Timetable/line file') }}:</td>
                         <td><input class="form-control" type="file" name="data_file" /></td>
                     </tr>
                     <tr>
-                        <td>Battery capacity</td>
+                        <td>{{ gettext('Battery capacity') }}</td>
                         <td><input type="text" class="form-control-sm" name="battery_capacity" value="350">&nbsp[kWh]</td>
                     </tr>
                     <tr>
-                        <td>Charging power</td>
+                        <td>{{ gettext('Charging power') }}</td>
                         <td><input type="text" class="form-control-sm" name="charger_power" value="150">&nbsp[kW]</td>
                     </tr>
                     <tr>
-                        <td>Fee connection power</td>
+                        <td>{{ gettext('Fee connection power') }}</td>
                         <td><input type="text" class="form-control-sm" name="fee_connection_power" value="250">&nbsp[kW]</td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark">Go to step 2</button></td>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark">{{ gettext('Go to step 2') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -47,6 +47,6 @@
     </form>
   {% if error %}
     <br>
-    <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
+    <a class="nav-link"><h3><strong>{{ gettext('Error') }}:</strong> {{ error }}</h3></a>
   {% endif %}
 {% endblock %}

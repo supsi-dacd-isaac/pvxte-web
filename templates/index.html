@@ -5,7 +5,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>Simulations:</h3></a>
+                <a class="nav-link"><h3>{{ gettext('Simulations') }}:</h3></a>
               </li>
         </ul>
     </nav>
@@ -13,14 +13,14 @@
         <table class="table-sm-list">
         <thead>
             <tr>
-                <td>Created at:</td>
-                <td>Company:</td>
-                <td>Bus Line:</td>
-                <td>Day Type:</td>
-                <td>Battery size [kWh]:</td>
-                <td>Max. Charge [kW]:</td>
-                <td>Detail:</td>
-                <td>Delete:</td>
+                <td>{{ gettext('Created at') }}:</td>
+                <td>{{ gettext('Company') }}:</td>
+                <td>{{ gettext('Bus Line') }}:</td>
+                <td>{{ gettext('Day Type') }}:</td>
+                <td>{{ gettext('Battery size') }} [kWh]:</td>
+                <td>{{ gettext('Max. Charge') }} [kW]:</td>
+                <td>{{ gettext('Detail') }}:</td>
+                <td>{{ gettext('Delete') }}:</td>
             </tr>
         </thead>
         {% for sim in sims %}
@@ -42,7 +42,7 @@
                             </a>
                         </td>
                         <td>
-                            <a class="link-dark" href="{{ url_for('index', id=sim['id'], del='y') }}" onclick="return confirm('Are you sure you want to delete the simulation?')">
+                            <a class="link-dark" href="{{ url_for('index', id=sim['id'], del='y') }}" onclick="return confirm('{{ gettext('Are you sure you want to delete the simulation?') }}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
                                     <path d="M8.086 2.207a2 2 0 0 1 2.828 0l3.879 3.879a2 2 0 0 1 0 2.828l-5.5 5.5A2 2 0 0 1 7.879 15H5.12a2 2 0 0 1-1.414-.586l-2.5-2.5a2 2 0 0 1 0-2.828l6.879-6.879zm2.121.707a1 1 0 0 0-1.414 0L4.16 7.547l5.293 5.293 4.633-4.633a1 1 0 0 0 0-1.414l-3.879-3.879zM8.746 13.547 3.453 8.254 1.914 9.793a1 1 0 0 0 0 1.414l2.5 2.5a1 1 0 0 0 .707.293H7.88a1 1 0 0 0 .707-.293l.16-.16z"/>
                                 </svg>

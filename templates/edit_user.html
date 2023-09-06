@@ -4,7 +4,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>User management:</h3></a>
+                <a class="nav-link"><h3>{{ gettext('User management') }}:</h3></a>
               </li>
         </ul>
     </nav>
@@ -14,23 +14,33 @@
             <table class="table-sm-form">
                 <thead>
                 <tr>
-                    <td colspan="3" align="center">Main settings:</td>
+                    <td colspan="3" align="center">{{ gettext('Main settings') }}:</td>
                 </tr>
                 <tbody>
                     <tr>
-                        <td>Name</td>
+                        <td>{{ gettext('Name') }}</td>
                         <td><input type="text" class="form-control-sm" name="username" value="{{ user_data['username'] }}"></td>
                     </tr>
                     <tr>
-                        <td>Email</td>
+                        <td>{{ gettext('Email') }}</td>
                         <td><input type="text" class="form-control-sm" name="email" value="{{ user_data['email'] }}"></td>
                     </tr>
-<!--                    <tr>-->
-<!--                        <td>Company</td>-->
-<!--                        <td>{{ user_data['company'] }}</td>-->
-<!--                    </tr>-->
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are updating your profile settings! Are you sure?')">Update</button></td>
+                        <td>{{ gettext('Language') }}</td>
+                        <td>
+                            <select class="form-select" name="language">
+                                {% for k in languages.keys() %}
+                                    {% if session['language'] == k %}
+                                        <option selected="selected" value="{{ k }}">{{ languages[k] }}</option>
+                                    {% else %}
+                                        <option value="{{ k }}">{{ languages[k] }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('You are updating your profile settings! Are you sure?') }}')">{{ gettext('Update') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -47,32 +57,20 @@
                 </tr>
                 <tbody>
                     <tr>
-                        <td>New password:</td>
+                        <td>{{ gettext('New password') }}:</td>
                         <td><input type="password" class="form-control-sm" name="password" value=""></td>
                     </tr>
                     <tr>
-                        <td>Retype New password:</td>
+                        <td>{{ gettext('Retype New password') }}:</td>
                         <td><input type="password" class="form-control-sm" name="confirm" value=""></td>
                     </tr>
-<!--                    <tr>-->
-<!--                        <td>Company</td>-->
-<!--                        <td>{{ user_data['company'] }}</td>-->
-<!--                    </tr>-->
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are changing your password! Are you sure?')">Change password</button></td>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('You are changing your password! Are you sure?') }}')">{{ gettext('Change password') }}</button></td>
                     </tr>
                 </tbody>
             </table>
         </fieldset>
     </form>
-<!--    <br><br>-->
-<!--    <table class="table-sm-form">-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--            <td colspan="3" align="center"><a class="nav-link" href="{{ url_for('logout') }}" onclick="return confirm('Are you sure you want to logout?')">Logout</span></a></td>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--    </table>-->
 
   {% if error %}
     <br>

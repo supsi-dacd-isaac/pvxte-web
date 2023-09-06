@@ -5,7 +5,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>Simulation results:</h3></a>
+                <a class="nav-link"><h3>{{ gettext('Simulation results') }} :</h3></a>
               </li>
         </ul>
     </nav>
@@ -16,12 +16,12 @@
             <table class="table-sm-list">
                 <thead>
                     <tr>
-                        <td colspan="3"> Buses and batteries sizing</td>
+                        <td colspan="3">{{ gettext('Buses and batteries sizing') }} </td>
                     </tr>
                     <tr>
-                        <td>Bus id:</td>
-                        <td>Battery size [kWh]:</td>
-                        <td>Battery packs:</td>
+                        <td>{{ gettext('Bus id') }} :</td>
+                        <td>{{ gettext('Battery size') }} [kWh]:</td>
+                        <td>{{ gettext('Battery packs') }} :</td>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,12 +35,12 @@
                 </tbody>
                 <thead>
                     <tr>
-                        <td colspan="3">Drivers sizing:</td>
+                        <td colspan="3">{{ gettext('Drivers sizing') }}:</td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="2">Minimum number:</td>
+                        <td colspan="2">{{ gettext('Minimum number') }}:</td>
                         <td>{{ data['min_num_drivers']|int }}</td>
                     </tr>
                 </tbody>
@@ -50,25 +50,25 @@
             <table class="table-sm-list">
                 <thead>
                 <tr>
-                    <td colspan="3">Investment costs:</td>
+                    <td colspan="3">{{ gettext('Investment costs') }}:</td>
                 </tr>
                 <tr>
-                    <td></td><td>Cost [CHF]</td><td>Lifetime [years]</td>
+                    <td></td><td>{{ gettext('Cost') }} [CHF]</td><td>{{ gettext('Lifetime') }} [{{ gettext('years') }}]</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>Bus:</td>
+                    <td>{{ gettext('Bus') }}:</td>
                     <td>{{ capex_features['capex_bus_cost']|int }}</td>
                     <td>{{ capex_features['capex_bus_lifetime']|int }}</td>
                 </tr>
                 <tr>
-                    <td>Battery:</td>
+                    <td>{{ gettext('Battery') }}:</td>
                     <td>{{ capex_features['capex_battery_cost']|int }}</td>
                     <td>{{ capex_features['capex_battery_lifetime']|int }}</td>
                 </tr>
                 <tr>
-                    <td>Charger:</td>
+                    <td>{{ gettext('Charger') }}:</td>
                     <td>{{ capex_features['capex_charger_cost']|int }}</td>
                     <td>{{ capex_features['capex_charger_lifetime']|int }}</td>
                 </tr>
@@ -78,16 +78,16 @@
                 </tr>
                 </thead>
                 <tr>
-                    <td>Interest rate:</td>
+                    <td>{{ gettext('Interest rate') }}:</td>
                     <td colspan="2">{{ capex_features['capex_interest_rate']|int }} %</td>
                 </tr>
                 <tr>
-                    <td>Additional fee:</td>
+                    <td>{{ gettext('Additional fee') }}:</td>
                     <td colspan="2">{{ capex_features['capex_charger_cost']|int }} CHF</td>
                 </tr>
                 <tr>
-                    <td><b>CAPEX:</b></td>
-                    <td colspan="2"><b>{{ capex_features['capex_cost']|int }} kCHF/year</b></td>
+                    <td><b>{{ gettext('CAPEX') }}:</b></td>
+                    <td colspan="2"><b>{{ capex_features['capex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
                 </tr>
                 </tbody>
             </table>
@@ -96,29 +96,29 @@
             <table class="table-sm-list">
                 <thead>
                 <tr>
-                    <td colspan="2">Operational costs:</td>
+                    <td colspan="2">{{ gettext('Operational costs') }}:</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>Energy tariff:</td>
+                    <td>{{ gettext('Energy tariff') }}:</td>
                     <td colspan="2">{{ opex_features['opex_energy_tariff'] }} CHF/kWh</td>
                 </tr>
                 <tr>
-                    <td>Buses maintenance:</td>
+                    <td>{{ gettext('Buses maintenance') }}:</td>
                     <td>{{ opex_features['opex_buses_maintainance'] }} CHF/km</td>
                 </tr>
                 <tr>
-                    <td>Buses efficiency:</td>
+                    <td>{{ gettext('Buses efficiency') }}:</td>
                     <td>{{ opex_features['opex_buses_efficiency'] }} kWh/km</td>
                 </tr>
                 <tr>
-                    <td>Annual usage:</td>
+                    <td>{{ gettext('Annual usage') }}:</td>
                     <td>{{ opex_features['opex_annual_usage'] }} km</td>
                 </tr>
                 <tr>
-                    <td><b>OPEX:</b></td>
-                    <td colspan="2"><b>{{ opex_features['opex_cost']|int }} kCHF/year</b></td>
+                    <td><b>{{ gettext('OPEX') }}:</b></td>
+                    <td colspan="2"><b>{{ opex_features['opex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
                 </tr>
                 </tbody>
             </table>
@@ -127,7 +127,7 @@
 
     <br>
     <div>
-        <a class="nav-link"><h4>Plot section:</h4></a><br>
+        <a class="nav-link"><h4>{{ gettext('Plot section') }}:</h4></a><br>
         <table class="table-sm-list">
             <tbody>
                 <tr>
@@ -146,11 +146,11 @@
     </div>
     <br>
     <div>
-        <a class="nav-link"><h4>Download section:</h4></a><br>
+        <a class="nav-link"><h4>{{ gettext('Download section') }}:</h4></a><br>
         <table class="table-sm-list">
             <tbody>
                 <tr>
-                    <td>Results:</td>
+                    <td>{{ gettext('Results') }}:</td>
                     <td>
                         <a class="link-dark" href="{{ url_for('static', filename='output-df/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.csv">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
@@ -159,7 +159,7 @@
                             </svg>
                         </a>
                     </td>
-                    <td>Raw data:</td>
+                    <td>{{ gettext('Raw data') }}:</td>
                     <td>
                         <a class="link-dark" href="{{ url_for('static', filename='output/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.zip">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">

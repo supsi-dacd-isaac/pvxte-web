@@ -4,6 +4,8 @@ import os
 import sqlite3
 import datetime
 import json
+
+import babel
 import pytz
 import glob
 import requests
@@ -15,6 +17,7 @@ import networkx as nx
 from collections import defaultdict
 from cryptography.fernet import Fernet
 from flask import Flask, render_template, request, url_for, redirect, session, flash
+from flask_babel import Babel, gettext
 
 # Get main conf
 with open('static/sims-basic-config/cfg.json', 'r') as f:
@@ -26,6 +29,13 @@ app.config.update(
     SECRET_KEY=main_cfg['appSecretKey']
 )
 
+# Set the Babel object for the translations
+
+def get_locale():
+    return session['language']
+
+babel = Babel(app)
+babel.init_app(app, locale_selector=get_locale)
 
 def get_db_connection():
     conn = sqlite3.connect('database.db')
@@ -57,7 +67,7 @@ def check_login_data(conn, u, p):
     login_data = conn.execute("SELECT * FROM user WHERE username='%s'" % u).fetchall()
     if len(login_data) > 0 and 'username' in login_data[0].keys():
         if decrypt(login_data[0]['password']) == p:
-            return login_data[0]['id'], login_data[0]['email'], login_data[0]['company']
+            return login_data[0]['id'], login_data[0]['email'], login_data[0]['company'], login_data[0]['language']
         else:
             return False, False, False
     else:
@@ -88,10 +98,11 @@ def get_user_data(conn):
 
 def update_user_data(conn, new_data):
     cur = conn.cursor()
-    cur.execute("UPDATE user SET username=?, email=? WHERE id=?",
-                (new_data['username'], new_data['email'], session['id_user']))
+    cur.execute("UPDATE user SET username=?, email=?, language=? WHERE id=?",
+                (new_data['username'], new_data['email'], new_data['language'], session['id_user']))
     session['username'] = new_data['username']
     session['email'] = new_data['email']
+    session['language'] = new_data['language']
     conn.commit()
 
 def change_user_password(conn, new_data):
@@ -149,10 +160,10 @@ def is_logged():
         return False
 
 
-def insert_user(conn, username, email, password, company):
+def insert_user(conn, username, email, password, company, language):
     cur = conn.cursor()
-    res = cur.execute("INSERT INTO user (username, email, password, company) VALUES (?, ?, ?, ?)",
-                      (username, email, encrypt(password), company))
+    res = cur.execute("INSERT INTO user (username, email, password, company, language) VALUES (?, ?, ?, ?, ?)",
+                      (username, email, encrypt(password), company, language))
     conn.commit()
     return res
 
@@ -459,9 +470,11 @@ def get_distances_matrix_dict(conn):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
+    session['language'] = 'en'
     if request.method == 'POST':
         conn = get_db_connection()
-        id_user, email_user, company_user = check_login_data(conn, request.form['username'], request.form['password'])
+        id_user, email_user, company_user, language = check_login_data(conn, request.form['username'],
+                                                                       request.form['password'])
         conn.close()
         if id_user is False:
             error = 'Invalid Credentials. Please try again.'
@@ -469,6 +482,7 @@ def login():
             session['id_user'] = id_user
             session['email_user'] = email_user
             session['company_user'] = company_user
+            session['language'] = language
             session['username'] = request.form['username']
             session['password'] = request.form['password']
             return redirect(url_for('index'))
@@ -479,6 +493,11 @@ def login():
 def logout():
     session.pop('username', None)
     session.pop('password', None)
+    session.pop('language', None)
+    session.pop('id_user', None)
+    session.pop('email', None)
+    session.pop('company_user', None)
+    session.pop('email_user', None)
     return redirect(url_for('index'))
 
 
@@ -486,12 +505,17 @@ def logout():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     error = None
+    session['language'] = 'en'
+    if 'lang' in request.args.keys():
+        session['language'] = request.args['lang']
+
     if request.method == 'POST':
         conn = get_db_connection()
-        insert_user(conn, request.form['username'], request.form['email'], request.form['password'], request.form['company'])
+        insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
+                    request.form['company'], request.form['language'])
         conn.close()
         return redirect(url_for('login'))
-    return render_template('signup.html', error=error)
+    return render_template('signup.html', language=session['language'], error=error)
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -657,6 +681,7 @@ def edit_user():
             form_data = request.form.to_dict()
             if form_data['type'] == 'change_settings':
                 # Update main settings
+
                 update_user_data(conn, form_data)
             elif form_data['type'] == 'change_pwd':
                 # Update password
@@ -666,12 +691,14 @@ def edit_user():
             # Get data from DB
             user_data = get_user_data(conn)
             conn.close()
-            return render_template('edit_user.html', user_data=user_data, error=err)
+            return render_template('edit_user.html', user_data=user_data, error=err,
+                                   languages=main_cfg['languages'])
         else:
             # Get data from DB
             user_data = get_user_data(conn)
             conn.close()
-            return render_template('edit_user.html', user_data=user_data)
+            return render_template('edit_user.html', user_data=user_data,
+                                   languages=main_cfg['languages'])
     else:
         return redirect(url_for('login'))
 

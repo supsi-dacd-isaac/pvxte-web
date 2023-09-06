@@ -4,7 +4,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>New bus model</h3></a>
+                <a class="nav-link"><h3>{{ gettext('New bus model') }}</h3></a>
               </li>
         </ul>
     </nav>
@@ -13,11 +13,11 @@
             <table class="table-sm-form">
                 <tbody>
                     <tr>
-                        <td>Name</td>
+                        <td>{{ gettext('Name') }}</td>
                         <td><input type="text" class="form-control-sm" name="bus_name" value=""></td>
                     </tr>
                     <tr>
-                        <td>Bus type</td>
+                        <td>{{ gettext('Bus type') }}</td>
                         <td>
                             <select class="form-select" name="bus_type">
                                 {% for abm in available_buses_models %}
@@ -27,35 +27,35 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Maximum passengers capacity</td>
+                        <td>{{ gettext('Maximum passengers capacity') }}</td>
                         <td><input type="text" class="form-control-sm" name="max_pass_cap" value="20"></td>
                     </tr>
                     <tr>
-                        <td>Minimum required battery packs</td>
+                        <td>{{ gettext('Minimum required battery packs') }}</td>
                         <td><input type="text" class="form-control-sm" name="min_required_batt_packs" value="1"></td>
                     </tr>
                     <tr>
-                        <td>Maximum allowed battery packs</td>
+                        <td>{{ gettext('Maximum allowed battery packs') }}</td>
                         <td><input type="text" class="form-control-sm" name="max_allowed_batt_packs" value="1"></td>
                     </tr>
                     <tr>
-                        <td>Capacity of a battery pack</td>
+                        <td>{{ gettext('Capacity of a battery pack') }}</td>
                         <td><input type="text" class="form-control-sm" name="batt_pack_capacity" value="1">&nbsp;[kWh]</td>
                     </tr>
                     <tr>
-                        <td>Empty weight of a bus without battery</td>
+                        <td>{{ gettext('Empty weight of a bus without battery') }}</td>
                         <td><input type="text" class="form-control-sm" name="empty_bus_weight" value="1">&nbsp;[kg]</td>
                     </tr>
                     <tr>
-                        <td>Weight of a battery pack</td>
+                        <td>{{ gettext('Weight of a battery pack') }}</td>
                         <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="1">&nbsp;[kg]</td>
                     </tr>
                     <tr>
-                        <td>Cost:</td>
+                        <td>{{ gettext('Cost') }}:</td>
                         <td><input type="text" class="form-control-sm" name="cost" value="400000">&nbsp;[CHF]</td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('You are inserting a new bus model! Are you sure?')">Submit</button></td>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('You are inserting a new bus model! Are you sure?') }}')">{{ gettext('Submit') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -63,6 +63,6 @@
     </form>
   {% if error %}
     <br>
-    <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
+    <a class="nav-link"><h3><strong>{{ gettext('Error') }}:</strong> {{ error }}</h3></a>
   {% endif %}
 {% endblock %}

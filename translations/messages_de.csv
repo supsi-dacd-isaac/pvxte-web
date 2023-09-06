@@ -1,0 +1,120 @@
+msgid,msgid
+,
+PVXTE Web GUI,PVXTE Web-GUI
+Simulations,Simulationen
+Create simulation,Simulation erstellen
+Company management,Unternehmen verwalten
+User,Benutzer
+Are you sure to logout?,Sind Sie sicher dass Sie sich abmelden wollen?
+Logout,Abmelden
+Buses models list,Busse Modelle Liste
+Name,Name
+Length,Länge
+Maximum passengers capacity,Maximale Passagierkapazität
+Minimum required battery packs,Mindestens benötigte Akkupacks
+Maximum allowed battery packs,Maximal zulässige Batteriesätze
+Capacity of a battery pack,Kapazität eines Batteriesatzes
+Empty weight of a bus without battery,Leergewicht eines Busses ohne Batterie
+Weight of a battery pack,Gewicht eines Batteriepacks
+Delete,löschen
+management section,Verwaltungsbereich
+Add new,Neu hinzufügen
+Cost,Kosten
+Battery pack capacity,Kapazität des Akkupacks
+Minimum required packs,Mindestens erforderliche Akkus
+Maximum allowed packs,Maximal zulässige Akkus
+Are you sure you want to delete the bus model?,Sind Sie sicher dass Sie das Busmodell löschen möchten?
+Terminals and distances setting,Einstellung der Klemmen und Abstände
+Terminals file,Klemmen-Datei
+Example file,Beispiel-Datei
+Distances file,Datei für Entfernungen
+Have you checked the files format before uploading them?,Haben Sie das Format der Dateien vor dem Hochladen überprüft?
+Terminals section,Abschnitt Terminals
+Elevation,Höhenlage
+Charging station,Ladestation
+Simulation results,Ergebnisse der Simulation
+Buses and batteries sizing,Dimensionierung von Bussen und Batterien
+Bus id,Bus-ID
+Battery size,Batteriegröße
+Battery packs,Batteriepacks
+Drivers sizing,Dimensionierung der Fahrer
+Minimum number,Mindestanzahl
+Investment costs,Investitionskosten
+Lifetime,Lebensdauer
+years,Jahre
+Bus,Bus
+Battery,Batterie
+Charger,Ladegerät
+Interest rate,Zinssatz
+Additional fee,Zusätzliche Gebühr
+CAPEX,CAPEX
+year,Jahr
+Operational costs,Betriebliche Kosten
+Energy tariff,Energietarif
+Buses maintenance,Wartung der Busse
+Buses efficiency,Effizienz der Busse
+Annual usage,Jährliche Nutzung
+OPEX,OPEX
+Plot section,Planausschnitt
+Download section,Abschnitt herunterladen
+Results,Ergebnisse
+Raw data,Rohdaten
+Edit bus model,Busmodell bearbeiten
+Type,Typ
+xxx,xxx
+User management,Benutzerverwaltung
+Main settings,Haupt-Einstellungen
+Email,E-Mail
+Language,Sprache
+You are updating your profile settings! Are you sure?,Sie aktualisieren gerade Ihre Profileinstellungen! Sind Sie sicher?
+Update,Aktualisieren
+New password,Neues Passwort
+Retype New password,Neu eingeben Neues Passwort
+You are changing your password! Are you sure?,Sie ändern Ihr Passwort! Sind Sie sich sicher?
+Change password,Passwort ändern
+Created at,Erstellt bei
+Company,Unternehmen
+Bus Line,Buslinie
+Day Type,Tag Typ
+Max. Charge,Max. Gebühr
+Detail,Einzelheiten
+Are you sure you want to delete the simulation?,Sind Sie sicher dass Sie die Simulation löschen möchten?
+Username,Benutzername
+Password,Kennwort
+Error,Fehler
+Registration,Anmeldung
+New bus model,Neues Busmodell
+Bus type,Bus-Typ
+You are inserting a new bus model! Are you sure?,Sie fügen ein neues Busmodell ein! Sind Sie sicher?
+Submit,Senden Sie
+New simulation - step1,Neue Simulation - Schritt 1
+Bus model,Busmodell
+Timetable/line file,Fahrplan/Liniendatei
+Battery capacity,Batteriekapazität
+Charging power,Leistung des Ladegeräts
+Fee connection power,Leistung der Gebührenverbindung
+Go to step 2,Weiter zu Schritt 2
+New simulation - step2,Neue Simulation - Schritt2
+Lines,Zeilen
+Day type,Tagestyp
+Pantograph maximum charging power,Stromabnehmer maximale Ladeleistung
+Maximum charging power at deposit,Maximale Ladeleistung bei Ablagerung
+CAPEX section,CAPEX-Abschnitt
+Bus cost,Kosten des Busses
+Bus lifetime,Lebensdauer des Busses
+Battery cost,Kosten der Batterie
+battery,Batterie
+Battery lifetime,Lebensdauer der Batterie
+Charger cost,Ladegerät Kosten
+charger,Ladegerät
+Charger lifetime,Lebensdauer des Ladegeräts
+Connection cost,Anschlusskosten
+OPEX section,OPEX-Abschnitt
+Buses maintainance,Wartung der Busse
+Charging efficiency,Effizienz des Ladevorgangs
+Annual usage per single bus,Jährlicher Verbrauch für einen einzelnen Bus
+Energy tariff increase per year,Erhöhung des Energietarifs pro Jahr
+Power tariff,Stromtarif
+Launch Simulation,Simulation starten
+Home,Startseite
+Signup,Anmeldung

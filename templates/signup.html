@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>PVXTE Web GUI</title>
+    <title>{{ gettext('PVXTE Web GUI') }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.2.2-dist/css/bootstrap_pvxte.css') }}">
 </head>
 <body>
@@ -11,46 +11,49 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <ul class="navbar-nav">
                   <li class="nav-item active">
-                    <a class="nav-link" href="{{ url_for('index') }}"><h3>Home</h3></span></a>
+                    <a class="nav-link" href="{{ url_for('index') }}"><h3>{{ gettext('Home') }}</h3></span></a>
                   </li>
             </ul>
         </nav>
+    </div>
+    <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <ul class="navbar-nav">
                   <li class="nav-item active">
-                    <a class="nav-link"><h2>Registration</h2></a>
+                    <a class="nav-link"><h4>{{ gettext('Registration') }}:&nbsp;&nbsp;&nbsp;&nbsp;</h4></a>
                   </li>
             </ul>
         </nav>
         <form action="" method="post">
+          <input type="hidden" class="form-control-sm" name="language" value="{{ language }}">
           <fieldset>
               <table class="table-sm-form">
                 <tbody>
                     <tr>
-                        <td>Username:</td>
+                        <td>{{ gettext('Username') }}:</td>
                         <td><input type="text" placeholder="Username" name="username" value="{{request.form.username }}"></td>
                     </tr>
                     <tr>
-                        <td>Password:</td>
+                        <td>{{ gettext('Password') }}:</td>
                         <td><input type="password" placeholder="Password" name="password" value="{{request.form.password }}"></td>
                     </tr>
                     <tr>
-                        <td>Email:</td>
+                        <td>{{ gettext('Email') }}:</td>
                         <td><input type="text" placeholder="Email" name="email" value="{{request.form.email }}"></td>
                     </tr>
                     <tr>
-                        <td>Company:</td>
+                        <td>{{ gettext('Company') }}:</td>
                         <td><input type="text" placeholder="company" name="company" value="{{request.form.company }}"></td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" >Signup</button></td>
+                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" >{{ gettext('Signup') }}</button></td>
                     </tr>
                 </tbody>
               </table>
           </fieldset>
         </form>
       {% if error %}
-        <p class="error"><strong>Error:</strong> {{ error }}
+        <p class="error"><strong>{{ gettext('Error') }}Error:</strong> {{ error }}
       {% endif %}
     </div>
 {% endblock %}

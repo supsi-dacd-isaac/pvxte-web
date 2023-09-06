@@ -27,11 +27,11 @@
             <table class="table-sm-form">
                 <tbody>
                     <tr>
-                        <td>Username:</td>
+                        <td>{{ gettext('Username') }}:</td>
                         <td><input type="text" placeholder="Username" name="username" value="{{request.form.username }}"></td>
                     </tr>
                     <tr>
-                        <td>Password:</td>
+                        <td>{{ gettext('Password') }}:</td>
                         <td><input type="password" placeholder="Password" name="password" value="{{request.form.password }}"></td>
                     </tr>
                     <tr>
@@ -42,17 +42,29 @@
           </fieldset>
         </form>
         {% if error %}
-        <p class="error"><strong>Error:</strong> {{ error }}
+        <p class="error"><strong>{{ gettext('Error') }}:</strong> {{ error }}
         {% endif %}
         {% if signup_info %}
-        <p class="info"><strong>Registration:</strong> {{ signup_info }}
+        <p class="info"><strong>{{ gettext('Registration') }}:</strong> {{ signup_info }}
         {% else %}
+    </div>
+    <br><br>
+    <div class="container">
+        <a class="link-dark" href="{{ url_for('signup', lang='en') }}">Not registered? Please sign up here!</a>
     </div>
     <br>
     <div class="container">
-        <a class="link-dark" href="{{ url_for('signup') }}">Not registered? Please sign up ;)</a>
-        {% endif %}
+        <a class="link-dark" href="{{ url_for('signup', lang='it') }}">Non hai un account? Registrati qui!</a>
     </div>
+    <br>
+    <div class="container">
+        <a class="link-dark" href="{{ url_for('signup', lang='de') }}">Nicht registriert? Bitte melden Sie sich hier an!</a>
+    </div>
+    <br>
+    <div class="container">
+        <a class="link-dark" href="{{ url_for('signup', lang='fr') }}">Vous n'êtes pas encore inscrit? Inscrivez-vous ici!</a>
+    </div>
+    {% endif %}
 
 {% endblock %}
 </body>

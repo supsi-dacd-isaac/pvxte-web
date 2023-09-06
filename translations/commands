@@ -1,0 +1,21 @@
+1) .pot file creation
+
+pybabel extract -F babel.cfg -o translations/messages.pot .
+
+2.a) .po files initialization (ATTENTION YOU RESET ALL THE TRANSLATIONS!!)
+
+pybabel init -i translations/messages.pot -d translations -l en
+pybabel init -i translations/messages.pot -d translations -l it
+pybabel init -i translations/messages.pot -d translations -l de
+pybabel init -i translations/messages.pot -d translations -l fr
+
+2.b) .po files updating
+
+pybabel update -i translations/messages.pot -d translations -l en
+pybabel update -i translations/messages.pot -d translations -l it
+pybabel update -i translations/messages.pot -d translations -l de
+pybabel update -i translations/messages.pot -d translations -l fr
+
+3) .mo compiling
+
+pybabel compile -d translations
