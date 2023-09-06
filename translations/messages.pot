@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-09-06 11:37+0200\n"
+"POT-Creation-Date: 2023-09-06 14:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,6 +140,10 @@ msgstr ""
 
 #: templates/company_manager.html:96
 msgid "Have you checked the files format before uploading them?"
+msgstr ""
+
+#: templates/company_manager.html:96
+msgid "Upload terminal and distances files"
 msgstr ""
 
 #: templates/company_manager.html:109
@@ -308,11 +312,11 @@ msgstr ""
 msgid "Retype New password"
 msgstr ""
 
-#: templates/edit_user.html:72
+#: templates/edit_user.html:68
 msgid "You are changing your password! Are you sure?"
 msgstr ""
 
-#: templates/edit_user.html:72
+#: templates/edit_user.html:68
 msgid "Change password"
 msgstr ""
 

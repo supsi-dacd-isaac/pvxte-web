@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-09-06 11:37+0200\n"
+"POT-Creation-Date: 2023-09-06 14:32+0200\n"
 "PO-Revision-Date: 2023-09-06 13:51+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: de\n"
@@ -142,6 +142,10 @@ msgstr "Datei für Entfernungen"
 #: templates/company_manager.html:96
 msgid "Have you checked the files format before uploading them?"
 msgstr "Haben Sie das Format der Dateien vor dem Hochladen überprüft?"
+
+#: templates/company_manager.html:96
+msgid "Upload terminal and distances files"
+msgstr "Dateien hochladen"
 
 #: templates/company_manager.html:109
 msgid "Terminals section"
@@ -309,11 +313,11 @@ msgstr "Neues Passwort"
 msgid "Retype New password"
 msgstr "Neu eingeben Neues Passwort"
 
-#: templates/edit_user.html:72
+#: templates/edit_user.html:68
 msgid "You are changing your password! Are you sure?"
 msgstr "Sie ändern Ihr Passwort! Sind Sie sich sicher?"
 
-#: templates/edit_user.html:72
+#: templates/edit_user.html:68
 msgid "Change password"
 msgstr "Passwort ändern"
 
