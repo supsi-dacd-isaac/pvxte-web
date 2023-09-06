@@ -69,9 +69,9 @@ def check_login_data(conn, u, p):
         if decrypt(login_data[0]['password']) == p:
             return login_data[0]['id'], login_data[0]['email'], login_data[0]['company'], login_data[0]['language']
         else:
-            return False, False, False
+            return False, False, False, False
     else:
-        return False, False, False
+        return False, False, False, False
 
 
 def get_sims_data(conn):

@@ -41,14 +41,11 @@
             </table>
           </fieldset>
         </form>
-        {% if error %}
-        <p class="error"><strong>{{ gettext('Error') }}:</strong> {{ error }}
-        {% endif %}
-        {% if signup_info %}
-        <p class="info"><strong>{{ gettext('Registration') }}:</strong> {{ signup_info }}
-        {% else %}
     </div>
     <br><br>
+    <div class="container">
+        <p class="info"><strong>{{ gettext('Registration') }}:</strong> {{ signup_info }}
+    </div>
     <div class="container">
         <a class="link-dark" href="{{ url_for('signup', lang='en') }}">Not registered? Please sign up here!</a>
     </div>
@@ -64,7 +61,13 @@
     <div class="container">
         <a class="link-dark" href="{{ url_for('signup', lang='fr') }}">Vous n'êtes pas encore inscrit? Inscrivez-vous ici!</a>
     </div>
+    {% if error %}
+    <br><br><br>
+    <div class="container">
+        <p class="error"><strong>{{ gettext('Error') }}: {{ error }}</strong>
+    </div>
     {% endif %}
+
 
 {% endblock %}
 </body>
