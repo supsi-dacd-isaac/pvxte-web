@@ -18,7 +18,7 @@
     "simulatorUrl": "http://localhost:8000/send-sim-data",
     "languages": {
         "en": "English",
-        "fr": "Francaise",
+        "fr": "Français",
         "it": "Italiano",
         "de": "Deutsch"
     }
