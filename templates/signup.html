@@ -35,19 +35,31 @@
                 <tbody>
                     <tr>
                         <td>{{ gettext('Username') }}:</td>
-                        <td><input type="text" placeholder="Username" name="username" value="{{request.form.username }}"></td>
+                        <td><input type="text" placeholder="{{ gettext('Username') }}" name="username" value="{{request.form.username }}"></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Password') }}:</td>
-                        <td><input type="password" placeholder="Password" name="password" value="{{request.form.password }}"></td>
+                        <td><input type="password" placeholder="{{ gettext('Password') }}" name="password" value="{{request.form.password }}"></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Email') }}:</td>
-                        <td><input type="text" placeholder="Email" name="email" value="{{request.form.email }}"></td>
+                        <td><input type="text" placeholder="{{ gettext('Email') }}" name="email" value="{{request.form.email }}"></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Company') }}:</td>
-                        <td><input type="text" placeholder="company" name="company" value="{{request.form.company }}"></td>
+                        <td>
+                            <select id="companies_select" placeholder="{{ gettext('Company') }}" class="company" name="company">
+                                {% for company in companies %}
+                                    <option value="{{company}}">{{ company }}</option>
+                                {% endfor %}
+                                <option value="new">{{ 'New' }}</option>
+                            </select>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('New company') }}:</td>
+                        <td><input id="new_company" type="text" placeholder="{{ gettext('New company') }}" name="new_company" value="{{request.form.company }}"></td>
                     </tr>
                     <tr>
                         <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" >{{ gettext('Signup') }}</button></td>
@@ -67,4 +79,6 @@
     {% include 'footer_not_logged.html' %}
 </footer>
 
+
 </body>
+

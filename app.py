@@ -74,9 +74,25 @@ def check_login_data(conn, u, p):
         return False, False, False, False
 
 
+def check_company_setup(conn):
+    terminal_data = conn.execute("SELECT * FROM terminal WHERE company='%s'" % session['company_user']).fetchall()
+    distance_data = conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
+    if len(terminal_data) > 0 and len(distance_data) > 0:
+        return True
+    else:
+        return False
+
+
 def get_sims_data(conn):
     return conn.execute("SELECT *, datetime(created_at, 'unixepoch', 'localtime') AS created_at_dt "
                         "FROM sim WHERE id_user=%i" % session['id_user']).fetchall()
+
+
+def get_companies_names(conn):
+    names = []
+    for data in conn.execute("select DISTINCT(company) from user").fetchall():
+        names.append(data[0])
+    return names
 
 
 def get_single_sim_data(conn, id_sim):
@@ -334,11 +350,10 @@ def launch_sim_instance(conn, main_cfg, pars):
     return True
 
 
-def create_new_bus_model(pars):
+def create_new_bus_model(conn, pars):
     bus_name = pars['bus_name']
     del pars['bus_name']
 
-    conn = get_db_connection()
     cur = conn.cursor()
 
     with open('static/bus-types/%s.json' % pars['bus_type'], 'r') as f:
@@ -513,13 +528,21 @@ def signup():
     if 'lang' in request.args.keys():
         session['language'] = request.args['lang']
 
+    conn = get_db_connection()
+    companies = get_companies_names(conn)
+
     if request.method == 'POST':
-        conn = get_db_connection()
-        insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
-                    request.form['company'], request.form['language'])
+        if request.form['company'] == 'new':
+            insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
+                        request.form['new_company'], request.form['language'])
+        else:
+            insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
+                        request.form['company'], request.form['language'])
         conn.close()
         return redirect(url_for('login'))
-    return render_template('signup.html', language=session['language'], error=error)
+
+    return render_template('signup.html', language=session['language'], error=error,
+                           companies=companies)
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -530,11 +553,13 @@ def index():
             sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
             delete_sim(conn, sim_metadata)
 
+        flag_company_setup = check_company_setup(conn)
+
         # Get simulation data
         sims = get_sims_data(conn)
         conn.close()
 
-        return render_template('index.html', sims=sims)
+        return render_template('index.html', sims=sims, flag_company_setup=flag_company_setup)
     else:
         if 'lang' in request.args.keys():
             return render_template('login.html', language=request.args['lang'])
@@ -546,6 +571,7 @@ def index():
 def detail():
     if is_logged():
         conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
         sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
         conn.close()
 
@@ -566,8 +592,9 @@ def detail():
         capex_features['capex_cost'] = int(capex / 1e3)
         opex_features['opex_cost'] = int(opex / 1e3)
 
-        return render_template('detail.html', sim_metadata=sim_metadata, data=data, capex_features=capex_features,
-                               opex_features=opex_features)
+        return render_template('detail.html', sim_metadata=sim_metadata, data=data,
+                               capex_features=capex_features, opex_features=opex_features,
+                               flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
 
@@ -576,6 +603,8 @@ def detail():
 def new_sim_step1():
     if is_logged():
         conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
+
         if request.method == 'POST':
             target = 'static/input-csv'
 
@@ -592,15 +621,18 @@ def new_sim_step1():
                                         id_bus_model=main_input_data['id_bus_model'],
                                         battery_capacity=main_input_data['battery_capacity'],
                                         charger_power=main_input_data['charger_power'],
-                                        fee_connection_power=main_input_data['fee_connection_power']))
+                                        fee_connection_power=main_input_data['fee_connection_power'],
+                                        flag_company_setup=flag_company_setup))
             else:
                 buses_models = get_buses_models_data(conn)
                 conn.close()
-                return render_template('new_sim_step1.html', error='No file uploaded', buses_models=buses_models)
+                return render_template('new_sim_step1.html', error='No file uploaded',
+                                       buses_models=buses_models, flag_company_setup=flag_company_setup)
         else:
             buses_models = get_buses_models_data(conn)
             conn.close()
-            return render_template('new_sim_step1.html', buses_models=buses_models)
+            return render_template('new_sim_step1.html', buses_models=buses_models,
+                                   flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
 
@@ -609,6 +641,8 @@ def new_sim_step1():
 def new_sim_step2():
     if is_logged():
         conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
+
         if request.method == 'POST':
             try:
                 # Run the simulation and save the output in the DB
@@ -627,7 +661,8 @@ def new_sim_step2():
                                        error='Data file has a wrong format! The simulation cannot be run',
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
                                        bus_model_data=bus_model_data,
-                                       default_costs=calculate_default_costs(req_dict, bus_model_data['length']))
+                                       default_costs=calculate_default_costs(req_dict, bus_model_data['length']),
+                                       flag_company_setup=flag_company_setup)
         else:
             req_dict = request.args.to_dict()
             lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
@@ -635,7 +670,8 @@ def new_sim_step2():
             conn.close()
             return render_template('new_sim_step2.html', data_file=req_dict['data_file'], lines=lines,
                                    days_types=days_types, bus_model_data=bus_model_data,
-                                   default_costs=calculate_default_costs(req_dict, bus_model_data['length']))
+                                   default_costs=calculate_default_costs(req_dict, bus_model_data['length']),
+                                   flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
 
@@ -643,12 +679,16 @@ def new_sim_step2():
 @app.route('/new_bus_model', methods=('GET', 'POST'))
 def new_bus_model():
     if is_logged():
+        conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
         if request.method == 'POST':
-            create_new_bus_model(request.form.to_dict())
+            create_new_bus_model(conn, request.form.to_dict())
             return redirect(url_for('company_manager'))
         else:
             available_buses_models = get_available_buses_models()
-            return render_template('new_bus_model.html', available_buses_models=available_buses_models)
+            return render_template('new_bus_model.html',
+                                   available_buses_models=available_buses_models,
+                                   flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
 
@@ -657,6 +697,7 @@ def new_bus_model():
 def edit_bus_model():
     if is_logged():
         conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
         if request.method == 'POST':
             # Update data on db
             new_pars = request.form.to_dict()
@@ -669,12 +710,14 @@ def edit_bus_model():
             # Get data of bus model and pass them to the page
             bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
             conn.close()
-            return render_template('edit_bus_model.html', bus_model_data=bus_model_data)
+            return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
+                                   flag_company_setup=flag_company_setup)
         else:
             # Get data of bus model and pass them to the page
             bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
             conn.close()
-            return render_template('edit_bus_model.html', bus_model_data=bus_model_data)
+            return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
+                                   flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
 
@@ -684,6 +727,8 @@ def edit_user():
     if is_logged():
         err = None
         conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
+
         if request.method == 'POST':
             form_data = request.form.to_dict()
             if form_data['type'] == 'change_settings':
@@ -699,36 +744,22 @@ def edit_user():
             user_data = get_user_data(conn)
             conn.close()
             return render_template('edit_user.html', user_data=user_data, error=err,
-                                   languages=main_cfg['languages'])
+                                   languages=main_cfg['languages'], flag_company_setup=flag_company_setup)
         else:
             # Get data from DB
             user_data = get_user_data(conn)
             conn.close()
             return render_template('edit_user.html', user_data=user_data,
-                                   languages=main_cfg['languages'])
+                                   languages=main_cfg['languages'], flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
-
-
-@app.route('/buses_models_list', methods=('GET', 'POST'))
-def buses_models_list():
-    if is_logged():
-        conn = get_db_connection()
-        if 'del' in request.args.keys() and 'id_bus_model' in request.args.keys():
-            delete_bus_model(conn, request.args['id_bus_model'])
-
-        # Get bus models data
-        buses_models = get_buses_models_data(conn)
-        conn.close()
-        return render_template('buses_models_list.html', buses_models=buses_models)
-    else:
-        return redirect(url_for('login')) \
 
 
 @app.route('/company_manager', methods=('GET', 'POST'))
 def company_manager():
     if is_logged():
         conn = get_db_connection()
+        flag_company_setup = check_company_setup(conn)
         buses_models = get_buses_models_data(conn)
 
         err = None
@@ -768,11 +799,16 @@ def company_manager():
                 err = 'The uploaded files have not the right folder, please check the examples files and upload them again'
 
         elif request.method == 'GET':
+            if 'del' in request.args.keys() and 'id_bus_model' in request.args.keys():
+                delete_bus_model(conn, request.args['id_bus_model'])
+                buses_models = get_buses_models_data(conn)
+
             terminals_raw_data = get_terminals_metadata(conn)
             terminals_data = handle_terminals_metadata(terminals_raw_data)
 
         return render_template('company_manager.html', buses_models=buses_models,
-                               company=session['company_user'], terminals_data=terminals_data, error=err)
+                               company=session['company_user'], terminals_data=terminals_data,
+                               flag_company_setup=flag_company_setup, error=err)
     else:
         return redirect(url_for('login'))
 
