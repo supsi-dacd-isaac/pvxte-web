@@ -470,7 +470,11 @@ def get_distances_matrix_dict(conn):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-    session['language'] = 'en'
+    if 'lang' in request.args.keys():
+        session['language'] = request.args['lang']
+    else:
+        session['language'] = 'it'
+
     if request.method == 'POST':
         conn = get_db_connection()
         id_user, email_user, company_user, language = check_login_data(conn, request.form['username'],
@@ -532,7 +536,10 @@ def index():
 
         return render_template('index.html', sims=sims)
     else:
-        return redirect(url_for('login'))
+        if 'lang' in request.args.keys():
+            return render_template('login.html', language=request.args['lang'])
+        else:
+            return redirect(url_for('login'))
 
 
 @app.route('/detail', methods=('GET', 'POST'))

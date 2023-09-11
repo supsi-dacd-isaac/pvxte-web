@@ -1,20 +1,24 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% if 'username' in session.keys() and session['username'] != '' %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <ul class="navbar-nav">
-              <li class="nav-item active">
-                <a class="nav-link"><h3>{{ company }} - {{ gettext('management section') }}:</h3></a>
-              </li>
-        </ul>
-    </nav>
-    <div>
-        <table class="table-sm-list">
+<div class="d-flex" id="wrapper">
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <ul class="navbar-nav">
+                  <li class="nav-item active">
+                    <a class="nav-link"><h3>{{ gettext('Company management') }}:</h3></a>
+                  </li>
+            </ul>
+        </nav>
+        <table class="table">
         <thead>
             <tr>
-                <td colspan="6"><h3>{{ gettext('Buses models list') }}</h3></td>
-                <td colspan="1"><a class="nav-link" href="{{ url_for('new_bus_model') }}">{{ gettext('Add new') }}</span></a></td>
+                <td colspan="6"><h4>{{ gettext('Buses models list') }}</h4></td>
+                <td colspan="1">
+                    <a href="{{ url_for('new_bus_model') }}">
+                    <button class="btn btn-primary">{{ gettext('Add new') }}</button>
+                    </a>
+                </td>
             </tr>
         </thead>
         <thead>
@@ -22,12 +26,9 @@
                 <td>{{ gettext('Name') }}</td>
                 <td>{{ gettext('Length') }}</td>
                 <td>{{ gettext('Cost') }}</td>
-<!--                <td>Passengers capacity</td>-->
                 <td>{{ gettext('Battery pack capacity') }}</td>
                 <td>{{ gettext('Minimum required packs') }}</td>
                 <td>{{ gettext('Maximum allowed packs') }}</td>
-<!--                <td>Empty weight of a bus without battery</td>-->
-<!--                <td>Weight of a battery pack</td>-->
                 <td></td>
             </tr>
         </thead>
@@ -37,12 +38,9 @@
                     <td><a class="link-dark" href="{{ url_for('edit_bus_model', id_bus_model=bus_model['id']) }}">{{ bus_model['name'] }}</a></td>
                     <td>{{ bus_model['length'] }} m</td>
                     <td>{{ bus_model['cost'][0:-3] }} kCHF</td>
-<!--                    <td>{{ bus_model['max_pass_cap'] }}</td>-->
                     <td>{{ bus_model['batt_pack_capacity'] }} kWh</td>
                     <td>{{ bus_model['min_required_batt_packs'] }}</td>
                     <td>{{ bus_model['max_allowed_batt_packs'] }}</td>
-<!--                    <td>{{ bus_model['empty_bus_weight'] }}</td>-->
-<!--                    <td>{{ bus_model['batt_pack_weight'] }}</td>-->
                     <td>
                         <a class="link-dark" href="{{ url_for('buses_models_list', id_bus_model=bus_model['id'], del='y') }}" onclick="return confirm('{{ gettext('Are you sure you want to delete the bus model?') }}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
@@ -54,12 +52,10 @@
             </tbody>
         {% endfor %}
         </table>
-    </div>
-    <br><br>
-    <div>
-    <form method="post" enctype = "multipart/form-data">
+        <br>
+        <form method="post" enctype = "multipart/form-data">
         <fieldset>
-            <table class="table-sm-form">
+            <table class="table">
                 <thead>
                     <tr>
                         <td colspan="4" align="center"><h3>{{ gettext('Terminals and distances setting') }}:</h3></td>
@@ -93,23 +89,20 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('Have you checked the files format before uploading them?') }}')">{{ gettext('Upload terminal and distances files') }}</button></td>
+                        <td colspan="4" align="center"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('Have you checked the files format before uploading them?') }}')">{{ gettext('Upload terminal and distances files') }}</button></td>
                     </tr>
                 </tbody>
             </table>
         </fieldset>
-    </form>
-    </div>
-
-    <br><br>
-    <div>
-        <table class="table-sm-list">
+        </form>
+        <br><br>
+        <table class="table">
         <thead>
             <tr>
                 <td colspan="3"><h3>{{ gettext('Terminals section') }}:</h3></td>
             </tr>
         </thead>
-    {% if terminals_data|length > 0 %}
+        {% if terminals_data|length > 0 %}
             <thead>
                 <tr>
                     <td>{{ gettext('Name') }}</td>
@@ -126,20 +119,20 @@
                     </tr>
                 </tbody>
             {% endfor %}
-    {% else %}
-        <tbody>
-            <tr>
-                <td colspan="2"><b>No data available</b></td>
-            </tr>
-        </tbody>
-    {% endif %}
+        {% else %}
+            <tbody>
+                <tr>
+                    <td colspan="2"><b>No data available</b></td>
+                </tr>
+            </tbody>
+        {% endif %}
         </table>
     </div>
-    {% endif %}
+</div>
 
-  {% if error %}
-    <br>
-    <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
-  {% endif %}
+<footer>
+    {% include 'footer_logged.html' %}
+</footer>
 
 {% endblock %}
+

@@ -2,7 +2,7 @@
 
 {% block content %}
     {% if 'username' in session.keys() and session['username'] != '' %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
                 <a class="nav-link"><h3>{{ gettext('Simulations') }}:</h3></a>
@@ -10,7 +10,7 @@
         </ul>
     </nav>
     <div>
-        <table class="table-sm-list">
+        <table class="table-pvxte-sims">
         <thead>
             <tr>
                 <td>{{ gettext('Created at') }}:</td>
@@ -63,5 +63,10 @@
     </div>
 
     {% endif %}
+
+<footer>
+    {% include 'footer_logged.html' %}
+</footer>
+
 
 {% endblock %}

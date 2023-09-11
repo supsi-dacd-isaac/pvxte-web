@@ -3,28 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <title>PVXTE Web GUI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.2.2-dist/css/bootstrap_pvxte.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='pvxte-simple-sidebar/css/styles_pvxte.css') }}">
 </head>
 <body>
 {% block content %}
-    <div class="container">
-        <ul class="navbar-nav">
-              <li class="nav-item active">
-                <a class="nav-link" href="{{ url_for('index') }}">Home</span></a>
-              </li>
-        </ul>
+    <div id="page-content-wrapper">
+        <!-- Top navigation-->
+        <nav class="navbar navbar-expand-lg navbar-light bg-pvxte-top-bar border-bottom">
+            <div class="container-fluid-coloured-pvxte">
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                        <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </div>
     <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light">
             <ul class="navbar-nav">
                   <li class="nav-item active">
-                    <a class="nav-link"><h3>Login</h3></a>
+                    <a class="nav-link"><h3>{{ gettext('PVXTE Web GUI') }}: {{ gettext('Login') }}</h3></a>
                   </li>
             </ul>
+        </nav>
     </div>
     <div class="container">
         <form action="" method="post">
           <fieldset>
-            <table class="table-sm-form">
+            <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
                         <td>{{ gettext('Username') }}:</td>
@@ -35,7 +42,7 @@
                         <td><input type="password" placeholder="Password" name="password" value="{{request.form.password }}"></td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" >Login</button></td>
+                        <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" >Login</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -61,13 +68,20 @@
     <div class="container">
         <a class="link-dark" href="{{ url_for('signup', lang='fr') }}">Vous n'êtes pas encore inscrit? Inscrivez-vous ici!</a>
     </div>
+
+
+    <br>
     {% if error %}
-    <br><br><br>
     <div class="container">
         <p class="error"><strong>{{ gettext('Error') }}: {{ error }}</strong>
     </div>
     {% endif %}
-
+    <br>
 
 {% endblock %}
+
+<footer>
+    {% include 'footer_not_logged.html' %}
+</footer>
+
 </body>

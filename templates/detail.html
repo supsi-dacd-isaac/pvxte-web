@@ -2,7 +2,7 @@
 
 {% block content %}
     {% if 'username' in session.keys() and session['username'] != '' %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
                 <a class="nav-link"><h3>{{ gettext('Simulation results') }} :</h3></a>
@@ -11,9 +11,9 @@
     </nav>
 
     <br>
-    <div class="container">
-        <div class="left">
-            <table class="table-sm-list">
+    <div class="table-container">
+        <div class="table-left">
+            <table class="table">
                 <thead>
                     <tr>
                         <td colspan="3">{{ gettext('Buses and batteries sizing') }} </td>
@@ -46,8 +46,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="center">
-            <table class="table-sm-list">
+        <div class="table-middle">
+            <table class="table">
                 <thead>
                 <tr>
                     <td colspan="3">{{ gettext('Investment costs') }}:</td>
@@ -92,8 +92,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="right">
-            <table class="table-sm-list">
+        <div class="table-right">
+            <table class="table">
                 <thead>
                 <tr>
                     <td colspan="2">{{ gettext('Operational costs') }}:</td>
@@ -124,11 +124,16 @@
             </table>
         </div>
     </div>
-
-    <br>
-    <div>
-        <a class="nav-link"><h4>{{ gettext('Plot section') }}:</h4></a><br>
-        <table class="table-sm-list">
+    <br><br>
+    <div class="centered-content">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>
+                        <a class="nav-link"><h4>{{ gettext('Plot section') }}:</h4></a>
+                    </td>
+                </tr>
+            </thead>
             <tbody>
                 <tr>
                     <td>
@@ -144,13 +149,15 @@
             </tbody>
         </table>
     </div>
-    <br>
+    <br><br><br><br><br>
     <div>
-        <a class="nav-link"><h4>{{ gettext('Download section') }}:</h4></a><br>
-        <table class="table-sm-list">
+        <table class="table">
             <tbody>
                 <tr>
-                    <td>{{ gettext('Results') }}:</td>
+                    <td>
+                        <a class="nav-link"><h4>{{ gettext('Download section') }}:</h4></a><br>
+                    </td>
+                    <td><b>{{ gettext('Results') }}:</b></td>
                     <td>
                         <a class="link-dark" href="{{ url_for('static', filename='output-df/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.csv">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
@@ -159,7 +166,7 @@
                             </svg>
                         </a>
                     </td>
-                    <td>{{ gettext('Raw data') }}:</td>
+                    <td><b>{{ gettext('Raw data') }}:</b></td>
                     <td>
                         <a class="link-dark" href="{{ url_for('static', filename='output/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.zip">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
@@ -173,5 +180,9 @@
         </table>
     </div>
     {% endif %}
+
+<footer>
+    {% include 'footer_logged.html' %}
+</footer>
 
 {% endblock %}

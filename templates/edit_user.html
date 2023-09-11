@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
                 <a class="nav-link"><h3>{{ gettext('User management') }}:</h3></a>
@@ -11,7 +11,7 @@
     <form method="post" enctype = "multipart/form-data">
         <input type="hidden" class="form-control-sm" name="type" value="change_settings">
         <fieldset>
-            <table class="table-sm-form">
+            <table class="table-sm-form-simple-left">
                 <thead>
                 <tr>
                     <td colspan="3" align="center">{{ gettext('Main settings') }}:</td>
@@ -40,7 +40,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('You are updating your profile settings! Are you sure?') }}')">{{ gettext('Update') }}</button></td>
+                        <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('You are updating your profile settings! Are you sure?') }}')">{{ gettext('Update') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -50,10 +50,10 @@
     <form method="post" enctype = "multipart/form-data">
         <input type="hidden" class="form-control-sm" name="type" value="change_pwd">
         <fieldset>
-            <table class="table-sm-form">
+            <table class="table-sm-form-simple-left">
                 <thead>
                 <tr>
-                    <td colspan="3" align="center">Password:</td>
+                    <td colspan="3" align="center">{{ gettext('Password') }}:</td>
                 </tr>
                 <tbody>
                     <tr>
@@ -65,7 +65,7 @@
                         <td><input type="password" class="form-control-sm" name="confirm" value=""></td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('You are changing your password! Are you sure?') }}')">{{ gettext('Change password') }}</button></td>
+                        <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('You are changing your password! Are you sure?') }}')">{{ gettext('Change password') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -76,4 +76,8 @@
     <br>
     <a class="nav-link"><h3><strong>Error:</strong> {{ error }}</h3></a>
   {% endif %}
+
+  <footer>
+      {% include 'footer_logged.html' %}
+  </footer>
 {% endblock %}

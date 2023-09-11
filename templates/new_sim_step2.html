@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>{{ gettext('New simulation - step2') }}</h3></a>
+                <a class="nav-link"><h3>{{ gettext('Create simulation') }}: {{ gettext('New simulation - step2') }}</h3></a>
               </li>
         </ul>
     </nav>
@@ -14,7 +14,7 @@
         <input type="hidden" class="form-control-sm" name="bus_model_code" value="{{ bus_model_data['code'] }}">
         <input type="hidden" class="form-control-sm" name="bus_model_name" value="{{ bus_model_data['name'] }}">
         <fieldset>
-            <table class="table-sm-form">
+            <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
                         <td>{{ gettext('Bus model') }}</td>
@@ -118,7 +118,7 @@
                         <td><input type="text" class="form-control-sm" name="opex_power_tariff" value="0">&nbsp[CHF/kW]</td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('Are you sure? You will receive a notification via email when the simulation will be completed') }}')">{{ gettext('Launch Simulation') }}</button></td>
+                        <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('Are you sure? You will receive a notification via email when the simulation will be completed') }}')">{{ gettext('Launch Simulation') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -129,6 +129,9 @@
     <a class="nav-link"><h3><strong>{{ gettext('Error') }}:</strong> {{ error }}</h3></a>
   {% endif %}
 
+<footer>
+    {% include 'footer_logged.html' %}
+</footer>
 
 {% endblock %}
 

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
                 <a class="nav-link"><h3>{{ gettext('New bus model') }}</h3></a>
@@ -10,7 +10,7 @@
     </nav>
     <form method="post" enctype = "multipart/form-data">
         <fieldset>
-            <table class="table-sm-form">
+            <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
                         <td>{{ gettext('Name') }}</td>
@@ -19,7 +19,7 @@
                     <tr>
                         <td>{{ gettext('Bus type') }}</td>
                         <td>
-                            <select class="form-select" name="bus_type">
+                            <select class="fixed-select" name="bus_type">
                                 {% for abm in available_buses_models %}
                                     <option value="{{ abm }}">{{ abm }}</option>
                                 {% endfor %}
@@ -54,8 +54,8 @@
                         <td>{{ gettext('Cost') }}:</td>
                         <td><input type="text" class="form-control-sm" name="cost" value="400000">&nbsp;[CHF]</td>
                     </tr>
-                    <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark" onclick="return confirm('{{ gettext('You are inserting a new bus model! Are you sure?') }}')">{{ gettext('Submit') }}</button></td>
+                    <tr >
+                        <td class="center-align-cell" colspan="2"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('You are inserting a new bus model! Are you sure?') }}')">{{ gettext('Submit') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -65,4 +65,8 @@
     <br>
     <a class="nav-link"><h3><strong>{{ gettext('Error') }}:</strong> {{ error }}</h3></a>
   {% endif %}
+
+  <footer>
+      {% include 'footer_logged.html' %}
+  </footer>
 {% endblock %}

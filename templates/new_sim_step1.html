@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>{{ gettext('New simulation - step1') }}</h3></a>
+                <a class="nav-link"><h3>{{ gettext('Create simulation') }}: {{ gettext('New simulation - step1') }}</h3></a>
               </li>
         </ul>
     </nav>
     <form method="post" enctype = "multipart/form-data">
         <fieldset>
-            <table class="table-sm-form">
+            <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
                         <td>{{ gettext('Bus model') }}</td>
@@ -39,7 +39,7 @@
                         <td><input type="text" class="form-control-sm" name="fee_connection_power" value="250">&nbsp[kW]</td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><button type="submit" class="btn btn-dark">{{ gettext('Go to step 2') }}</button></td>
+                        <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary">{{ gettext('Go to step 2') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -49,4 +49,12 @@
     <br>
     <a class="nav-link"><h3><strong>{{ gettext('Error') }}:</strong> {{ error }}</h3></a>
   {% endif %}
+
+<footer>
+    {% include 'footer_logged.html' %}
+</footer>
+
+
 {% endblock %}
+
+
