@@ -510,3 +510,6 @@ msgstr ""
 msgid "Signup"
 msgstr ""
 
+#: templates/signup.html:42 templates/signup.html:43
+msgid "New company"
+msgstr ""

@@ -1,25 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ gettext('PVXTE Web GUI') }}</title>
-<!--    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-5.2.2-dist/css/bootstrap_pvxte.css') }}">-->
-    <link rel="stylesheet" href="{{ url_for('static', filename='pvxte-simple-sidebar/css/styles_pvxte.css') }}">
-</head>
-<body>
+{% extends 'base_not_logged.html' %}
+
 {% block content %}
-    <div id="page-content-wrapper">
-        <!-- Top navigation-->
-        <nav class="navbar navbar-expand-lg navbar-light bg-pvxte-top-bar border-bottom">
-            <div class="container-fluid-coloured-pvxte">
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                        <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('login', lang=language) }}"><h4>{{ gettext('Home') }}</h4></a>
-                    </ul>
-                </div>
-            </div>
-        </nav>
-    </div>
     <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light">
             <ul class="navbar-nav">
@@ -74,10 +55,6 @@
     </div>
     <br><br>
 {% endblock %}
-
-<footer>
-    {% include 'footer_not_logged.html' %}
-</footer>
 
 
 </body>

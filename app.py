@@ -32,7 +32,10 @@ app.config.update(
 # Set the Babel object for the translations
 
 def get_locale():
-    return session['language']
+    if 'language' in session.keys():
+        return session['language']
+    else:
+        return 'it'
 
 babel = Babel(app)
 babel.init_app(app, locale_selector=get_locale)
@@ -561,10 +564,7 @@ def index():
 
         return render_template('index.html', sims=sims, flag_company_setup=flag_company_setup)
     else:
-        if 'lang' in request.args.keys():
-            return render_template('login.html', language=request.args['lang'])
-        else:
-            return redirect(url_for('login'))
+        return render_template('index.html', sims=[], flag_company_setup=False, language='it')
 
 
 @app.route('/detail', methods=('GET', 'POST'))

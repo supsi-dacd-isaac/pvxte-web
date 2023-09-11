@@ -9,39 +9,38 @@
 
 <div class="d-flex" id="wrapper">
     {% if 'username' in session.keys() and session['username'] != '' %}
-    <div class="border-end bg-light" id="sidebar-wrapper">
-        <div class="sidebar-heading border-bottom bg-pvxte-top-bar nav-link-pvxte-white">{{ gettext('PVXTE Web GUI') }}</div>
-        <div class="list-group list-group-flush">
-            {% if flag_company_setup == True %}
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('index') }}">{{ gettext('Simulations') }}</a></a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('new_sim_step1') }}">{{ gettext('Create simulation') }}</a>
-            {% endif %}
-            <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('company_manager') }}">{{ gettext('Company management') }}</a>
-        </div>
-    </div>
-    <!-- Page content wrapper-->
-    <div id="page-content-wrapper">
-        <!-- Top navigation-->
-        <nav class="navbar navbar-expand-lg navbar-light bg-pvxte-top-bar border-bottom">
-            <div class="container-fluid-coloured-pvxte">
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                        <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('edit_user') }}">{{ gettext('User') }}: {{ session['username'] }}</a></li>
-                        <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
-                        <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('logout') }}" onclick="return confirm('{{ gettext('Are you sure to logout?') }}')">{{ gettext('Logout') }}</a></li>
-                    </ul>
-                </div>
+        <div class="border-end bg-light" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-pvxte-top-bar nav-link-pvxte-white">{{ gettext('PVXTE Web GUI') }}</div>
+            <div class="list-group list-group-flush">
+                {% if flag_company_setup == True %}
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('index') }}">{{ gettext('Simulations') }}</a></a>
+                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('new_sim_step1') }}">{{ gettext('Create simulation') }}</a>
+                {% endif %}
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('company_manager') }}">{{ gettext('Company management') }}</a>
             </div>
-        </nav>
+        </div>
+        <!-- Page content wrapper-->
+        <div id="page-content-wrapper">
+            <!-- Top navigation-->
+            <nav class="navbar navbar-expand-lg navbar-light bg-pvxte-top-bar border-bottom">
+                <div class="container-fluid-coloured-pvxte">
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
+                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('edit_user') }}">{{ gettext('User') }}: {{ session['username'] }}</a></li>
+                            <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
+                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('logout') }}" onclick="return confirm('{{ gettext('Are you sure to logout?') }}')">{{ gettext('Logout') }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+    {% endif %}
 
     {% for message in get_flashed_messages() %}
         <div class="alert">{{ message }}</div>
     {% endfor %}
 
     {% block content %} {% endblock %}
-    {% else %}
-        <a href="{{ url_for('login') }}">Login</a>
-    {% endif %}
+
 </div>
 </body>
 

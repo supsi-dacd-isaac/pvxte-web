@@ -511,3 +511,6 @@ msgstr "Home"
 msgid "Signup"
 msgstr "Iscrizioni"
 
+#: templates/signup.html:42 templates/signup.html:43
+msgid "New company"
+msgstr "Nuova compagnia"
