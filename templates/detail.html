@@ -110,7 +110,7 @@
                 </tr>
                 <tr>
                     <td>{{ gettext('Buses efficiency') }}:</td>
-                    <td>{{ opex_features['opex_buses_efficiency'] }} kWh/km</td>
+                    <td>{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>
                 </tr>
                 <tr>
                     <td>{{ gettext('Annual usage') }}:</td>
@@ -119,6 +119,28 @@
                 <tr>
                     <td><b>{{ gettext('OPEX') }}:</b></td>
                     <td colspan="2"><b>{{ opex_features['opex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
+                </tr>
+                </tbody>
+                <thead>
+                <tr>
+                    <td colspan="2"></td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ gettext('TTW emissions saved (diesel comparison)') }}:</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{{ gettext('CO2') }}:</td>
+                    <td colspan="2">{{ emissions['CO2']['value']|round(2) }} {{ emissions['CO2']['unit'] }}/{{ gettext('year') }}</td>
+                </tr>
+                <tr>
+                    <td>{{ gettext('NOx') }}:</td>
+                    <td colspan="2">{{ emissions['NOx']['value']|round(2) }} {{ emissions['NOx']['unit'] }}/{{ gettext('year') }}</td>
+                </tr>
+                <tr>
+                    <td>{{ gettext('PM10') }}:</td>
+                    <td colspan="2">{{ emissions['PM10']['value']|round(2) }} {{ emissions['PM10']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 </tbody>
             </table>

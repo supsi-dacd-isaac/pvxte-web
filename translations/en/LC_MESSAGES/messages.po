@@ -513,3 +513,7 @@ msgstr ""
 #: templates/signup.html:42 templates/signup.html:43
 msgid "New company"
 msgstr ""
+
+#: templates/detail.html:129
+msgid "TTW emissions saved (diesel comparison)"
+msgstr ""

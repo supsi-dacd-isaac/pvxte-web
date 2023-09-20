@@ -21,6 +21,11 @@
         "fr": "Français",
         "it": "Italiano",
         "de": "Deutsch"
+    },
+    "emissionsRates": {
+        "CO2": 1155,
+        "NOx": 1.1,
+        "PM10": 0.015
     }
 }
 

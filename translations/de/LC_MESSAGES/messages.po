@@ -514,3 +514,7 @@ msgstr "Anmeldung"
 #: templates/signup.html:42 templates/signup.html:43
 msgid "New company"
 msgstr "Neue Firma"
+
+#: templates/detail.html:129
+msgid "TTW emissions saved (diesel comparison)"
+msgstr "Eingesparte TTW-Emissionen (Dieselvergleich)"

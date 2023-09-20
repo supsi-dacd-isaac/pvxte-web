@@ -226,6 +226,13 @@ def calc_a(i, t):
     q = 1 + i
     return (np.power(q, t) * i) / (np.power(q, t) - 1)
 
+def calculate_emissions(rates, kms):
+    return {
+        'CO2':  { 'value': rates['CO2']  * 1e-6 * float(kms), 'unit': 'ton'},
+        'NOx':  { 'value': rates['NOx']  * 1e-6 * float(kms), 'unit': 'ton'},
+        'PM10': { 'value': rates['PM10'] * 1e-3 * float(kms), 'unit': 'kg'}
+    }
+
 
 def calculate_economical_parameters(capex_features, opex_features):
     # Calculate the CAPEX costs
@@ -243,7 +250,7 @@ def calculate_economical_parameters(capex_features, opex_features):
     # Calculate the OPEX costs
     # todo OPEX still to check
     opex_cost = (float(opex_features['opex_buses_maintainance']) +
-                 float(opex_features['opex_buses_efficiency']) * float(opex_features['opex_energy_tariff'])) * \
+                 float(opex_features['opex_bus_efficiency_sim']) * float(opex_features['opex_energy_tariff'])) * \
                 float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
 
     return capex_cost, opex_cost
@@ -588,13 +595,19 @@ def detail():
         # Calculate CAPEX and OPEX costs
         capex_features = json.loads(sim_metadata[11])
         opex_features = json.loads(sim_metadata[12])
+        if 'opex_bus_efficiency_sim' not in opex_features.keys():
+            opex_features['opex_bus_efficiency_sim'] = float(opex_features['opex_buses_efficiency'])
+
         capex, opex = calculate_economical_parameters(capex_features=capex_features, opex_features=opex_features)
         capex_features['capex_cost'] = int(capex / 1e3)
         opex_features['opex_cost'] = int(opex / 1e3)
 
+        # Calculate emissions
+        ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
+
         return render_template('detail.html', sim_metadata=sim_metadata, data=data,
                                capex_features=capex_features, opex_features=opex_features,
-                               flag_company_setup=flag_company_setup)
+                               flag_company_setup=flag_company_setup, emissions=ems)
     else:
         return redirect(url_for('login'))
 
