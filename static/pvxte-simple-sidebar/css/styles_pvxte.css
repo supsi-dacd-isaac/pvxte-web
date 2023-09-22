@@ -712,6 +712,11 @@ progress {
   margin-top: var(--bs-gutter-y);
 }
 
+.error-row {
+  background-color: lightpink;
+  color: black;
+}
+
 .col {
   flex: 1 0 0%;
 }
@@ -11031,3 +11036,4 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     border-color: transparent;
     text-align: center;
 }
+

@@ -95,6 +95,8 @@ if __name__ == "__main__":
         shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/json-input-pars')
         shutil.copy('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
 
+        update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
+                        "WHERE id_user = ? and  created_at = ?;")
         if 'error' not in main_results.keys():
             shutil.copy('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
             shutil.copy('%s/output-bsize/%s.csv' % (target_folder, sim_id), 'static/output-bsize')
@@ -102,9 +104,7 @@ if __name__ == "__main__":
             shutil.copy('%s/plot/%s.png' % (target_folder, sim_id), 'static/plot')
             shutil.copy('%s/plot/%s_charge_profile.png' % (target_folder, sim_id), 'static/plot')
 
-            # Insert the main results in the database
-            update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
-                            "WHERE id_user = ? and  created_at = ?;")
+            # Update the main results in the database
             data_to_update = (main_results['strRoutes'],
                               json.dumps(main_results['capexPars']),
                               json.dumps(main_results['opexPars']),
@@ -112,9 +112,10 @@ if __name__ == "__main__":
                               int(id_user),
                               int(ts))
         else:
-            # Insert the main results in the database
-            update_query = ("UPDATE sim SET line = ? WHERE id_user = ? and  created_at = ?;")
-            data_to_update = (main_results['strRoutes'], int(id_user), int(ts))
+            # Update the main results in the database
+            data_to_update = (main_results['strRoutes'], 'error', 'error', 'error', int(id_user), int(ts))
+
+        data_to_update = (main_results['strRoutes'], int(id_user), int(ts))
         cursor.execute(update_query, data_to_update)
         conn.commit()
 
