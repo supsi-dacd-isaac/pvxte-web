@@ -66,34 +66,43 @@ if __name__ == "__main__":
 
     input_folder = '%s/input' % cfg['inputFolder']
     tmp_folder = '%s/tmp' % cfg['inputFolder']
+
+    # Delete any other result in the tmp folder
+    shutil.rmtree(tmp_folder)
+    os.mkdir(tmp_folder)
+
     for sim_results_file in os.listdir(input_folder):
         shutil.copy('%s/%s' % (input_folder, sim_results_file), '%s/%s' % (tmp_folder, sim_results_file))
         sim_id = sim_results_file.replace('.zip', '')
         target_folder = '%s/%s' % (tmp_folder, sim_id)
 
         logger.info('Simulation %s: Data management starting' % sim_id)
+        id_user, ts = sim_id.split('_')
 
         # Extract the data in the tmp folder
         os.mkdir(target_folder)
         with zipfile.ZipFile('%s/%s' % (tmp_folder, sim_results_file), 'r') as zip_ref:
             zip_ref.extractall(target_folder)
 
+        logger.info('Simulation %s: DB update' % sim_id)
+
+        # Get the main results
+        main_results = json.loads(open('%s/main_results.json' % target_folder).read())
+
         # Copy the files results
         logger.info('Simulation %s: Files copy' % sim_id)
         shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/input-csv')
         shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/json-input-pars')
-        shutil.copy('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
-        shutil.copy('%s/output-bsize/%s.csv' % (target_folder, sim_id), 'static/output-bsize')
-        shutil.copy('%s/output-df/%s.csv' % (target_folder, sim_id), 'static/output-df')
-        shutil.copy('%s/plot/%s.png' % (target_folder, sim_id), 'static/plot')
-        shutil.copy('%s/plot/%s_charge_profile.png' % (target_folder, sim_id), 'static/plot')
         shutil.copy('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
 
-        # Insert the main results in the database
-        logger.info('Simulation %s: DB update' % sim_id)
-        main_results = json.loads(open('%s/main_results.json' % target_folder).read())
+        if 'error' not in main_results.keys():
+            shutil.copy('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
+            shutil.copy('%s/output-bsize/%s.csv' % (target_folder, sim_id), 'static/output-bsize')
+            shutil.copy('%s/output-df/%s.csv' % (target_folder, sim_id), 'static/output-df')
+            shutil.copy('%s/plot/%s.png' % (target_folder, sim_id), 'static/plot')
+            shutil.copy('%s/plot/%s_charge_profile.png' % (target_folder, sim_id), 'static/plot')
 
-        id_user, ts = sim_id.split('_')
+        # Insert the main results in the database
         update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
                         "WHERE id_user = ? and  created_at = ?;")
         data_to_update = (main_results['strRoutes'],
@@ -118,8 +127,12 @@ if __name__ == "__main__":
         ts = int(sim_id.split('_')[1])
         dt = datetime.datetime.fromtimestamp(ts)
         dt_str = dt.strftime('%Y-%m-%d %H:%M:%S')
-        text = ('Dear user,<br>the simulation you launched at %s is now completed and its results available at '
-                '<a href="https://pvxte.isaac.supsi.ch">PVXTE web tool</a>') % dt_str
+        if 'error' not in main_results.keys():
+            text = ('Dear user,<br>the simulation you launched at %s is now completed and its results available at '
+                    '<a href="https://pvxte.isaac.supsi.ch">PVXTE web tool</a>') % dt_str
+        else:
+            text = ('Dear user,<br>unfortunately the simulation you launched at %s is unfeasible and no results '
+                    'are available at <a href="https://pvxte.isaac.supsi.ch">PVXTE web tool</a><br>') % dt_str
 
         try:
             smtp_server = smtplib.SMTP(cfg['email']['host'], cfg['email']['port'])
