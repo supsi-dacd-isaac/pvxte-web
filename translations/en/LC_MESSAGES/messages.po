@@ -517,3 +517,8 @@ msgstr ""
 #: templates/detail.html:129
 msgid "TTW emissions saved (diesel comparison)"
 msgstr ""
+
+#: templates/index.html:54
+msgid "Unfeasible simulation"
+msgstr ""
+

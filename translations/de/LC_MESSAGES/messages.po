@@ -518,3 +518,7 @@ msgstr "Neue Firma"
 #: templates/detail.html:129
 msgid "TTW emissions saved (diesel comparison)"
 msgstr "Eingesparte TTW-Emissionen (Dieselvergleich)"
+
+#: templates/index.html:54
+msgid "Unfeasible simulation"
+msgstr "Nicht durchführbare Simulation"
