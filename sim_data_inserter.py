@@ -102,15 +102,19 @@ if __name__ == "__main__":
             shutil.copy('%s/plot/%s.png' % (target_folder, sim_id), 'static/plot')
             shutil.copy('%s/plot/%s_charge_profile.png' % (target_folder, sim_id), 'static/plot')
 
-        # Insert the main results in the database
-        update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
-                        "WHERE id_user = ? and  created_at = ?;")
-        data_to_update = (main_results['strRoutes'],
-                          json.dumps(main_results['capexPars']),
-                          json.dumps(main_results['opexPars']),
-                          json.dumps(main_results['chargingData']),
-                          int(id_user),
-                          int(ts))
+            # Insert the main results in the database
+            update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
+                            "WHERE id_user = ? and  created_at = ?;")
+            data_to_update = (main_results['strRoutes'],
+                              json.dumps(main_results['capexPars']),
+                              json.dumps(main_results['opexPars']),
+                              json.dumps(main_results['chargingData']),
+                              int(id_user),
+                              int(ts))
+        else:
+            # Insert the main results in the database
+            update_query = ("UPDATE sim SET line = ? WHERE id_user = ? and  created_at = ?;")
+            data_to_update = (main_results['strRoutes'], int(id_user), int(ts))
         cursor.execute(update_query, data_to_update)
         conn.commit()
 
