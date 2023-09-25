@@ -4,55 +4,50 @@
     <nav class="navbar navbar-expand-lg navbar-light">
         <ul class="navbar-nav">
               <li class="nav-item active">
-                <a class="nav-link"><h3>{{ gettext('New bus model') }}</h3></a>
+                <a class="nav-link"><h3>{{ gettext('New bus model') }} - {{ bus_default_pars['length']|int }} {{ gettext('meters') }}</h3></a>
               </li>
         </ul>
     </nav>
     <form method="post" enctype = "multipart/form-data">
+        <input type="hidden" class="form-control-sm" name="bus_type" value="{{ bus_default_pars['bus_type'] }}">
         <fieldset>
             <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
                         <td>{{ gettext('Name') }}</td>
-                        <td><input type="text" class="form-control-sm" name="bus_name" value=""></td>
+                        <td><input type="text" class="form-control-sm" name="bus_name" value="{{ gettext('New') }}-{{ gettext('bus') }}-{{ bus_default_pars['length']|int }}m"></td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Bus type') }}</td>
-                        <td>
-                            <select class="fixed-select" name="bus_type">
-                                {% for abm in available_buses_models %}
-                                    <option value="{{ abm }}">{{ abm }}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>{{ gettext('Maximum passengers capacity') }}</td>
-                        <td><input type="text" class="form-control-sm" name="max_pass_cap" value="20"></td>
+                        <td>{{ gettext('Length') }}</td>
+                        <td>{{ bus_default_pars['length'] }} m</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Minimum required battery packs') }}</td>
-                        <td><input type="text" class="form-control-sm" name="min_required_batt_packs" value="1"></td>
+                        <td><input type="text" class="form-control-sm" name="min_required_batt_packs" value="{{ bus_default_pars['min_required_batt_packs'] }}"></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Maximum allowed battery packs') }}</td>
-                        <td><input type="text" class="form-control-sm" name="max_allowed_batt_packs" value="1"></td>
+                        <td><input type="text" class="form-control-sm" name="max_allowed_batt_packs" value="{{ bus_default_pars['max_allowed_batt_packs'] }}"></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Capacity of a battery pack') }}</td>
-                        <td><input type="text" class="form-control-sm" name="batt_pack_capacity" value="1">&nbsp;[kWh]</td>
+                        <td><input type="text" class="form-control-sm" name="batt_pack_capacity" value="{{ bus_default_pars['batt_pack_capacity'] }}">&nbsp;kWh</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Empty weight of a bus without battery') }}</td>
-                        <td><input type="text" class="form-control-sm" name="empty_bus_weight" value="1">&nbsp;[kg]</td>
+                        <td><input type="text" class="form-control-sm" name="empty_bus_weight" value="{{ bus_default_pars['weight'] }}">&nbsp;kg</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Maximum passengers capacity') }}</td>
+                        <td><input type="text" class="form-control-sm" name="max_pass_cap" value="{{ bus_default_pars['max_capacity'] }}"></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Weight of a battery pack') }}</td>
-                        <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="1">&nbsp;[kg]</td>
+                        <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="{{ bus_default_pars['batt_pack_weight'] }}">&nbsp;kg</td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Cost') }}:</td>
-                        <td><input type="text" class="form-control-sm" name="cost" value="400000">&nbsp;[CHF]</td>
+                        <td>{{ gettext('Cost') }}</td>
+                        <td><input type="text" class="form-control-sm" name="cost" value="400000">&nbsp;CHF</td>
                     </tr>
                     <tr >
                         <td class="center-align-cell" colspan="2"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('You are inserting a new bus model! Are you sure?') }}')">{{ gettext('Submit') }}</button></td>

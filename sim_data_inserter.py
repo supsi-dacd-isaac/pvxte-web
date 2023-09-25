@@ -93,11 +93,11 @@ if __name__ == "__main__":
         logger.info('Simulation %s: Files copy' % sim_id)
         shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/input-csv')
         shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/json-input-pars')
-        shutil.copy('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
 
         update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
                         "WHERE id_user = ? and  created_at = ?;")
         if 'error' not in main_results.keys():
+            shutil.copy('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
             shutil.copy('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
             shutil.copy('%s/output-bsize/%s.csv' % (target_folder, sim_id), 'static/output-bsize')
             shutil.copy('%s/output-df/%s.csv' % (target_folder, sim_id), 'static/output-df')
@@ -115,7 +115,6 @@ if __name__ == "__main__":
             # Update the main results in the database
             data_to_update = (main_results['strRoutes'], 'error', 'error', 'error', int(id_user), int(ts))
 
-        data_to_update = (main_results['strRoutes'], int(id_user), int(ts))
         cursor.execute(update_query, data_to_update)
         conn.commit()
 

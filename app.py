@@ -1,3 +1,4 @@
+import copy
 import csv
 import http
 import os
@@ -136,7 +137,7 @@ def change_user_password(conn, new_data):
 
 def get_buses_models_data(conn):
     cur = conn.cursor()
-    cur.execute("SELECT id, code, name, features FROM bus_model ORDER BY id ASC")
+    cur.execute("SELECT id, code, name, features FROM bus_model WHERE id_user=%i ORDER BY name ASC" % session['id_user'])
     bus_data = []
     for row in cur.fetchall():
         if row[3] is not None:
@@ -292,24 +293,21 @@ def get_terminals(sim_metadata):
     return list(set(terminals))
 
 
-def calculate_default_costs(input_data, length):
+def calculate_default_costs(input_data, bus_model_data):
     # Not discrete costs
     step = 100
+    battery_capacity = float(bus_model_data['max_allowed_batt_packs']) * float(bus_model_data['batt_pack_capacity'])
     default_costs =  {
-        "battery": round((main_cfg['defaultCosts']['battery']['slope'] * float(input_data['battery_capacity']) + main_cfg['defaultCosts']['battery']['intercept']) / step) * step,
+        "battery": round((main_cfg['defaultCosts']['battery']['slope'] * battery_capacity + main_cfg['defaultCosts']['battery']['intercept']) / step) * step,
         "charger": round((main_cfg['defaultCosts']['charger']['slope'] * float(input_data['charger_power']) + main_cfg['defaultCosts']['charger']['intercept']) / step) * step,
         "connection_fee": round((main_cfg['defaultCosts']['connectionFee']['slope'] * float(input_data['fee_connection_power']) + main_cfg['defaultCosts']['connectionFee']['intercept']) / step) * step
     }
 
     # Discrete costs
-    # Basically we have only 3 options (8, 12, 18 meters) (12 is managed by the ELSE case)
-    if length == 8:
-        default_costs['bus'] = main_cfg['defaultCosts']['bus']['8']
-    elif length == 12:
-        default_costs['bus'] = main_cfg['defaultCosts']['bus']['12']
-    elif length == 18:
-        default_costs['bus'] = main_cfg['defaultCosts']['bus']['18']
-    else:
+    try:
+        default_costs['bus'] = main_cfg['defaultCosts']['bus'][bus_model_data['bus_type']]
+    except Exception as e:
+        print('EXCEPTION: %s' % str(e))
         default_costs['bus'] = main_cfg['defaultCosts']['bus']['else']
 
     return default_costs
@@ -366,13 +364,17 @@ def create_new_bus_model(conn, pars):
 
     cur = conn.cursor()
 
+    print('PARS ->', pars)
     with open('static/bus-types/%s.json' % pars['bus_type'], 'r') as f:
         default_pars = json.load(f)
-    pars.update(default_pars)
+    # Update the default with the input values
+    default_pars.update(pars)
 
-    cur.execute("INSERT INTO bus_model (code, name, features) "
-                "VALUES (?, ?, ?)",
-                (pars['bus_type'], bus_name, json.dumps(pars)))
+    print('DEFAULT PARS ->', default_pars)
+
+    cur.execute("INSERT INTO bus_model (id_user, code, name, features) "
+                "VALUES (?, ?, ?, ?)",
+                (session['id_user'], pars['bus_type'], bus_name, json.dumps(default_pars)))
     conn.commit()
     conn.close()
 
@@ -632,7 +634,7 @@ def new_sim_step1():
                 conn.close()
                 return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
                                         id_bus_model=main_input_data['id_bus_model'],
-                                        battery_capacity=main_input_data['battery_capacity'],
+                                        # battery_capacity=main_input_data['battery_capacity'],
                                         charger_power=main_input_data['charger_power'],
                                         fee_connection_power=main_input_data['fee_connection_power'],
                                         flag_company_setup=flag_company_setup))
@@ -674,7 +676,7 @@ def new_sim_step2():
                                        error='Data file has a wrong format! The simulation cannot be run',
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
                                        bus_model_data=bus_model_data,
-                                       default_costs=calculate_default_costs(req_dict, bus_model_data['length']),
+                                       default_costs=calculate_default_costs(req_dict, bus_model_data),
                                        flag_company_setup=flag_company_setup)
         else:
             req_dict = request.args.to_dict()
@@ -683,7 +685,7 @@ def new_sim_step2():
             conn.close()
             return render_template('new_sim_step2.html', data_file=req_dict['data_file'], lines=lines,
                                    days_types=days_types, bus_model_data=bus_model_data,
-                                   default_costs=calculate_default_costs(req_dict, bus_model_data['length']),
+                                   default_costs=calculate_default_costs(req_dict, bus_model_data),
                                    flag_company_setup=flag_company_setup)
     else:
         return redirect(url_for('login'))
@@ -699,9 +701,22 @@ def new_bus_model():
             return redirect(url_for('company_manager'))
         else:
             available_buses_models = get_available_buses_models()
+            args = request.args.to_dict()
+
+            # Get default bus parameters
+            try:
+                with open('static/bus-types/%s.json' % args['l'], 'r') as f:
+                    bus_default_pars = json.load(f)
+                bus_default_pars['bus_type'] = args['l']
+            except Exception as e:
+                print('EXCEPTION: %s' % str(e))
+                with open('static/bus-types/12m.json', 'r') as f:
+                    bus_default_pars = json.load(f)
+                bus_default_pars['bus_type'] = '12m'
+
             return render_template('new_bus_model.html',
                                    available_buses_models=available_buses_models,
-                                   flag_company_setup=flag_company_setup)
+                                   flag_company_setup=flag_company_setup, bus_default_pars=bus_default_pars)
     else:
         return redirect(url_for('login'))
 

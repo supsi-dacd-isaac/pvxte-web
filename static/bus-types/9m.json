@@ -1,27 +1,13 @@
 {
-  "p_ventilation": 500,
-  "p_other": 700,
-  "battery_capacity": 352000,
-
-  "intern_temperature": 18,
-  "orifice_coefficient": 0.5,
-  "orifice_height": 2,
-  "orifice_length": 3,
-  "stop_frequency": 360,
-
+  "batt_pack_capacity": 80,
+  "batt_pack_weight": 600,
+  "min_required_batt_packs": 2,
+  "max_allowed_batt_packs": 4,
+  "battery_efficiency": 0.9,
   "length": 9,
   "width": 2.55,
   "height": 3.48,
   "weight": 16200,
-
-  "n_seats": 40,
   "rolling_resistance": 0.01,
-  "max_capacity": 60,
-  "occupancy": 0.5,
-
-  "drag_coefficient": 0.7,
-  "passage_rate": 0.25,
-
-  "bus_efficiency": 0.82,
-  "battery_efficiency": 0.9
+  "max_capacity": 60
 }

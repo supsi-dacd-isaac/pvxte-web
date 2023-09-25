@@ -13,12 +13,7 @@
         <table class="table">
         <thead>
             <tr>
-                <td colspan="6"><h4>{{ gettext('Buses models list') }}</h4></td>
-                <td colspan="1">
-                    <a href="{{ url_for('new_bus_model') }}">
-                    <button class="btn btn-primary">{{ gettext('Add new') }}</button>
-                    </a>
-                </td>
+                <td colspan="8"><h4>{{ gettext('Buses models list') }}</h4></td>
             </tr>
         </thead>
         <thead>
@@ -29,7 +24,8 @@
                 <td>{{ gettext('Battery pack capacity') }}</td>
                 <td>{{ gettext('Minimum required packs') }}</td>
                 <td>{{ gettext('Maximum allowed packs') }}</td>
-                <td></td>
+                <td>{{ gettext('Weight') }}</td>
+                <td>{{ gettext('Delete') }}</td>
             </tr>
         </thead>
         {% for bus_model in buses_models %}
@@ -41,6 +37,7 @@
                     <td>{{ bus_model['batt_pack_capacity'] }} kWh</td>
                     <td>{{ bus_model['min_required_batt_packs'] }}</td>
                     <td>{{ bus_model['max_allowed_batt_packs'] }}</td>
+                    <td>{{ bus_model['weight'] }} kg</td>
                     <td>
                         <a class="link-dark" href="{{ url_for('company_manager', id_bus_model=bus_model['id'], del='y') }}" onclick="return confirm('{{ gettext('Are you sure you want to delete the bus model?') }}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
@@ -49,8 +46,21 @@
                         </a>
                     </td>
                 </tr>
-            </tbody>
         {% endfor %}
+            <tr>
+                <td colspan="8">
+                <a href="{{ url_for('new_bus_model', l='9m') }}">
+                <button class="btn btn-primary">{{ gettext('Add new') }} - 9 {{ gettext('meters') }}</button>
+                </a>
+                <a href="{{ url_for('new_bus_model', l='12m') }}">
+                <button class="btn btn-primary">{{ gettext('Add new') }} - 12 {{ gettext('meters') }}</button>
+                </a>
+                <a href="{{ url_for('new_bus_model', l='18m') }}">
+                <button class="btn btn-primary">{{ gettext('Add new') }} - 18 {{ gettext('meters') }}</button>
+                </a>
+                </td>
+            </tr>
+        </tbody>
         </table>
         <br>
         <form method="post" enctype = "multipart/form-data">
