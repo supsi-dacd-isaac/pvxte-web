@@ -9,7 +9,6 @@
               </li>
         </ul>
     </nav>
-
     <br>
     <div class="table-container">
         <div class="table-left">
@@ -18,58 +17,82 @@
                     <tr>
                         <td colspan="3">{{ gettext('Buses and batteries sizing') }} </td>
                     </tr>
-                    <tr>
-                        <td>{{ gettext('Bus id') }} :</td>
-                        <td>{{ gettext('Battery size') }} [kWh]:</td>
-                        <td>{{ gettext('Battery packs') }} :</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for bsize in data['df_bsize'].iterrows() %}
-                        <tr>
-                            <td>{{ bsize[1]['Bus id']|int }}</td>
-                            <td>{{ bsize[1]['Battery side (kWh)']|int }}</td>
-                            <td>{{ bsize[1]['Battery packs']|int }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-                <thead>
-                    <tr>
-                        <td colspan="3">{{ gettext('Drivers sizing') }}:</td>
-                    </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="2">{{ gettext('Minimum number') }}:</td>
-                        <td>{{ data['min_num_drivers']|int }}</td>
+                        <td style="text-align: left;">{{ gettext('Capacity of a battery pack') }}</td>
+                        <td>{{ input_bus_model_data['batt_pack_capacity'] }} kWh</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">{{ gettext('Minimum required battery packs') }}</td>
+                        <td>{{ input_bus_model_data['min_required_batt_packs'] }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">{{ gettext('Maximum allowed battery packs') }}</td>
+                        <td>{{ input_bus_model_data['max_allowed_batt_packs'] }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">{{ gettext('Empty weight of a bus without battery') }}</td>
+                        <td>{{ (input_bus_model_data['empty_bus_weight']|int)/1000 }} ton</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;" id="align-left-td">{{ gettext('Length') }}</td>
+                        <td>{{ input_bus_model_data['length'] }} m</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">{{ gettext('Weight of a battery pack') }}</td>
+                        <td>{{ input_bus_model_data['batt_pack_weight'] }} kg</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">{{ gettext('Pantograph maximum charging power') }}</td>
+                        <td>{{ input_pars['p_max'] }} kW</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;">{{ gettext('Maximum charging power at deposit') }}</td>
+                        <td>{{ input_pars['pd_max'] }} kW</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;"><b>{{ gettext('Number of buses') }}</b></td>
+                        <td>{{ bus_data['number'] }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;"><b>{{ gettext('Battery size') }}</b></td>
+                        <td>{{ bus_data['battery_packs_capacity']|int }} kWh</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;"><b>{{ gettext('Battery packs') }}</b></td>
+                        <td>{{ bus_data['battery_packs_number'] }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
-        <div class="table-middle">
+        <div class="table-center">
             <table class="table">
                 <thead>
                 <tr>
-                    <td colspan="3">{{ gettext('Investment costs') }}:</td>
+                    <td colspan="3">{{ gettext('Investment costs') }}</td>
                 </tr>
                 <tr>
-                    <td></td><td>{{ gettext('Cost') }} [CHF]</td><td>{{ gettext('Lifetime') }} [{{ gettext('years') }}]</td>
+                    <td></td><td>{{ gettext('Cost') }} [kCHF]</td><td>{{ gettext('Lifetime') }} [{{ gettext('years') }}]</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{{ gettext('Bus') }}:</td>
-                    <td>{{ capex_features['capex_bus_cost']|int }}</td>
+                    <td style="text-align: left;">{{ gettext('Bus') }}</td>
+                    <td>{{ ((capex_features['capex_bus_cost']|int)/1000)|int }}</td>
                     <td>{{ capex_features['capex_bus_lifetime']|int }}</td>
                 </tr>
                 <tr>
-                    <td>{{ gettext('Battery') }}:</td>
-                    <td>{{ capex_features['capex_battery_cost']|int }}</td>
+                    <td style="text-align: left;">{{ gettext('Battery') }}</td>
+                    <td>{{ ((capex_features['capex_battery_cost']|int)/1000)|int }}</td>
                     <td>{{ capex_features['capex_battery_lifetime']|int }}</td>
                 </tr>
                 <tr>
-                    <td>{{ gettext('Charger') }}:</td>
-                    <td>{{ capex_features['capex_charger_cost']|int }}</td>
+                    <td style="text-align: left;">{{ gettext('Charger') }}</td>
+                    <td>{{ ((capex_features['capex_charger_cost']|int)/1000)|int }}</td>
                     <td>{{ capex_features['capex_charger_lifetime']|int }}</td>
                 </tr>
                 <thead>
@@ -78,15 +101,15 @@
                 </tr>
                 </thead>
                 <tr>
-                    <td>{{ gettext('Interest rate') }}:</td>
+                    <td style="text-align: left;">{{ gettext('Interest rate') }}</td>
                     <td colspan="2">{{ capex_features['capex_interest_rate']|int }} %</td>
                 </tr>
                 <tr>
-                    <td>{{ gettext('Additional fee') }}:</td>
-                    <td colspan="2">{{ capex_features['capex_additional_fee']|int }} CHF</td>
+                    <td style="text-align: left;">{{ gettext('Additional fee') }}</td>
+                    <td colspan="2">{{ ((capex_features['capex_additional_fee']|int)/1000)|int }} CHF</td>
                 </tr>
                 <tr>
-                    <td><b>{{ gettext('CAPEX') }}:</b></td>
+                    <td style="text-align: left;"><b>{{ gettext('CAPEX') }}</b></td>
                     <td colspan="2"><b>{{ capex_features['capex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
                 </tr>
                 </tbody>
@@ -96,28 +119,28 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <td colspan="2">{{ gettext('Operational costs') }}:</td>
+                    <td colspan="2">{{ gettext('Operational costs') }}</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td>{{ gettext('Energy tariff') }}:</td>
+                    <td style="text-align: left;">{{ gettext('Energy tariff') }}</td>
                     <td colspan="2">{{ opex_features['opex_energy_tariff'] }} CHF/kWh</td>
                 </tr>
                 <tr>
-                    <td>{{ gettext('Buses maintenance') }}:</td>
+                    <td style="text-align: left;">{{ gettext('Buses maintenance') }}</td>
                     <td>{{ opex_features['opex_buses_maintainance'] }} CHF/km</td>
                 </tr>
                 <tr>
-                    <td>{{ gettext('Buses efficiency') }}:</td>
+                    <td style="text-align: left;">{{ gettext('Buses efficiency') }}</td>
                     <td>{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>
                 </tr>
                 <tr>
-                    <td>{{ gettext('Annual usage') }}:</td>
+                    <td style="text-align: left;">{{ gettext('Annual usage') }}</td>
                     <td>{{ opex_features['opex_annual_usage'] }} km</td>
                 </tr>
                 <tr>
-                    <td><b>{{ gettext('OPEX') }}:</b></td>
+                    <td style="text-align: left;"><b>{{ gettext('OPEX') }}</b></td>
                     <td colspan="2"><b>{{ opex_features['opex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
                 </tr>
                 </tbody>
@@ -131,22 +154,22 @@
                 </thead>
                 <tbody>
                 <tr>
-                    <td>CO<sub>2</sub>:</td>
+                    <td style="text-align: left;"><b>CO<sub>2</sub></b></td>
                     <td colspan="2">{{ emissions['CO2']['value']|round(2) }} {{ emissions['CO2']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 <tr>
-                    <td>NO<sub>X</sub>:</td>
+                    <td style="text-align: left;"><b>NO<sub>X</sub></b></td>
                     <td colspan="2">{{ emissions['NOx']['value']|round(2) }} {{ emissions['NOx']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 <tr>
-                    <td>PM10:</td>
+                    <td style="text-align: left;"><b>PM10</b></td>
                     <td colspan="2">{{ emissions['PM10']['value']|round(2) }} {{ emissions['PM10']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
-    <br><br><br><br>
+
     <div class="centered-content">
         <table class="table">
             <thead>
