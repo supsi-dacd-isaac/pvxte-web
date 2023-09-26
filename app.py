@@ -222,11 +222,6 @@ def delete_bus_model(conn, bus_model_id):
     conn.execute('DELETE FROM bus_model WHERE id = ?', (bus_model_id,))
     conn.commit()
 
-
-def calc_a(i, t):
-    q = 1 + i
-    return (np.power(q, t) * i) / (np.power(q, t) - 1)
-
 def calculate_emissions(rates, kms):
     return {
         'CO2':  { 'value': rates['CO2']  * 1e-6 * float(kms), 'unit': 'ton'},
@@ -234,6 +229,9 @@ def calculate_emissions(rates, kms):
         'PM10': { 'value': rates['PM10'] * 1e-3 * float(kms), 'unit': 'kg'}
     }
 
+def calc_a(i, t):
+    q = 1 + i
+    return (np.power(q, t) * i) / (np.power(q, t) - 1)
 
 def calculate_economical_parameters(capex_features, opex_features):
     # Calculate the CAPEX costs
@@ -252,7 +250,7 @@ def calculate_economical_parameters(capex_features, opex_features):
     # todo OPEX still to check
     opex_cost = (float(opex_features['opex_buses_maintainance']) +
                  float(opex_features['opex_bus_efficiency_sim']) * float(opex_features['opex_energy_tariff'])) * \
-                float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
+                 float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
 
     return capex_cost, opex_cost
 
@@ -366,10 +364,13 @@ def create_new_bus_model(conn, pars):
 
     with open('static/bus-types/%s.json' % pars['bus_type'], 'r') as f:
         default_pars = json.load(f)
+
     # Update the default with the input values
     default_pars.update(pars)
+    default_pars['capex_battery_cost'] = (main_cfg['defaultCosts']['battery']['slope'] * float(pars['batt_pack_capacity']) +
+                                          main_cfg['defaultCosts']['battery']['intercept'])
+    default_pars['batt_pack_weight'] = main_cfg['weights']['battery'] * float(pars['batt_pack_capacity'])
 
-    print('DEFAULT PARS ->', default_pars)
 
     cur.execute("INSERT INTO bus_model (id_user, code, name, features) "
                 "VALUES (?, ?, ?, ?)",
@@ -384,6 +385,10 @@ def update_bus_model(conn, pars):
     del pars['id']
     del pars['name']
     cur = conn.cursor()
+
+    pars['capex_battery_cost'] = (main_cfg['defaultCosts']['battery']['slope'] * float(pars['batt_pack_capacity']) +
+                                  main_cfg['defaultCosts']['battery']['intercept'])
+    pars['batt_pack_weight'] = main_cfg['weights']['battery'] * float(pars['batt_pack_capacity'])
 
     cur.execute("UPDATE bus_model SET name=?, features=? WHERE id=?",
                 (bus_name, json.dumps(pars), bus_id))
@@ -733,7 +738,6 @@ def new_bus_model():
         else:
             available_buses_models = get_available_buses_models()
             args = request.args.to_dict()
-
             # Get default bus parameters
             try:
                 with open('static/bus-types/%s.json' % args['l'], 'r') as f:
@@ -745,6 +749,7 @@ def new_bus_model():
                     bus_default_pars = json.load(f)
                 bus_default_pars['bus_type'] = '12m'
 
+            bus_default_pars['default_cost'] = main_cfg['defaultCosts']['bus'][args['l']]
             return render_template('new_bus_model.html',
                                    available_buses_models=available_buses_models,
                                    flag_company_setup=flag_company_setup, bus_default_pars=bus_default_pars)

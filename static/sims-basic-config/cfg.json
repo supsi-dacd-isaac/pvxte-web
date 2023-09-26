@@ -9,11 +9,14 @@
         "charger": {"slope":  384.6, "intercept":  33076.9},
         "connectionFee": {"slope":  225.8, "intercept":  1798.4},
         "bus": {
-            "8m":  390000,
+            "9m":  390000,
             "12m": 440000,
             "18m": 690000,
             "else": 500000
         }
+    },
+    "weights": {
+        "battery": 6.85
     },
     "simulatorUrl": "http://localhost:8000/send-sim-data",
     "languages": {

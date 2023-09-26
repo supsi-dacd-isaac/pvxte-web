@@ -13,31 +13,44 @@
         <table class="table">
         <thead>
             <tr>
-                <td colspan="8"><h4>{{ gettext('Buses models list') }}</h4></td>
+                <td colspan="9"><h4>{{ gettext('Buses models list') }}</h4></td>
             </tr>
         </thead>
         <thead>
             <tr>
                 <td>{{ gettext('Name') }}</td>
                 <td>{{ gettext('Length') }}</td>
-                <td>{{ gettext('Cost') }}</td>
-                <td>{{ gettext('Battery pack capacity') }}</td>
-                <td>{{ gettext('Minimum required packs') }}</td>
-                <td>{{ gettext('Maximum allowed packs') }}</td>
                 <td>{{ gettext('Weight') }}</td>
+                <td>{{ gettext('Bus cost') }}</td>
+                <td>{{ gettext('Battery pack capacity') }}</td>
+                <td>{{ gettext('Single pack cost') }}</td>
+                <td>{{ gettext('Min. req. packs') }}</td>
+                <td>{{ gettext('Max. all. packs') }}</td>
                 <td>{{ gettext('Delete') }}</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>[m]</td>
+                <td>[kg]</td>
+                <td>[kCHF]</td>
+                <td>[kWh]</td>
+                <td>[kWh]</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
             </tr>
         </thead>
         {% for bus_model in buses_models %}
             <tbody>
                 <tr>
-                    <td><a class="link-dark" href="{{ url_for('edit_bus_model', id_bus_model=bus_model['id']) }}">{{ bus_model['name'] }}</a></td>
-                    <td>{{ bus_model['length'] }} m</td>
-                    <td>{{ bus_model['cost'][0:-3] }} kCHF</td>
+                    <td style="text-align: left;"><a class="link-dark" href="{{ url_for('edit_bus_model', id_bus_model=bus_model['id']) }}">{{ bus_model['name'] }}</a></td>
+                    <td>{{ bus_model['length']|int }} m</td>
+                    <td>{{ bus_model['weight'] }} kg</td>
+                    <td>{{ bus_model['capex_bus_cost'][0:-3] }} kCHF</td>
                     <td>{{ bus_model['batt_pack_capacity'] }} kWh</td>
+                    <td>{{ (bus_model['capex_battery_cost']/1000)|int }} kCHF</td>
                     <td>{{ bus_model['min_required_batt_packs'] }}</td>
                     <td>{{ bus_model['max_allowed_batt_packs'] }}</td>
-                    <td>{{ bus_model['weight'] }} kg</td>
                     <td>
                         <a class="link-dark" href="{{ url_for('company_manager', id_bus_model=bus_model['id'], del='y') }}" onclick="return confirm('{{ gettext('Are you sure you want to delete the bus model?') }}')">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
@@ -48,7 +61,7 @@
                 </tr>
         {% endfor %}
             <tr>
-                <td colspan="8">
+                <td colspan="9">
                 <a href="{{ url_for('new_bus_model', l='9m') }}">
                 <button class="btn btn-primary">{{ gettext('Add new') }} - 9 {{ gettext('meters') }}</button>
                 </a>

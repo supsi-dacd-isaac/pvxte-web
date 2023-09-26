@@ -18,8 +18,30 @@
                         <td><input type="text" class="form-control-sm" name="bus_name" value="{{ gettext('New') }}-{{ gettext('bus') }}-{{ bus_default_pars['length']|int }}m"></td>
                     </tr>
                     <tr>
+                        <td colspan="2" style="text-align: center;"><b>{{ gettext('Bus section') }}</b></td>
+                    </tr>
+                    <tr>
                         <td>{{ gettext('Length') }}</td>
                         <td>{{ bus_default_pars['length'] }} m</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Bus cost') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_bus_cost" value="{{ bus_default_pars['default_cost'] }}">&nbsp;CHF</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Bus lifetime') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_bus_lifetime" value="12">&nbsp{{ gettext('years') }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Empty weight of a bus without battery') }}</td>
+                        <td><input type="text" class="form-control-sm" name="empty_bus_weight" value="{{ bus_default_pars['weight'] }}">&nbsp;kg</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Maximum passengers capacity') }}</td>
+                        <td><input type="text" class="form-control-sm" name="max_pass_cap" value="{{ bus_default_pars['max_capacity'] }}"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center;"><b>{{ gettext('Batteries section') }}</b></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Minimum required battery packs') }}</td>
@@ -34,20 +56,8 @@
                         <td><input type="text" class="form-control-sm" name="batt_pack_capacity" value="{{ bus_default_pars['batt_pack_capacity'] }}">&nbsp;kWh</td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Empty weight of a bus without battery') }}</td>
-                        <td><input type="text" class="form-control-sm" name="empty_bus_weight" value="{{ bus_default_pars['weight'] }}">&nbsp;kg</td>
-                    </tr>
-                    <tr>
-                        <td>{{ gettext('Maximum passengers capacity') }}</td>
-                        <td><input type="text" class="form-control-sm" name="max_pass_cap" value="{{ bus_default_pars['max_capacity'] }}"></td>
-                    </tr>
-                    <tr>
-                        <td>{{ gettext('Weight of a battery pack') }}</td>
-                        <td><input type="text" class="form-control-sm" name="batt_pack_weight" value="{{ bus_default_pars['batt_pack_weight'] }}">&nbsp;kg</td>
-                    </tr>
-                    <tr>
-                        <td>{{ gettext('Cost') }}</td>
-                        <td><input type="text" class="form-control-sm" name="cost" value="400000">&nbsp;CHF</td>
+                        <td>{{ gettext('Battery lifetime') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_battery_lifetime" value="6">&nbsp{{ gettext('years') }}</td>
                     </tr>
                     <tr >
                         <td class="center-align-cell" colspan="2"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('You are inserting a new bus model! Are you sure?') }}')">{{ gettext('Submit') }}</button></td>
