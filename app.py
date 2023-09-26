@@ -350,10 +350,10 @@ def launch_sim_instance(conn, main_cfg, pars):
 
     if response.status_code == http.HTTPStatus.OK and data_response['error'] is False:
         cur.execute("INSERT INTO sim (id_user, created_at, company, day_type, battery_size, max_charging_power, "
-                    "elevation_deposit, elevation_starting_station, elevation_arrival_station) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "elevation_deposit, elevation_starting_station, elevation_arrival_station, name) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (int(session['id_user']), int(ts), session['company_user'], pars['day_type'],
-                     float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0))
+                     float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0, pars['sim_name']))
         conn.commit()
     return True
 
@@ -364,7 +364,6 @@ def create_new_bus_model(conn, pars):
 
     cur = conn.cursor()
 
-    print('PARS ->', pars)
     with open('static/bus-types/%s.json' % pars['bus_type'], 'r') as f:
         default_pars = json.load(f)
     # Update the default with the input values
@@ -571,9 +570,31 @@ def index():
         sims = get_sims_data(conn)
         conn.close()
 
-        return render_template('index.html', sims=sims, flag_company_setup=flag_company_setup)
+        # Create a list of dictionary
+        sims_list = []
+        for sim in sims:
+            data_sim = {
+                'id': sim['id'],
+                'name': sim['name'],
+                'created_at_dt': sim['created_at_dt'][:-3],
+                'company': sim['company'],
+                'line': sim['line'],
+                'day_type': sim['day_type'],
+                'battery_size': sim['battery_size'],
+                'max_charging_powers': sim['max_charging_powers']
+            }
+
+            if sim['input_pars'] is not None and sim['input_bus_model_data'] is not None:
+                data_sim['input_pars'] = json.loads(sim['input_pars'])
+                data_sim['input_bus_model_data'] = json.loads(sim['input_bus_model_data'])
+            else:
+                data_sim['input_pars'] = None
+                data_sim['input_bus_model_data'] = None
+            sims_list.append(data_sim)
+
+        return render_template('index.html', sims_list=sims_list, flag_company_setup=flag_company_setup)
     else:
-        return render_template('index.html', sims=[], flag_company_setup=False, language='it')
+        return render_template('index.html', sims_list=[], flag_company_setup=False, language='it')
 
 
 @app.route('/detail', methods=('GET', 'POST'))
@@ -584,6 +605,9 @@ def detail():
         sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
         conn.close()
 
+        input_pars = json.loads(sim_metadata[14])
+        input_bus_model_data = json.loads(sim_metadata[15])
+
         df_bsize_filename = 'static/output-bsize/%s_%i.csv' % (session['id_user'], sim_metadata[2])
         df_bsize = pd.read_csv(df_bsize_filename)
 
@@ -593,6 +617,12 @@ def detail():
         data = dict(request.args)
         data['min_num_drivers'] = len(set(df_data["Driver#"]))
         data['df_bsize'] = df_bsize
+
+        bus_data = {
+            'number': len(df_bsize),
+            'battery_packs_capacity': df_bsize.iloc[0]['Battery side (kWh)'],
+            'battery_packs_number': int(df_bsize.iloc[0]['Battery packs'])
+        }
 
         # Calculate CAPEX and OPEX costs
         capex_features = json.loads(sim_metadata[11])
@@ -607,9 +637,10 @@ def detail():
         # Calculate emissions
         ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
-        return render_template('detail.html', sim_metadata=sim_metadata, data=data,
+        return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
                                capex_features=capex_features, opex_features=opex_features,
-                               flag_company_setup=flag_company_setup, emissions=ems)
+                               flag_company_setup=flag_company_setup, emissions=ems, input_pars=input_pars,
+                               input_bus_model_data=input_bus_model_data)
     else:
         return redirect(url_for('login'))
 

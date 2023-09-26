@@ -17,6 +17,10 @@
             <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
+                        <td>{{ gettext('Name') }}</td>
+                        <td><input type="text" class="form-control-sm" name="sim_name" value="sim_{{ bus_model_data['name'] }}"></td>
+                    </tr>
+                    <tr>
                         <td>{{ gettext('Bus model') }}</td>
                         <td>{{ bus_model_data['name'] }}</td>
                     </tr>

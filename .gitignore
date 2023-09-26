@@ -1,6 +1,7 @@
 venv
 .idea
 database.db
+archive/*
 data_files_to_upload/*.csv
 static/input-csv/*.csv
 static/json-input-pars/*.json

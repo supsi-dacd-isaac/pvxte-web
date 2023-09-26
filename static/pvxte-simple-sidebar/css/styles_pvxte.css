@@ -717,6 +717,11 @@ progress {
   color: black;
 }
 
+.error-gray {
+  background-color: lightgray;
+  color: black;
+}
+
 .col {
   flex: 1 0 0%;
 }
@@ -11016,6 +11021,18 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
   align-items: flex-start;
 }
 
+.table-p11,
+.table-p12,
+.table-p13,
+.table-p14 {
+  flex: 1;
+  border: 0px solid #ccc;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
 .table_logos {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -11036,4 +11053,3 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     border-color: transparent;
     text-align: center;
 }
-
