@@ -66,6 +66,7 @@ if __name__ == "__main__":
 
     input_folder = '%s/input' % cfg['inputFolder']
     tmp_folder = '%s/tmp' % cfg['inputFolder']
+    archive_folder = cfg['archiveFolder']
 
     # Delete any other result in the tmp folder
     shutil.rmtree(tmp_folder)
@@ -89,13 +90,16 @@ if __name__ == "__main__":
         # Get the main results
         main_results = json.loads(open('%s/main_results.json' % target_folder).read())
 
+        # Get the inputs
+        inputs = json.loads(open('%s/input-json/%s.json' % (target_folder, sim_id)).read())
+
         # Copy the files results
         logger.info('Simulation %s: Files copy' % sim_id)
         shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/input-csv')
-        shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/json-input-pars')
+        shutil.copy('%s/input-json/%s.json' % (target_folder, sim_id), 'static/json-input-pars')
 
-        update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ? "
-                        "WHERE id_user = ? and  created_at = ?;")
+        update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ?, "
+                        "input_pars = ?, input_bus_model_data = ? WHERE id_user = ? and  created_at = ?;")
         if 'error' not in main_results.keys():
             shutil.copy('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
             shutil.copy('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
@@ -109,14 +113,20 @@ if __name__ == "__main__":
                               json.dumps(main_results['capexPars']),
                               json.dumps(main_results['opexPars']),
                               json.dumps(main_results['chargingData']),
+                              json.dumps(inputs['pars']),
+                              json.dumps(inputs['bus_model_data']),
                               int(id_user),
                               int(ts))
         else:
             # Update the main results in the database
-            data_to_update = (main_results['strRoutes'], 'error', 'error', 'error', int(id_user), int(ts))
+            data_to_update = (main_results['strRoutes'], 'error', 'error', 'error', json.dumps(inputs['pars']),
+                              json.dumps(inputs['bus_model_data']), int(id_user), int(ts))
 
         cursor.execute(update_query, data_to_update)
         conn.commit()
+
+        # Move result file in the archive folder and delete the content in the temporary folder
+        shutil.copy('%s/%s' % (input_folder, sim_results_file), '%s/%s' % (archive_folder, sim_results_file))
 
         # Delete the files and folders from tmp and input directories
         shutil.rmtree(target_folder)
@@ -158,4 +168,3 @@ if __name__ == "__main__":
 
     logger.info('End program')
     conn.close()
-    # print(cfg['email'])
