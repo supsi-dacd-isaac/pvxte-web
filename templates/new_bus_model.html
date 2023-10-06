@@ -30,7 +30,7 @@
                     </tr>
                     <tr>
                         <td>{{ gettext('Bus lifetime') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_bus_lifetime" value="12">&nbsp{{ gettext('years') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_bus_lifetime" value="{{ main_cfg['lifetimes']['bus'] }}">&nbsp{{ gettext('years') }}</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Empty weight of a bus without battery') }}</td>
@@ -57,7 +57,7 @@
                     </tr>
                     <tr>
                         <td>{{ gettext('Battery lifetime') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_battery_lifetime" value="6">&nbsp{{ gettext('years') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_battery_lifetime" value="{{ main_cfg['lifetimes']['battery'] }}">&nbsp{{ gettext('years') }}</td>
                     </tr>
                     <tr >
                         <td class="center-align-cell" colspan="2"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('You are inserting a new bus model! Are you sure?') }}')">{{ gettext('Submit') }}</button></td>

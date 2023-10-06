@@ -29,12 +29,14 @@
                         <td>
                             <table class="table-sm-form">
                                 <tbody>
+                                    <tr>
                                     {% for line in lines %}
-                                        <tr>
+
                                             <td>{{ line }}</td>
                                             <td><input type="checkbox" id="line_{{ line }}" name="line_{{ line }}"></td>
-                                        </tr>
+                                            <td>&nbsp;&nbsp;&nbsp;</td>
                                     {% endfor %}
+                                    </tr>
                                 </tbody>
                             </table>
                         </td>
@@ -50,76 +52,118 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Pantograph maximum charging power') }}</td>
-                        <td><input type="text" class="form-control-sm" name="p_max" value="450">&nbsp[kW]</td>
+                        <td colspan="2" align="center"><h3>{{ gettext('CAPEX section') }}</h3></td>
+                    </tr>                    <tr>
+                        <td colspan="2" align="center"><b>{{ gettext('Bus section') }}</b></td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Maximum charging power at deposit') }}</td>
-                        <td><input type="text" class="form-control-sm" name="pd_max" value="150">&nbsp[kW]</td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" align="center"><b>{{ gettext('CAPEX section') }}</b></td>
-                    </tr>
-                    <tr>
-                        <td>{{ gettext('Bus cost') }}</td>
-                        <td>{{ default_costs['bus'] }}" CHF/bus</td>
+                        <td>{{ gettext('Single bus cost') }}</td>
+                        <td>{{ bus_model_data['capex_bus_cost'][:-3] }} kCHF</td>
+                        <input type="hidden" class="form-control-sm" name="capex_bus_cost" value="{{ bus_model_data['capex_bus_cost'] }}">
                     </tr>
                     <tr>
                         <td>{{ gettext('Bus lifetime') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_bus_lifetime" value="12">&nbsp[{{ gettext('years') }}]</td>
+                        <td>{{ bus_model_data['capex_bus_lifetime'] }}&nbsp{{ gettext('years') }}</td>
+                        <input type="hidden" class="form-control-sm" name="capex_bus_lifetime" value="{{ bus_model_data['capex_bus_lifetime'] }}">
                     </tr>
                     <tr>
-                        <td>{{ gettext('Battery cost') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_battery_cost" value="{{ default_costs['battery'] }}">&nbsp[CHF/{{ gettext('battery') }}]</td>
-                    </tr>
-                        <td>{{ gettext('Battery lifetime') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_battery_lifetime" value="6">&nbsp[{{ gettext('years') }}]</td>
+                        <td>{{ gettext('Single pack battery cost') }}</td>
+                        <td>{{ (bus_model_data['capex_battery_cost']/1000)|int }} kCHF</td>
+                        <input type="hidden" class="form-control-sm" name="capex_battery_cost" value="{{ bus_model_data['capex_battery_cost'] }}">
                     </tr>
                     <tr>
-                        <td>{{ gettext('Charger cost') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_charger_cost" value="{{ default_costs['charger'] }}">&nbsp[CHF/{{ gettext('charger') }}]</td>
+                        <td>{{ gettext('Battery pack lifetime') }}</td>
+                        <td>{{ bus_model_data['capex_battery_lifetime'] }} &nbsp {{ gettext('years') }}</td>
+                        <input type="hidden" class="form-control-sm" name="capex_battery_lifetime" value="{{ bus_model_data['capex_battery_lifetime'] }}">
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Minimum/maximum required/allowed battery packs') }}</td>
+                        <td>{{ bus_model_data['min_required_batt_packs'] }} / {{ bus_model_data['max_allowed_batt_packs'] }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" align="center"><b>{{ gettext('Deposit charger section') }}</b></td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Nominal charging power') }}</td>
+                        <td>{{ step1_data['deposit_nominal_power'] }} kW</td>
+                        <input type="hidden" class="form-control-sm" name="pd_max" value="{{ step1_data['deposit_nominal_power'] }}">
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Single charger cost') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_charger_cost" value="{{ defaults_costs['charger']|int }}"> CHF</td>
                     </tr>
                         <td>{{ gettext('Charger lifetime') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_charger_lifetime" value="10">&nbsp[{{ gettext('years') }}]</td>
+                        <td><input type="text" class="form-control-sm" name="capex_charger_lifetime" value="{{ main_cfg['lifetimes']['depoCharger'] }}"> {{ gettext('years') }}</td>
+                    </tr>
+                    <input type="hidden" class="form-control-sm" name="p_max" value="{{ step1_data['pantograph_nominal_power'] }}">
+                    {% if step1_data['pantograph_nominal_power']|int > 0 %}
+                        <tr>
+                            <td colspan="2" align="center"><b>{{ gettext('Additional chargers section (pantograph or plugin)') }}</b></td>
+                        </tr>
+                        <tr>
+                            <td>{{ gettext('Nominal charging power') }}</td>
+                            <td>{{ step1_data['pantograph_nominal_power'] }} kW</td>
+                        </tr>
+                        <tr>
+                            <td>{{ gettext('Single charger cost') }}</td>
+                            <td><input type="text" class="form-control-sm" name="capex_panto_cost" value="{{ defaults_costs['pantograph'] }}"> CHF/kW</td>
+                        </tr>
+                            <td>{{ gettext('Charger lifetime') }}</td>
+                            <td><input type="text" class="form-control-sm" name="capex_panto_lifetime" value="{{ main_cfg['lifetimes']['pantoCharger'] }}"> {{ gettext('years') }}</td>
+                        </tr>
+                    {% else %}
+                        <input type="hidden" class="form-control-sm" name="capex_panto_cost" value="{{ defaults_costs['pantograph'] }}">
+                        <input type="hidden" class="form-control-sm" name="capex_panto_lifetime" value="{{ main_cfg['lifetimes']['pantoCharger'] }}">
+                    {% endif %}
+                    <tr>
+                        <td colspan="2" align="center"><b>{{ gettext('Connection fee and interest rate') }}</b></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Connection cost') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_additional_fee" value="{{ default_costs['connection_fee'] }}">&nbsp[CHF/{{ gettext('charger') }}]</td>
+                        <td><input type="text" class="form-control-sm" name="capex_additional_fee" value="{{ main_cfg['defaultCosts']['connectionFee'] }}"> CHF/kW</td>
+                    </tr>
+                    </tr>
+                        <td>{{ gettext('Connection lifetime') }}</td>
+                        <td><input type="text" class="form-control-sm" name="capex_additional_fee_lifetime" value="{{ main_cfg['lifetimes']['connectionFee'] }}">{{ gettext('years') }}</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Interest rate') }}</td>
-                        <td><input type="text" class="form-control-sm" name="capex_interest_rate" value="3">&nbsp[%]</td>
+                        <td><input type="text" class="form-control-sm" name="capex_interest_rate" value="{{ main_cfg['defaultCosts']['interestRate'] }}"> %</td>
                     </tr>
                     <tr>
-                        <td colspan="2" align="center"><b>{{ gettext('OPEX section') }}</b></td>
+                        <td colspan="2" align="center"><h3>{{ gettext('OPEX section') }}</h3></td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Buses efficiency') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_buses_efficiency" value="1.15">&nbsp[kWh/km]</td>
+                        <td><input type="text" class="form-control-sm" name="opex_buses_efficiency" value="1.15"> kWh/km</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Buses maintainance') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_buses_maintainance" value="0.21">&nbsp[CHF/km]</td>
+                        <td><input type="text" class="form-control-sm" name="opex_buses_maintainance" value="0.21"> CHF/km</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Charging efficiency') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_charging_efficiency" value="2">&nbsp[%]</td>
+                        <td><input type="text" class="form-control-sm" name="opex_charging_efficiency" value="2"> %</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Annual usage per single bus') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_annual_usage" value="100000">&nbsp[Km/{{ gettext('year') }}]</td>
+                        <td><input type="text" class="form-control-sm" name="opex_annual_usage" value="100000"> km/{{ gettext('year') }}</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Energy tariff') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff" value="0.3">&nbsp[CHF/kWh]</td>
+                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff" value="0.3"> CHF/kWh</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Energy tariff increase per year') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff_yearly_increase" value="1">&nbsp[%]</td>
+                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff_yearly_increase" value="1"> %</td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Power tariff') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_power_tariff" value="0">&nbsp[CHF/kW]</td>
+                        <td>{{ gettext('Additional power tariff') }}</td>
+                        <td><input type="text" class="form-control-sm" name="opex_power_tariff" value="0"> CHF/kW</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Diesel cost for comparison') }}</td>
+                        <td><input type="text" class="form-control-sm" name="opex_diesel_cost_per_liter" value="{{ main_cfg['defaultCosts']['diesel']['consumptionCHPerLiter'] }}"> CHF/L</td>
                     </tr>
                     <tr>
                         <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('Are you sure? You will receive a notification via email when the simulation will be completed') }}')">{{ gettext('Launch Simulation') }}</button></td>

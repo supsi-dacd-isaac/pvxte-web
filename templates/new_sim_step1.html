@@ -13,6 +13,9 @@
             <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
+                        <td colspan="2" style="text-align: center;"><b>{{ gettext('Bus/lines section') }}</b></td>
+                    </tr>
+                    <tr>
                         <td>{{ gettext('Bus model') }}</td>
                         <td>
                             <select class="form-select" name="id_bus_model">
@@ -23,17 +26,30 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Timetable/line file') }}:</td>
-                        <td><input class="form-control" type="file" name="data_file" /></td>
+                        <td>{{ gettext('Timetable/line file') }}&nbsp;&nbsp;
+                            <a class="link-dark" href="{{ url_for('static', filename='profile_file_example/example-profiles-pvxte.csv') }}">
+                            ({{ gettext('Example file') }})
+                            </a>
+                        </td>
+                        <td>
+                            <input class="form-control" type="file" name="data_file" />
+                        </td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Charging power') }}</td>
-                        <td><input type="text" class="form-control-sm" name="charger_power" value="150">&nbsp[kW]</td>
+                        <td colspan="2" style="text-align: center;"><b>{{ gettext('Nominal charging power section') }}</b></td>
                     </tr>
                     <tr>
-                        <td>{{ gettext('Fee connection power') }}</td>
-                        <td><input type="text" class="form-control-sm" name="fee_connection_power" value="250">&nbsp[kW]</td>
+                        <td>{{ gettext('Single charger in the deposit') }}</td>
+                        <td><input type="text" class="form-control-sm" name="deposit_nominal_power" value="{{ main_cfg['defaultPower']['depoCharger'] }}"> kW</td>
                     </tr>
+                    {% if num_not_depo_chargers > 0 %}
+                        <tr>
+                            <td>{{ gettext('Other charger (pantograph or plugin) not in the deposit') }}</td>
+                            <td><input type="text" class="form-control-sm" name="pantograph_nominal_power" value="{{ main_cfg['defaultPower']['notDepoCharger'] }}"> kW</td>
+                        </tr>
+                    {% else %}
+                        <input type="hidden" class="form-control-sm" name="pantograph_nominal_power" value="0">
+                    {% endif %}
                     <tr>
                         <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary">{{ gettext('Go to step 2') }}</button></td>
                     </tr>
