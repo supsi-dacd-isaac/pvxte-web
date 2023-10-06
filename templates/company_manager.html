@@ -136,9 +136,17 @@
             {% for terminal_data in terminals_data %}
                 <tbody>
                     <tr>
-                        <td>{{ terminal_data['name'] }}</td>
+                        <td style="text-align: left;">{{ terminal_data['name'] }}</td>
                         <td>{{ terminal_data['elevation']|int }}</td>
-                        <td>{{ terminal_data['is_charging_station'] }}</td>
+                        <td>
+                            {% if terminal_data['is_charging_station'] == 'depo_charger' %}
+                                {{ gettext('Plugin charger station at deposit') }}
+                            {% elif terminal_data['is_charging_station'] == 'not_depo_charger' %}
+                                {{ gettext('Charger (e.g. pantograph, plugin)') }}
+                            {% else %}
+                                {{ gettext('None') }}
+                            {% endif %}
+                        </td>
                     </tr>
                 </tbody>
             {% endfor %}
