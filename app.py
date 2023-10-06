@@ -14,6 +14,7 @@ import requests
 import numpy as np
 import pandas as pd
 import networkx as nx
+import plotly.graph_objs as go
 
 from collections import defaultdict
 from cryptography.fernet import Fernet
@@ -46,6 +47,19 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def get_not_depo_charging_terminals_ids(terminals_metadata, terminals_selected):
+    ids = []
+    for terminal_selected in terminals_selected:
+        if terminals_metadata[terminal_selected]['is_charging_station'] == 'not_depo_charger':
+            ids.append(terminals_metadata[terminal_selected]['id'])
+    return ids
+
+def get_all_not_depo_charging_terminals_ids(terminals_metadata):
+    no_depo_chargers = {}
+    for k in terminals_metadata.keys():
+        if terminals_metadata[k]['is_charging_station'] == 'not_depo_charger':
+            no_depo_chargers[k] = terminals_metadata[k]
+    return no_depo_chargers
 
 def get_key():
     key_file = open('key.key', 'rb')
@@ -233,26 +247,113 @@ def calc_a(i, t):
     q = 1 + i
     return (np.power(q, t) * i) / (np.power(q, t) - 1)
 
-def calculate_economical_parameters(capex_features, opex_features):
-    # Calculate the CAPEX costs
+def get_total_number_batteries_packs(capex_number_batt_packs):
+    tot_capacity = 0
+    for k in capex_number_batt_packs.keys():
+        tot_capacity += capex_number_batt_packs[k]
+    return tot_capacity
+
+def calculate_economical_parameters(main_cfg, capex_features, opex_features, input_pars, num_pantographs,
+                                    input_bus_model_data):
+    # 1) CAPEX SECTION
+
+    # Calculate the annualization parameter
     interest_rate = float(capex_features['capex_interest_rate']) / 1e2
     a_bus = calc_a(interest_rate, float(capex_features['capex_bus_lifetime']))
     a_batt = calc_a(interest_rate, float(capex_features['capex_battery_lifetime']))
     a_char = calc_a(interest_rate, float(capex_features['capex_charger_lifetime']))
+    a_panto = calc_a(interest_rate, float(capex_features['capex_panto_lifetime']))
+    a_add_fee = calc_a(interest_rate, float(capex_features['capex_additional_fee_lifetime']))
 
-    # todo Capex_additional_fee is the cost for the connection to the grid for a charger (TBD)
-    capex_cost = a_bus * float(capex_features['capex_bus_cost']) * float(capex_features['capex_number_buses']) + \
-                 a_batt * float(capex_features['capex_battery_cost']) * float(capex_features['capex_number_buses']) + \
-                 a_char * float(capex_features['capex_charger_cost']) * float(capex_features['capex_number_chargers']) + \
-                 (float(capex_features['capex_additional_fee']) * float(capex_features['capex_number_chargers']))
+    # CAPEX cost of the buses without the batteries (cost in CHF/bus)
+    capex_bus_cost = float(capex_features['capex_bus_cost']) * float(capex_features['capex_number_buses'])
 
-    # Calculate the OPEX costs
-    # todo OPEX still to check
+    # CAPEX cost of the batteries installed in the buses (cost in CHF/battery pack)
+    num_battery_packs = get_total_number_batteries_packs(capex_features['capex_number_batt_packs'])
+    capex_batt_cost = float(capex_features['capex_battery_cost']) * float(num_battery_packs)
+
+    # CAPEX cost of the deposit charger (cost in CHF/bus because chargers=buses)
+    capex_char_cost = a_char * float(capex_features['capex_charger_cost']) * float(capex_features['capex_number_chargers'])
+
+    # CAPEX cost of other pantograph/plugin chargers (not deposit) (cost in CHF/kW)
+    # Currently it is not possible to differentiate between pantographs and plugin charging stations
+    capex_panto_cost = a_panto * float(capex_features['capex_panto_cost']) * float(input_pars['p_max']) * num_pantographs
+
+    # CAPEX cost of fees (basically the connection one) (cost in CHF/kW)
+    # Maximum power of the deposit (power calculated by the simulation)
+    max_power_deposit = float(capex_features['capex_maximum_power_at_deposit'])
+    # Maximum power of the (not deposit) chargers (power inputted by the user before the simulation (default 450 kW)
+    max_power_panto = float(input_pars['p_max']) * num_pantographs
+    capex_add_fee = a_add_fee * float(capex_features['capex_additional_fee']) * (max_power_deposit + max_power_panto)
+
+    # Calculate the total investment
+    capex_total_cost = capex_bus_cost + capex_batt_cost + capex_char_cost + capex_panto_cost
+
+    # Perform the annualization
+    capex_bus_cost *= a_bus
+    capex_batt_cost *= a_batt
+    capex_char_cost *= a_char
+    capex_panto_cost *= a_panto
+
+    # Get the total annualized capex
+    capex_cost = capex_bus_cost + capex_batt_cost + capex_char_cost + capex_panto_cost + capex_add_fee
+
+    # Get the total cost for the diesel
+    diesel_cost_single_bus = (main_cfg['defaultCosts']['diesel']['investment']['slope'] * float(input_bus_model_data['length']) +
+                              main_cfg['defaultCosts']['diesel']['investment']['intercept'])
+    capex_total_cost_diesel = diesel_cost_single_bus * float(capex_features['capex_number_buses'])
+    capex_cost_diesel = a_bus * capex_total_cost_diesel
+
+    # 2) OPEX SECTION
+
+    # Calculate the OPEX costs for the electrical buses
     opex_cost = (float(opex_features['opex_buses_maintainance']) +
                  float(opex_features['opex_bus_efficiency_sim']) * float(opex_features['opex_energy_tariff'])) * \
                  float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
 
-    return capex_cost, opex_cost
+    # Calculate the OPEX costs for the diesel buses
+    # CHF/y = (0.02 x [length bus] + 0.1918) x [total km per year] x 1.6 [CHF/liter, user editable]
+    m_cons = main_cfg['defaultCosts']['diesel']['opex']['consumption']['m']
+    q_cons = main_cfg['defaultCosts']['diesel']['opex']['consumption']['q']
+    opex_cost_consumption_diesel = (m_cons * float(input_bus_model_data['length']) + q_cons) * float(input_pars['opex_annual_usage']) * float(input_pars['opex_diesel_cost_per_liter'])
+    opex_cost_consumption_diesel *= float(capex_features['capex_number_buses'])
+    # CHF/y = (0.02 x [length bus] + 0.14) x [total km per year]
+    m_mant = main_cfg['defaultCosts']['diesel']['opex']['maintenance']['m']
+    q_mant = main_cfg['defaultCosts']['diesel']['opex']['maintenance']['q']
+    opex_cost_maintenance_diesel = (m_mant * float(input_bus_model_data['length']) + q_mant) * float(input_pars['opex_annual_usage'])
+    opex_cost_maintenance_diesel *= float(capex_features['capex_number_buses'])
+    opex_cost_diesel = opex_cost_consumption_diesel + opex_cost_maintenance_diesel
+
+
+    capex_opex_years = []
+    capex_opex_cost_at_year = []
+    capex_opex_cost_at_year_diesel = []
+    for i in range(0, main_cfg['defaultCosts']['investmentPeriod']+1):
+        ye = opex_cost * i + capex_total_cost
+        yd = opex_cost_diesel * i + capex_total_cost_diesel
+        capex_opex_years.append(i)
+        capex_opex_cost_at_year.append(round(ye/1e3))
+        capex_opex_cost_at_year_diesel.append(round(yd/1e3))
+
+    capex_opex_costs = {
+        "capex_bus_cost":  capex_bus_cost/1e3,
+        "capex_batt_cost": capex_batt_cost/1e3,
+        "capex_depo_charger_cost": capex_char_cost/1e3,
+        "capex_not_depo_charger_cost": capex_panto_cost/1e3,
+        "capex_add_fee": capex_add_fee/1e3,
+        "capex_total_cost": capex_total_cost/1e3,
+        "capex_total_cost_diesel": capex_total_cost_diesel/1e3,
+        "capex_cost": capex_cost/1e3,
+        "capex_cost_diesel": capex_cost_diesel/1e3,
+        "opex_cost": opex_cost/1e3,
+        "opex_cost_diesel": opex_cost_diesel/1e3,
+        "opex_cost_consumption_diesel": opex_cost_consumption_diesel/1e3,
+        "opex_cost_maintenance_diesel": opex_cost_maintenance_diesel/1e3,
+        "capex_opex_years": capex_opex_years,
+        "capex_opex_cost_at_year": capex_opex_cost_at_year,
+        "capex_opex_cost_at_year_diesel": capex_opex_cost_at_year_diesel
+    }
+    return capex_opex_costs
 
 
 def get_lines_daytypes_from_data_file(sim_file_path):
@@ -291,23 +392,13 @@ def get_terminals(sim_metadata):
     return list(set(terminals))
 
 
-def calculate_default_costs(input_data, bus_model_data):
-    # Not discrete costs
-    step = 100
-    battery_capacity = float(bus_model_data['max_allowed_batt_packs']) * float(bus_model_data['batt_pack_capacity'])
+def calculate_default_costs(input_data):
+    dict_main_input = json.loads(input_data['main_input_data'].replace('\'', '\"'))
+    step = 1e3
     default_costs =  {
-        "battery": round((main_cfg['defaultCosts']['battery']['slope'] * battery_capacity + main_cfg['defaultCosts']['battery']['intercept']) / step) * step,
-        "charger": round((main_cfg['defaultCosts']['charger']['slope'] * float(input_data['charger_power']) + main_cfg['defaultCosts']['charger']['intercept']) / step) * step,
-        "connection_fee": round((main_cfg['defaultCosts']['connectionFee']['slope'] * float(input_data['fee_connection_power']) + main_cfg['defaultCosts']['connectionFee']['intercept']) / step) * step
+        "charger": step*(round((main_cfg['defaultCosts']['charger']['slope'] * float(dict_main_input['deposit_nominal_power']) + main_cfg['defaultCosts']['charger']['intercept'])/step, 0)),
+        "pantograph": main_cfg['defaultCosts']['pantograph']
     }
-
-    # Discrete costs
-    try:
-        default_costs['bus'] = main_cfg['defaultCosts']['bus'][bus_model_data['bus_type']]
-    except Exception as e:
-        print('EXCEPTION: %s' % str(e))
-        default_costs['bus'] = main_cfg['defaultCosts']['bus']['else']
-
     return default_costs
 
 
@@ -348,10 +439,11 @@ def launch_sim_instance(conn, main_cfg, pars):
 
     if response.status_code == http.HTTPStatus.OK and data_response['error'] is False:
         cur.execute("INSERT INTO sim (id_user, created_at, company, day_type, battery_size, max_charging_power, "
-                    "elevation_deposit, elevation_starting_station, elevation_arrival_station, name) "
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "elevation_deposit, elevation_starting_station, elevation_arrival_station, name, "
+                    "input_terminals_selected, input_terminals_metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (int(session['id_user']), int(ts), session['company_user'], pars['day_type'],
-                     float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0, pars['sim_name']))
+                     float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0, pars['sim_name'],
+                     json.dumps(terminals_selected), json.dumps(terminals_metadata)))
         conn.commit()
     return True
 
@@ -625,27 +717,33 @@ def detail():
 
         bus_data = {
             'number': len(df_bsize),
-            'battery_packs_capacity': df_bsize.iloc[0]['Battery side (kWh)'],
+            'battery_packs_capacity': df_bsize.iloc[0]['Battery size (kWh)'],
             'battery_packs_number': int(df_bsize.iloc[0]['Battery packs'])
         }
 
         # Calculate CAPEX and OPEX costs
         capex_features = json.loads(sim_metadata[11])
         opex_features = json.loads(sim_metadata[12])
+        input_bus_model_data = json.loads(sim_metadata[15])
+        terminals_selected = json.loads(sim_metadata[17])
+        terminals_metadata = json.loads(sim_metadata[18])
+        panto_ids = get_not_depo_charging_terminals_ids(terminals_metadata, terminals_selected)
+
         if 'opex_bus_efficiency_sim' not in opex_features.keys():
             opex_features['opex_bus_efficiency_sim'] = float(opex_features['opex_buses_efficiency'])
 
-        capex, opex = calculate_economical_parameters(capex_features=capex_features, opex_features=opex_features)
-        capex_features['capex_cost'] = int(capex / 1e3)
-        opex_features['opex_cost'] = int(opex / 1e3)
+        capex_opex_costs = calculate_economical_parameters(main_cfg=main_cfg, capex_features=capex_features,
+                                                           opex_features=opex_features, input_pars=input_pars,
+                                                           num_pantographs=len(panto_ids),
+                                                           input_bus_model_data=input_bus_model_data)
 
         # Calculate emissions
         ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
         return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
                                capex_features=capex_features, opex_features=opex_features,
-                               flag_company_setup=flag_company_setup, emissions=ems, input_pars=input_pars,
-                               input_bus_model_data=input_bus_model_data)
+                               capex_opex_costs=capex_opex_costs, flag_company_setup=flag_company_setup, emissions=ems,
+                               input_pars=input_pars, input_bus_model_data=input_bus_model_data)
     else:
         return redirect(url_for('login'))
 
@@ -671,19 +769,24 @@ def new_sim_step1():
                 return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
                                         id_bus_model=main_input_data['id_bus_model'],
                                         # battery_capacity=main_input_data['battery_capacity'],
-                                        charger_power=main_input_data['charger_power'],
-                                        fee_connection_power=main_input_data['fee_connection_power'],
+                                        main_input_data=main_input_data,
                                         flag_company_setup=flag_company_setup))
             else:
                 buses_models = get_buses_models_data(conn)
+                tm = get_terminals_metadata_dict(conn)
+                not_depo_ch_terms = get_all_not_depo_charging_terminals_ids(tm)
                 conn.close()
                 return render_template('new_sim_step1.html', error='No file uploaded',
-                                       buses_models=buses_models, flag_company_setup=flag_company_setup)
+                                       buses_models=buses_models, flag_company_setup=flag_company_setup,
+                                       main_cfg=main_cfg, num_not_depo_chargers=len(not_depo_ch_terms.keys()))
         else:
             buses_models = get_buses_models_data(conn)
+            tm = get_terminals_metadata_dict(conn)
+            not_depo_ch_terms = get_all_not_depo_charging_terminals_ids(tm)
             conn.close()
             return render_template('new_sim_step1.html', buses_models=buses_models,
-                                   flag_company_setup=flag_company_setup)
+                                   flag_company_setup=flag_company_setup, main_cfg=main_cfg,
+                                   num_not_depo_chargers=len(not_depo_ch_terms.keys()))
     else:
         return redirect(url_for('login'))
 
@@ -705,24 +808,26 @@ def new_sim_step2():
                 print('EXCEPTION: %s' % str(e))
                 conn = get_db_connection()
                 req_dict = request.args.to_dict()
+                step1_data = json.loads(req_dict['main_input_data'].replace('\'', '\"'))
                 lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
                 bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
                 conn.close()
                 return render_template('new_sim_step2.html',
                                        error='Data file has a wrong format! The simulation cannot be run',
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
-                                       bus_model_data=bus_model_data,
-                                       default_costs=calculate_default_costs(req_dict, bus_model_data),
-                                       flag_company_setup=flag_company_setup)
+                                       bus_model_data=bus_model_data, step1_data=step1_data,
+                                       flag_company_setup=flag_company_setup, main_cfg=main_cfg)
         else:
             req_dict = request.args.to_dict()
+            step1_data = json.loads(req_dict['main_input_data'].replace('\'', '\"'))
             lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
             bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
+            defaults_costs = calculate_default_costs(req_dict)
             conn.close()
             return render_template('new_sim_step2.html', data_file=req_dict['data_file'], lines=lines,
-                                   days_types=days_types, bus_model_data=bus_model_data,
-                                   default_costs=calculate_default_costs(req_dict, bus_model_data),
-                                   flag_company_setup=flag_company_setup)
+                                   days_types=days_types, bus_model_data=bus_model_data, step1_data=step1_data,
+                                   flag_company_setup=flag_company_setup, main_cfg=main_cfg,
+                                   defaults_costs=defaults_costs)
     else:
         return redirect(url_for('login'))
 
@@ -751,7 +856,7 @@ def new_bus_model():
 
             bus_default_pars['default_cost'] = main_cfg['defaultCosts']['bus'][args['l']]
             return render_template('new_bus_model.html',
-                                   available_buses_models=available_buses_models,
+                                   available_buses_models=available_buses_models, main_cfg=main_cfg,
                                    flag_company_setup=flag_company_setup, bus_default_pars=bus_default_pars)
     else:
         return redirect(url_for('login'))

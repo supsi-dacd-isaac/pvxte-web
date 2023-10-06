@@ -21,96 +21,134 @@
                 <tbody>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Capacity of a battery pack') }}</td>
-                        <td>{{ input_bus_model_data['batt_pack_capacity'] }} kWh</td>
+                        <td style="text-align: right;">{{ input_bus_model_data['batt_pack_capacity'] }} kWh</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Minimum required battery packs') }}</td>
-                        <td>{{ input_bus_model_data['min_required_batt_packs'] }}</td>
+                        <td style="text-align: right;">{{ input_bus_model_data['min_required_batt_packs'] }}</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Maximum allowed battery packs') }}</td>
-                        <td>{{ input_bus_model_data['max_allowed_batt_packs'] }}</td>
+                        <td style="text-align: right;">{{ input_bus_model_data['max_allowed_batt_packs'] }}</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Empty weight of a bus without battery') }}</td>
-                        <td>{{ (input_bus_model_data['empty_bus_weight']|int)/1000 }} ton</td>
+                        <td style="text-align: right;">{{ (input_bus_model_data['empty_bus_weight']|int)/1000 }} ton</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;" id="align-left-td">{{ gettext('Length') }}</td>
-                        <td>{{ input_bus_model_data['length'] }} m</td>
+                        <td style="text-align: right;">{{ input_bus_model_data['length'] }} m</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Weight of a battery pack') }}</td>
-                        <td>{{ input_bus_model_data['batt_pack_weight'] }} kg</td>
+                        <td style="text-align: right;">{{ input_bus_model_data['batt_pack_weight'] }} kg</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Pantograph maximum charging power') }}</td>
-                        <td>{{ input_pars['p_max'] }} kW</td>
+                        <td style="text-align: right;">{{ input_pars['p_max'] }} kW</td>
                     </tr>
                     <tr>
                         <td style="text-align: left;">{{ gettext('Maximum charging power at deposit') }}</td>
-                        <td>{{ input_pars['pd_max'] }} kW</td>
+                        <td style="text-align: right;">{{ input_pars['pd_max'] }} kW</td>
                     </tr>
                     <tr>
                         <td colspan="2"></td>
                     </tr>
                     <tr>
                         <td style="text-align: left;"><b>{{ gettext('Number of buses') }}</b></td>
-                        <td>{{ bus_data['number'] }}</td>
+                        <td style="text-align: right;">{{ bus_data['number'] }}</td>
                     </tr>
                     <tr>
-                        <td style="text-align: left;"><b>{{ gettext('Battery size') }}</b></td>
-                        <td>{{ bus_data['battery_packs_capacity']|int }} kWh</td>
+                        <td style="text-align: left;"><b>{{ gettext('Battery packs for each bus') }}</b></td>
+                        <td style="text-align: right;">{{ bus_data['battery_packs_number'] }}</td>
                     </tr>
                     <tr>
-                        <td style="text-align: left;"><b>{{ gettext('Battery packs') }}</b></td>
-                        <td>{{ bus_data['battery_packs_number'] }}</td>
+                        <td style="text-align: left;"><b>{{ gettext('Total capacity of a bus') }}</b></td>
+                        <td style="text-align: right;">{{ bus_data['battery_packs_capacity']|int }} kWh</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;"><b>{{ gettext('Minimum number of drivers') }}</b></td>
+                        <td style="text-align: right;">{{ data['min_num_drivers'] }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
         <div class="table-center">
             <table class="table">
+<!--                <thead>-->
+<!--                <tr>-->
+<!--                    <td colspan="3">{{ gettext('Investment costs') }}</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td></td><td>{{ gettext('Cost') }} [kCHF/{{ gettext('unit') }}]</td><td>{{ gettext('Lifetime') }} [{{ gettext('years') }}]</td>-->
+<!--                </tr>-->
+<!--                </thead>-->
+<!--                <tbody>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Bus') }}</td>-->
+<!--                    <td>{{ ((capex_features['capex_bus_cost']|int)/1000)|int }}</td>-->
+<!--                    <td>{{ capex_features['capex_bus_lifetime']|int }}</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Battery') }}</td>-->
+<!--                    <td>{{ ((capex_features['capex_battery_cost']|int)/1000)|int }}</td>-->
+<!--                    <td>{{ capex_features['capex_battery_lifetime']|int }}</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Deposit charger') }}</td>-->
+<!--                    <td>{{ ((capex_features['capex_charger_cost']|int)/1000)|int }}</td>-->
+<!--                    <td>{{ capex_features['capex_charger_lifetime']|int }}</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Pantographs') }}</td>-->
+<!--                    <td>{{ ((capex_features['capex_panto_cost']|int)/1)|int }}</td>-->
+<!--                    <td>{{ capex_features['capex_panto_lifetime']|int }}</td>-->
+<!--                </tr>-->
+<!--                </tbody>-->
+<!--                <thead>-->
                 <thead>
                 <tr>
-                    <td colspan="3">{{ gettext('Investment costs') }}</td>
-                </tr>
-                <tr>
-                    <td></td><td>{{ gettext('Cost') }} [kCHF]</td><td>{{ gettext('Lifetime') }} [{{ gettext('years') }}]</td>
+                    <td colspan="3">{{ gettext('Investment costs') }} [kCHF/{{ gettext('year')}}] ({{ gettext('rate') }}: {{ capex_features['capex_interest_rate']|int }}%)</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Bus') }}</td>
-                    <td>{{ ((capex_features['capex_bus_cost']|int)/1000)|int }}</td>
-                    <td>{{ capex_features['capex_bus_lifetime']|int }}</td>
+                    <td colspan="2" style="text-align: left;">{{ gettext('Buses') }}</td>
+                    <td style="text-align: right;">{{ ((capex_opex_costs['capex_bus_cost']|int)/1)|int }}</td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Battery') }}</td>
-                    <td>{{ ((capex_features['capex_battery_cost']|int)/1000)|int }}</td>
-                    <td>{{ capex_features['capex_battery_lifetime']|int }}</td>
+                    <td colspan="2" style="text-align: left;">{{ gettext('Batteries') }}</td>
+                    <td style="text-align: right;">{{ ((capex_opex_costs['capex_batt_cost']|int)/1)|int }}</td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Charger') }}</td>
-                    <td>{{ ((capex_features['capex_charger_cost']|int)/1000)|int }}</td>
-                    <td>{{ capex_features['capex_charger_lifetime']|int }}</td>
+                    <td colspan="2" style="text-align: left;">{{ gettext('Deposit charger') }}
+                    <td style="text-align: right;">{{ ((capex_opex_costs['capex_depo_charger_cost']|int)/1)|int }}</td>
                 </tr>
-                <thead>
-                <tr>
-                    <td colspan="3"></td>
-                </tr>
-                </thead>
-                <tr>
-                    <td style="text-align: left;">{{ gettext('Interest rate') }}</td>
-                    <td colspan="2">{{ capex_features['capex_interest_rate']|int }} %</td>
+               <tr>
+                    <td colspan="2" style="text-align: left;">{{ gettext('Other chargers (e.g. pantographs)') }}
+                    <td style="text-align: right;">{{ ((capex_opex_costs['capex_not_depo_charger_cost']|int)/1)|int }}</td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Additional fee') }}</td>
-                    <td colspan="2">{{ ((capex_features['capex_additional_fee']|int)/1000)|int }} CHF</td>
+                    <td colspan="2" style="text-align: left;">{{ gettext('Connection fee') }}</td>
+                    <td style="text-align: right;">{{ ((capex_opex_costs['capex_add_fee']|int)/1)|int }}</td>
+                </tr>
+                <tr><td colspan="3"></td></tr>
+                </tbody>
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Interest rate') }}</td>-->
+<!--                    <td colspan="2">{{ capex_features['capex_interest_rate']|int }} %</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Additional fee') }}</td>-->
+<!--                    <td colspan="2">{{ ((capex_features['capex_additional_fee']|int)/1000)|int }} CHF</td>-->
+<!--                </tr>-->
+                <tr>
+                    <td colspan="2" style="text-align: left;"><b>{{ gettext('CAPEX') }}</b></td>
+                    <td style="text-align: right;"><b>{{ capex_opex_costs['capex_cost']|int }}</b></td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;"><b>{{ gettext('CAPEX') }}</b></td>
-                    <td colspan="2"><b>{{ capex_features['capex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
+                    <td colspan="2" style="text-align: left;"><b>{{ gettext('CAPEX') }} ({{ gettext('equivalent diesel buses') }})</b></td>
+                    <td style="text-align: right;"><b>{{ capex_opex_costs['capex_cost_diesel']|int }}</b></td>
                 </tr>
                 </tbody>
             </table>
@@ -125,29 +163,28 @@
                 <tbody>
                 <tr>
                     <td style="text-align: left;">{{ gettext('Energy tariff') }}</td>
-                    <td colspan="2">{{ opex_features['opex_energy_tariff'] }} CHF/kWh</td>
+                    <td style="text-align: right;">{{ opex_features['opex_energy_tariff'] }} CHF/kWh</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;">{{ gettext('Buses maintenance') }}</td>
-                    <td>{{ opex_features['opex_buses_maintainance'] }} CHF/km</td>
+                    <td style="text-align: right;">{{ opex_features['opex_buses_maintainance'] }} CHF/km</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;">{{ gettext('Buses efficiency') }}</td>
-                    <td>{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>
+                    <td style="text-align: right;">{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;">{{ gettext('Annual usage') }}</td>
-                    <td>{{ opex_features['opex_annual_usage'] }} km</td>
+                    <td style="text-align: right;">{{ opex_features['opex_annual_usage'] }} km</td>
                 </tr>
+                <tr><td colspan="3"></td></tr>
                 <tr>
                     <td style="text-align: left;"><b>{{ gettext('OPEX') }}</b></td>
-                    <td colspan="2"><b>{{ opex_features['opex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
+                    <td style="text-align: right;"><b>{{ capex_opex_costs['opex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
                 </tr>
                 </tbody>
                 <thead>
-                <tr>
-                    <td colspan="2"></td>
-                </tr>
+                <tr><td colspan="3"></td></tr>
                 <tr>
                     <td colspan="2">{{ gettext('TTW emissions saved (diesel comparison)') }}:</td>
                 </tr>
@@ -155,75 +192,83 @@
                 <tbody>
                 <tr>
                     <td style="text-align: left;"><b>CO<sub>2</sub></b></td>
-                    <td colspan="2">{{ emissions['CO2']['value']|round(2) }} {{ emissions['CO2']['unit'] }}/{{ gettext('year') }}</td>
+                    <td style="text-align: right;">{{ emissions['CO2']['value']|round(2) }} {{ emissions['CO2']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;"><b>NO<sub>X</sub></b></td>
-                    <td colspan="2">{{ emissions['NOx']['value']|round(2) }} {{ emissions['NOx']['unit'] }}/{{ gettext('year') }}</td>
+                    <td style="text-align: right;">{{ emissions['NOx']['value']|round(2) }} {{ emissions['NOx']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;"><b>PM10</b></td>
-                    <td colspan="2">{{ emissions['PM10']['value']|round(2) }} {{ emissions['PM10']['unit'] }}/{{ gettext('year') }}</td>
+                    <td style="text-align: right;">{{ emissions['PM10']['value']|round(2) }} {{ emissions['PM10']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="centered-content">
-        <table class="table">
-            <thead>
-                <tr>
-                    <td>
-                        <a class="nav-link"><h4>{{ gettext('Plot section') }}:</h4></a>
-                    </td>
-                </tr>
-            </thead>
-            <tbody>
+    <br><br><br><br>
+    <div class="plot-container">
+        <div id="plot" class="plot"></div>
+    </div>
+    <script>
+        var plotDiv = document.getElementById('plot');
+        var data = [
+            {
+                x: {{ capex_opex_costs['capex_opex_years'] | safe }},
+                y: {{ capex_opex_costs['capex_opex_cost_at_year'] | safe }},
+                mode: 'lines+markers',
+                name: '{{ gettext('Electrical') }}',
+                line: {color: 'green'}
+            },
+            {
+                x: {{ capex_opex_costs['capex_opex_years'] | safe }},
+                y: {{ capex_opex_costs['capex_opex_cost_at_year_diesel'] | safe }},
+                mode: 'lines+markers',
+                name: '{{ gettext('Diesel') }}',
+                line: {color: 'red'}
+            }
+        ];
+        var layout = {
+            title: '{{ gettext('Electrical vs. Diesel') }}',
+            xaxis: { title: '{{ gettext('Year') }}' },
+            yaxis: { title: '{{ gettext('Cost') }}' },
+            responsive: true
+        };
+
+        // Create the plot
+        Plotly.newPlot(plotDiv, data, layout);
+    </script>
+
+<!--    <div class="centered-content" id="download">-->
+<!--        <table class="table">-->
+<!--            <tbody>-->
 <!--                <tr>-->
 <!--                    <td>-->
-<!--                        <img src="{{ url_for('static', filename='plot/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.png" style="width:1080px;height:495px;">-->
+<!--                        <a class="nav-link"><h4>{{ gettext('Download section') }}:</h4></a><br>-->
+<!--                    </td>-->
+<!--                    <td><b>{{ gettext('Results') }}:</b></td>-->
+<!--                    <td>-->
+<!--                        <a class="link-dark" href="{{ url_for('static', filename='output-df/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.csv">-->
+<!--                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">-->
+<!--                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>-->
+<!--                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>-->
+<!--                            </svg>-->
+<!--                        </a>-->
+<!--                    </td>-->
+<!--                    <td><b>{{ gettext('Raw data') }}:</b></td>-->
+<!--                    <td>-->
+<!--                        <a class="link-dark" href="{{ url_for('static', filename='output/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.zip">-->
+<!--                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">-->
+<!--                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>-->
+<!--                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>-->
+<!--                            </svg>-->
+<!--                        </a>-->
 <!--                    </td>-->
 <!--                </tr>-->
-<!--                <tr><td></td></tr>-->
-                <tr>
-                    <td>
-                        <img src="{{ url_for('static', filename='plot/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}_charge_profile.png" style="width:1080px;height:495px;">
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <br><br><br><br><br>
-    <div>
-        <table class="table">
-            <tbody>
-                <tr>
-                    <td>
-                        <a class="nav-link"><h4>{{ gettext('Download section') }}:</h4></a><br>
-                    </td>
-                    <td><b>{{ gettext('Results') }}:</b></td>
-                    <td>
-                        <a class="link-dark" href="{{ url_for('static', filename='output-df/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.csv">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                            </svg>
-                        </a>
-                    </td>
-                    <td><b>{{ gettext('Raw data') }}:</b></td>
-                    <td>
-                        <a class="link-dark" href="{{ url_for('static', filename='output/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.zip">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">
-                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
-                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
-                            </svg>
-                        </a>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
     {% endif %}
 
 <footer>

@@ -1,9 +1,9 @@
 terminal_station,elevation_m,is_charging_station
-Depot,230,TRUE
-Chiasso_Stazione,230,FALSE
-Cantine_di_Sotto,200,FALSE
-Crocione,241,FALSE
-Serfontana,267,FALSE
-Seseglio,269,FALSE
-Morbio_Posta,346,FALSE
-Vacallo,317,FALSE
+Depot,230,depo_charger
+Chiasso_Stazione,230,no
+Cantine_di_Sotto,200,not_depo_charger
+Crocione,241,no
+Serfontana,267,no
+Seseglio,269,no
+Morbio_Posta,346,no
+Vacallo,317,no

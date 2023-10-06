@@ -4,16 +4,46 @@
         "chargingAtDeposit": true
     },
     "appSecretKey": "8EuPLSnVQ47U1XcymcUcadLdk9H7P3Cg5tWH5Pc1aj27GtHsFt",
+    "defaultPower": {
+        "notDepoCharger": 450,
+        "depoCharger": 150
+    },
     "defaultCosts": {
-        "battery": {"slope":  350.0, "intercept":  0.0},
-        "charger": {"slope":  384.6, "intercept":  33076.9},
-        "connectionFee": {"slope":  225.8, "intercept":  1798.4},
+        "battery": {
+            "slope": 350.0,
+            "intercept": 0.0
+        },
+        "charger": {
+            "slope": 384.6,
+            "intercept": 33076.9
+        },
+        "diesel": {
+            "investment": {
+                "slope": 25000,
+                "intercept": 50000
+            },
+            "consumptionCHPerLiter": 1.6,
+            "opex": {
+                "consumption": {
+                    "m": 0.02,
+                    "q": 0.1918
+                },
+                "maintenance": {
+                    "m": 0.02,
+                    "q": 0.14
+                }
+            }
+        },
+        "pantograph": 1830,
+        "connectionFee": 100,
+        "interestRate": 3,
         "bus": {
             "9m":  390000,
             "12m": 440000,
             "18m": 690000,
             "else": 500000
-        }
+        },
+        "investmentPeriod": 20
     },
     "weights": {
         "battery": 6.85
@@ -29,6 +59,13 @@
         "CO2": 1155,
         "NOx": 1.1,
         "PM10": 0.015
+    },
+    "lifetimes": {
+        "bus": 12,
+        "battery": 6,
+        "depoCharger": 10,
+        "pantoCharger": 12,
+        "connectionFee": 20
     }
 }
 

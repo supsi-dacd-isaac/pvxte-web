@@ -11053,3 +11053,16 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
     border-color: transparent;
     text-align: center;
 }
+
+.plot-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 30vh;
+}
+.plot {
+  max-width: 100%;
+  height: auto;
+  width: 1000px;
+}

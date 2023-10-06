@@ -138,7 +138,7 @@
                     <tr>
                         <td>{{ terminal_data['name'] }}</td>
                         <td>{{ terminal_data['elevation']|int }}</td>
-                        <td>{% if terminal_data['is_charging_station']|int == 1 %} YES {% endif %}</td>
+                        <td>{{ terminal_data['is_charging_station'] }}</td>
                     </tr>
                 </tbody>
             {% endfor %}
