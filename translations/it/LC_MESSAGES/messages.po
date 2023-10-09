@@ -636,6 +636,10 @@ msgstr "Sei sicuro? Riceverai una notifica via email quando la simulazione sarà
 msgid "Launch Simulation"
 msgstr "Simulazione di lancio"
 
+#: templates/new_sim_step2.html:197
+msgid "Please select at least one line"
+msgstr "Per favore seleziona almeno una linea"
+
 #: templates/signup.html:30 templates/signup.html:32
 msgid "Company"
 msgstr "Azienda"

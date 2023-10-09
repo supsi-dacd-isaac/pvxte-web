@@ -703,7 +703,6 @@ def detail():
         conn.close()
 
         input_pars = json.loads(sim_metadata[14])
-        input_bus_model_data = json.loads(sim_metadata[15])
 
         df_bsize_filename = 'static/output-bsize/%s_%i.csv' % (session['id_user'], sim_metadata[2])
         df_bsize = pd.read_csv(df_bsize_filename)
@@ -725,6 +724,7 @@ def detail():
         capex_features = json.loads(sim_metadata[11])
         opex_features = json.loads(sim_metadata[12])
         input_bus_model_data = json.loads(sim_metadata[15])
+        sim_name = sim_metadata[16]
         terminals_selected = json.loads(sim_metadata[17])
         terminals_metadata = json.loads(sim_metadata[18])
         panto_ids = get_not_depo_charging_terminals_ids(terminals_metadata, terminals_selected)
@@ -741,7 +741,7 @@ def detail():
         ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
         return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
-                               capex_features=capex_features, opex_features=opex_features,
+                               capex_features=capex_features, opex_features=opex_features, sim_name=sim_name,
                                capex_opex_costs=capex_opex_costs, flag_company_setup=flag_company_setup, emissions=ems,
                                input_pars=input_pars, input_bus_model_data=input_bus_model_data)
     else:
@@ -759,24 +759,32 @@ def new_sim_step1():
 
             ts = (datetime.datetime.now(tz=pytz.UTC).timestamp())
             if len(request.files['data_file'].filename) > 0:
-                file_name = '%i_%i.csv' % (session['id_user'], ts)
-                data_file = '/'.join([target, file_name])
-                request.files['data_file'].save(data_file)
+                try:
+                    file_name = '%i_%i.csv' % (session['id_user'], ts)
+                    data_file = '/'.join([target, file_name])
+                    request.files['data_file'].save(data_file)
 
-                main_input_data = request.form.to_dict()
-                lines, days_types = get_lines_daytypes_from_data_file(data_file)
-                conn.close()
-                return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
-                                        id_bus_model=main_input_data['id_bus_model'],
-                                        # battery_capacity=main_input_data['battery_capacity'],
-                                        main_input_data=main_input_data,
-                                        flag_company_setup=flag_company_setup))
+                    main_input_data = request.form.to_dict()
+                    lines, days_types = get_lines_daytypes_from_data_file(data_file)
+                    conn.close()
+                    return redirect(url_for('new_sim_step2', data_file=data_file, lines=lines, days_types=days_types,
+                                            id_bus_model=main_input_data['id_bus_model'],
+                                            main_input_data=main_input_data,
+                                            flag_company_setup=flag_company_setup))
+                except Exception as e:
+                    buses_models = get_buses_models_data(conn)
+                    tm = get_terminals_metadata_dict(conn)
+                    not_depo_ch_terms = get_all_not_depo_charging_terminals_ids(tm)
+                    conn.close()
+                    return render_template('new_sim_step1.html', error='Input file with wrong format, please check the example',
+                                           buses_models=buses_models, flag_company_setup=flag_company_setup,
+                                           main_cfg=main_cfg, num_not_depo_chargers=len(not_depo_ch_terms.keys()))
             else:
                 buses_models = get_buses_models_data(conn)
                 tm = get_terminals_metadata_dict(conn)
                 not_depo_ch_terms = get_all_not_depo_charging_terminals_ids(tm)
                 conn.close()
-                return render_template('new_sim_step1.html', error='No file uploaded',
+                return render_template('new_sim_step1.html', error='No input file uploaded, please check the example',
                                        buses_models=buses_models, flag_company_setup=flag_company_setup,
                                        main_cfg=main_cfg, num_not_depo_chargers=len(not_depo_ch_terms.keys()))
         else:

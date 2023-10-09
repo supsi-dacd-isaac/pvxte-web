@@ -638,6 +638,10 @@ msgstr ""
 msgid "Launch Simulation"
 msgstr ""
 
+#: templates/new_sim_step2.html:197
+msgid "Please select at least one line"
+msgstr ""
+
 #: templates/signup.html:30 templates/signup.html:32
 msgid "Company"
 msgstr ""
