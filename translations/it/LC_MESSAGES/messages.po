@@ -662,7 +662,7 @@ msgstr "Consumo"
 
 #: app.py:777
 msgid "Annual expenditure and operative costs"
-msgstr "Spese annuali a costi operativi"
+msgstr "Spese annuali e costi operativi"
 
 #: templates/detail.html:261
 msgid "Break point analysis"
