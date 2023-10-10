@@ -135,31 +135,31 @@
                     </tr>
                     <tr>
                         <td>{{ gettext('Buses efficiency') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_buses_efficiency" value="1.15"> kWh/km</td>
+                        <td><input type="text" class="form-control-sm" name="opex_buses_efficiency" value="{{ main_cfg['defaultOperativeFeatures']['busesEfficiency'] }}"> kWh/km</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Buses maintainance') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_buses_maintainance" value="0.21"> CHF/km</td>
+                        <td><input type="text" class="form-control-sm" name="opex_buses_maintainance" value="{{ main_cfg['defaultOperativeFeatures']['busesMaintenance'] }}"> CHF/km</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Charging efficiency') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_charging_efficiency" value="2"> %</td>
+                        <td><input type="text" class="form-control-sm" name="opex_charging_efficiency" value="{{ main_cfg['defaultOperativeFeatures']['chargingEfficiency'] }}"> %</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Annual usage per single bus') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_annual_usage" value="100000"> km/{{ gettext('year') }}</td>
+                        <td><input type="text" class="form-control-sm" name="opex_annual_usage" value="{{ main_cfg['defaultOperativeFeatures']['annualUsage'] }}"> km/{{ gettext('year') }}</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Energy tariff') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff" value="0.3"> CHF/kWh</td>
+                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff" value="{{ main_cfg['defaultCosts']['energyTariff'] }}"> CHF/kWh</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Energy tariff increase per year') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff_yearly_increase" value="1"> %</td>
+                        <td><input type="text" class="form-control-sm" name="opex_energy_tariff_yearly_increase" value="{{ main_cfg['defaultCosts']['energyTariffYearlyIncrease'] }}"> %</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Additional power tariff') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_power_tariff" value="0"> CHF/kW</td>
+                        <td><input type="text" class="form-control-sm" name="opex_power_tariff" value="{{ main_cfg['defaultCosts']['powerTariff'] }}"> CHF/kW</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Diesel cost for comparison') }}</td>

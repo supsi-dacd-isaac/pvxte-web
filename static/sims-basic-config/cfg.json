@@ -43,7 +43,16 @@
             "18m": 690000,
             "else": 500000
         },
-        "investmentPeriod": 10
+        "investmentPeriod": 10,
+        "energyTariff": 0.28,
+        "energyTariffYearlyIncrease": 1,
+        "powerTariff": 0
+    },
+    "defaultOperativeFeatures": {
+        "busesEfficiency": 1.15,
+        "busesMaintenance": 0.21,
+        "chargingEfficiency": 2,
+        "annualUsage": 100000
     },
     "weights": {
         "battery": 6.85
