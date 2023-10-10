@@ -354,6 +354,57 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
     return capex_opex_costs
 
 
+def create_costs_bargraph(capex_opex_costs):
+    categories = [gettext('Electrical'), gettext('Diesel')]
+    vals_bus = [round(capex_opex_costs['capex_bus_cost']), round(capex_opex_costs['capex_cost_diesel'])]
+    vals_batt = [round(capex_opex_costs['capex_batt_cost']), 0]
+    vals_depo_char = [round(capex_opex_costs['capex_depo_charger_cost']), 0]
+    vals_no_depo_char = [round(capex_opex_costs['capex_not_depo_charger_cost']), 0]
+    vals_main = [round(capex_opex_costs['opex_cost_maintenance']),
+                 round(capex_opex_costs['opex_cost_maintenance_diesel'])]
+    vals_cons = [round(capex_opex_costs['opex_cost_consumption']),
+                 round(capex_opex_costs['opex_cost_consumption_diesel'])]
+
+    # Create traces for each set of values
+    trace_bus = go.Bar(x=categories, y=vals_bus, name='CAPEX - %s' % gettext('Buses'),
+                       marker=dict(color=['rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)',
+                                          'rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)']))
+
+    trace_batt = go.Bar(x=categories, y=vals_batt, name='CAPEX - %s' % gettext('Batteries'),
+                        marker=dict(color=['rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)',
+                                           'rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)']))
+
+    trace_depo_char = go.Bar(x=categories, y=vals_depo_char, name='CAPEX - %s' % gettext('Deposit charger'),
+                             marker=dict(color=['rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)',
+                                                'rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)']))
+
+    trace_no_depo_char = go.Bar(x=categories, y=vals_no_depo_char,
+                                name='CAPEX - %s' % gettext('Other chargers (e.g. pantographs)'),
+                                marker=dict(color=['rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)',
+                                                   'rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)']))
+
+    trace_main = go.Bar(x=categories, y=vals_main, name='OPEX - %s' % gettext('Maintenance'),
+                        marker=dict(color=['rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)',
+                                           'rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)']))
+
+    trace_cons = go.Bar(x=categories, y=vals_cons, name='OPEX - %s' % gettext('Consumption'),
+                        marker=dict(color=['rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)',
+                                           'rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)']))
+
+    layout = go.Layout(
+        title=gettext('Annual expenditure and operative costs'),
+        xaxis=dict(title=''),
+        yaxis=dict(title='kCHF/%s' % gettext('year')),
+        barmode='stack',
+        plot_bgcolor='rgba(255, 255, 255, 0.8)',
+        paper_bgcolor='rgba(255, 255, 255, 0.8)'
+    )
+
+    fig = go.Figure(data=[trace_bus, trace_batt, trace_depo_char, trace_no_depo_char, trace_main, trace_cons],
+                    layout=layout)
+    plot_div = fig.to_html(full_html=False)
+    return plot_div
+
 def get_lines_daytypes_from_data_file(sim_file_path):
     lines = set()
     days_types = set()
@@ -730,6 +781,14 @@ def detail():
         if 'opex_bus_efficiency_sim' not in opex_features.keys():
             opex_features['opex_bus_efficiency_sim'] = float(opex_features['opex_buses_efficiency'])
 
+        # Calculate the cost of a single not depo charging station and update costs
+        if len(panto_ids) > 0:
+            capex_features['capex_single_not_depo_charger_investment'] = float(capex_features['capex_panto_cost']) * float(input_pars['p_max'])/1e3
+        else:
+            capex_features['capex_single_not_depo_charger_investment'] = 0
+        input_pars['capex_bus_cost'] = float(input_pars['capex_bus_cost']) / 1e3
+        input_pars['capex_charger_cost'] = float(input_pars['capex_charger_cost']) / 1e3
+
         capex_opex_costs = calculate_economical_parameters(main_cfg=main_cfg, capex_features=capex_features,
                                                            opex_features=opex_features, input_pars=input_pars,
                                                            num_pantographs=len(panto_ids),
@@ -738,50 +797,8 @@ def detail():
         # Calculate emissions
         ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
-        categories = [gettext('Electrical'), gettext('Diesel')]
-        vals_bus = [round(capex_opex_costs['capex_bus_cost']), round(capex_opex_costs['capex_cost_diesel'])]
-        vals_batt = [round(capex_opex_costs['capex_batt_cost']), 0]
-        vals_depo_char = [round(capex_opex_costs['capex_depo_charger_cost']), 0]
-        vals_no_depo_char = [round(capex_opex_costs['capex_not_depo_charger_cost']), 0]
-        vals_main = [round(capex_opex_costs['opex_cost_maintenance']), round(capex_opex_costs['opex_cost_maintenance_diesel'])]
-        vals_cons = [round(capex_opex_costs['opex_cost_consumption']), round(capex_opex_costs['opex_cost_consumption_diesel'])]
-
-        # Create traces for each set of values
-        trace_bus = go.Bar(x=categories, y=vals_bus, name='CAPEX - %s' % gettext('Buses'),
-                           marker=dict(color=['rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)',
-                                              'rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)']))
-
-        trace_batt = go.Bar(x=categories, y=vals_batt, name='CAPEX - %s' % gettext('Batteries'),
-                            marker=dict(color=['rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)',
-                                       'rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)']))
-
-        trace_depo_char = go.Bar(x=categories, y=vals_depo_char, name='CAPEX - %s' % gettext('Deposit charger'),
-                                 marker=dict(color=['rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)',
-                                                    'rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)']))
-
-        trace_no_depo_char = go.Bar(x=categories, y=vals_no_depo_char, name='CAPEX - %s' % gettext('Other chargers (e.g. pantographs)'),
-                                    marker=dict(color=['rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)',
-                                                       'rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)']))
-
-        trace_main = go.Bar(x=categories, y=vals_main, name='OPEX - %s' % gettext('Maintenance'),
-                            marker=dict(color=['rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)',
-                                               'rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)']))
-
-        trace_cons = go.Bar(x=categories, y=vals_cons, name='OPEX - %s' % gettext('Consumption'),
-                            marker=dict(color=['rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)',
-                                               'rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)']))
-
-        layout = go.Layout(
-            title=gettext('Annual expenditure and operative costs'),
-            xaxis=dict(title=''),
-            yaxis=dict(title='kCHF/%s' % gettext('year')),
-            barmode='stack',
-            plot_bgcolor='rgba(255, 255, 255, 0.8)',
-            paper_bgcolor='rgba(255, 255, 255, 0.8)'
-        )
-
-        fig = go.Figure(data=[trace_bus, trace_batt, trace_depo_char, trace_no_depo_char, trace_main, trace_cons], layout=layout)
-        plot_div = fig.to_html(full_html=False)
+        # Create bargraph object for the costs
+        plot_div = create_costs_bargraph(capex_opex_costs)
 
         return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
                                capex_features=capex_features, opex_features=opex_features, sim_name=sim_name,

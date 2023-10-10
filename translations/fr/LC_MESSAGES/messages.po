@@ -709,6 +709,18 @@ msgstr ""
 msgid "Total"
 msgstr ""
 
+#: templates/detail.html:18
+msgid "Main simulation inputs"
+msgstr ""
+
+#: templates/detail.html:33
+msgid "Deposit charger cost"
+msgstr ""
+
+#: templates/detail.html:37
+msgid "Not deposit charger cost"
+msgstr ""
+
 #~ msgid "management section"
 #~ msgstr "section de gestion"
 

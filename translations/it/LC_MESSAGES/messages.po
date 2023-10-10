@@ -218,7 +218,7 @@ msgstr "Pacchetti di batterie"
 
 #: templates/detail.html:66
 msgid "Total capacity of a bus"
-msgstr "Capacità di un pacco batteria"
+msgstr "Capacità totale di un bus"
 
 #: templates/detail.html:70
 msgid "Minimum number of drivers"
@@ -671,6 +671,18 @@ msgstr "Analisi di break point"
 #: templates/detail.html:146
 msgid "Total"
 msgstr "Totale"
+
+#: templates/detail.html:18
+msgid "Main simulation inputs"
+msgstr "Input principali della simulazione"
+
+#: templates/detail.html:33
+msgid "Deposit charger cost"
+msgstr "Costo di un caricatore da deposito"
+
+#: templates/detail.html:37
+msgid "Not deposit charger cost"
+msgstr "Costo di un caricatore non da deposito"
 
 #~ msgid "management section"
 #~ msgstr "sezione gestione"
