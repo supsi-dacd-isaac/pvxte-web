@@ -108,7 +108,7 @@
 <!--                <thead>-->
                 <thead>
                 <tr>
-                    <td colspan="3">{{ gettext('Investment costs') }} [kCHF/{{ gettext('year')}}] ({{ gettext('rate') }}: {{ capex_features['capex_interest_rate']|int }}%)</td>
+                    <td colspan="3">{{ gettext('Investment costs') }} [kCHF/{{ gettext('year')}}]</td>
                 </tr>
                 </thead>
                 <tbody>
@@ -143,11 +143,11 @@
 <!--                    <td colspan="2">{{ ((capex_features['capex_additional_fee']|int)/1000)|int }} CHF</td>-->
 <!--                </tr>-->
                 <tr>
-                    <td colspan="2" style="text-align: left;"><b>{{ gettext('CAPEX') }}</b></td>
+                    <td colspan="2" style="text-align: left;"><b>{{ gettext('Total') }}</b></td>
                     <td style="text-align: right;"><b>{{ capex_opex_costs['capex_cost']|int }}</b></td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="text-align: left;"><b>{{ gettext('CAPEX') }} ({{ gettext('equivalent diesel buses') }})</b></td>
+                    <td colspan="2" style="text-align: left;"><b>{{ gettext('Total') }} ({{ gettext('diesel') }})</b></td>
                     <td style="text-align: right;"><b>{{ capex_opex_costs['capex_cost_diesel']|int }}</b></td>
                 </tr>
                 </tbody>
@@ -157,49 +157,76 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <td colspan="2">{{ gettext('Operational costs') }}</td>
+                    <td colspan="3">{{ gettext('Operational costs') }} [kCHF/{{ gettext('year') }}]</td>
+                </tr>
+<!--                </thead>-->
+<!--                <tbody>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Energy tariff') }}</td>-->
+<!--                    <td style="text-align: right;">{{ opex_features['opex_energy_tariff'] }} CHF/kWh</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Buses maintenance') }}</td>-->
+<!--                    <td style="text-align: right;">{{ opex_features['opex_buses_maintainance'] }} CHF/km</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Buses efficiency') }}</td>-->
+<!--                    <td style="text-align: right;">{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>-->
+<!--                </tr>-->
+<!--                <tr>-->
+<!--                    <td style="text-align: left;">{{ gettext('Annual usage') }}</td>-->
+<!--                    <td style="text-align: right;">{{ opex_features['opex_annual_usage'] }} km</td>-->
+<!--                </tr>-->
+<!--                <tr><td colspan="2"></td></tr>-->
+<!--                <tr><td colspan="2"></td></tr>-->
+<!--                </tbody>-->
+<!--            </table>-->
+<!--            <table class="table">-->
+                <thead>
+                <tr>
+                    <td style="text-align: center;">{{ gettext('Cost') }}</td>
+                    <td style="text-align: center;">{{ gettext('Electrical') }}</td>
+                    <td style="text-align: center;">{{ gettext('Diesel') }}</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Energy tariff') }}</td>
-                    <td style="text-align: right;">{{ opex_features['opex_energy_tariff'] }} CHF/kWh</td>
+                    <td style="text-align: left;">{{ gettext('Maintenance') }}</td>
+                    <td style="text-align: center;">{{ capex_opex_costs['opex_cost_maintenance']|int }} </td>
+                    <td style="text-align: center;">{{ capex_opex_costs['opex_cost_maintenance_diesel']|int }} </td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Buses maintenance') }}</td>
-                    <td style="text-align: right;">{{ opex_features['opex_buses_maintainance'] }} CHF/km</td>
+                    <td style="text-align: left;">{{ gettext('Consumption') }}</td>
+                    <td style="text-align: center;">{{ capex_opex_costs['opex_cost_consumption']|int }} </td>
+                    <td style="text-align: center;">{{ capex_opex_costs['opex_cost_consumption_diesel']|int }} </td>
                 </tr>
                 <tr>
-                    <td style="text-align: left;">{{ gettext('Buses efficiency') }}</td>
-                    <td style="text-align: right;">{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>
+                    <td style="text-align: left;"><b>{{ gettext('Total') }}</b></td>
+                    <td style="text-align: center;"><b>{{ capex_opex_costs['opex_cost']|int }}</b></td>
+                    <td style="text-align: center;"><b>{{ capex_opex_costs['opex_cost_diesel']|int }}</b></td>
                 </tr>
-                <tr>
-                    <td style="text-align: left;">{{ gettext('Annual usage') }}</td>
-                    <td style="text-align: right;">{{ opex_features['opex_annual_usage'] }} km</td>
-                </tr>
-                <tr><td colspan="3"></td></tr>
-                <tr>
-                    <td style="text-align: left;"><b>{{ gettext('OPEX') }}</b></td>
-                    <td style="text-align: right;"><b>{{ capex_opex_costs['opex_cost']|int }} kCHF/{{ gettext('year') }}</b></td>
-                </tr>
+                <tr style="border: white;"><td colspan="3"></td></tr>
+                <tr style="border: white;"><td colspan="3"></td></tr>
                 </tbody>
                 <thead>
-                <tr><td colspan="3"></td></tr>
                 <tr>
-                    <td colspan="2">{{ gettext('TTW emissions saved (diesel comparison)') }}:</td>
+                    <td colspan="3">{{ gettext('TTW emissions saved (diesel comparison)') }}:</td>
                 </tr>
                 </thead>
                 <tbody>
                 <tr>
                     <td style="text-align: left;"><b>CO<sub>2</sub></b></td>
+                    <td style="text-align: left;"></td>
                     <td style="text-align: right;">{{ emissions['CO2']['value']|round(2) }} {{ emissions['CO2']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;"><b>NO<sub>X</sub></b></td>
+                    <td style="text-align: left;"></td>
                     <td style="text-align: right;">{{ emissions['NOx']['value']|round(2) }} {{ emissions['NOx']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 <tr>
                     <td style="text-align: left;"><b>PM10</b></td>
+                    <td style="text-align: left;"></td>
                     <td style="text-align: right;">{{ emissions['PM10']['value']|round(2) }} {{ emissions['PM10']['unit'] }}/{{ gettext('year') }}</td>
                 </tr>
                 </tbody>
@@ -208,67 +235,46 @@
     </div>
 
     <br><br><br><br>
-    <div class="plot-container">
-        <div id="plot" class="plot"></div>
+    <div class="graphs-container">
+        <div class="plot-container">
+            <div id="plot" class="plot"></div>
+        </div>
+        <script>
+            var plotDiv = document.getElementById('plot');
+            var data = [
+                {
+                    x: {{ capex_opex_costs['capex_opex_years'] | safe }},
+                    y: {{ capex_opex_costs['capex_opex_cost_at_year'] | safe }},
+                    mode: 'lines+markers',
+                    name: '{{ gettext('Electrical') }}',
+                    line: {color: 'green'}
+                },
+                {
+                    x: {{ capex_opex_costs['capex_opex_years'] | safe }},
+                    y: {{ capex_opex_costs['capex_opex_cost_at_year_diesel'] | safe }},
+                    mode: 'lines+markers',
+                    name: '{{ gettext('Diesel') }}',
+                    line: {color: 'red'}
+                }
+            ];
+            var layout = {
+                title: '{{ gettext('Break point analysis') }}',
+                xaxis: { title: '{{ gettext('Year') }}' },
+                yaxis: { title: '{{ gettext('Cost') }} [M CHF]' },
+                responsive: true
+            };
+
+            // Create the plot
+            Plotly.newPlot(plotDiv, data, layout);
+        </script>
+
+        <div class="plot-container">
+            <div id="bargraph" class="plot">
+                {{ plot_div|safe }}
+            </div>
+        </div>
     </div>
-    <script>
-        var plotDiv = document.getElementById('plot');
-        var data = [
-            {
-                x: {{ capex_opex_costs['capex_opex_years'] | safe }},
-                y: {{ capex_opex_costs['capex_opex_cost_at_year'] | safe }},
-                mode: 'lines+markers',
-                name: '{{ gettext('Electrical') }}',
-                line: {color: 'green'}
-            },
-            {
-                x: {{ capex_opex_costs['capex_opex_years'] | safe }},
-                y: {{ capex_opex_costs['capex_opex_cost_at_year_diesel'] | safe }},
-                mode: 'lines+markers',
-                name: '{{ gettext('Diesel') }}',
-                line: {color: 'red'}
-            }
-        ];
-        var layout = {
-            title: '{{ gettext('Electrical vs. Diesel') }}',
-            xaxis: { title: '{{ gettext('Year') }}' },
-            yaxis: { title: '{{ gettext('Cost') }}' },
-            responsive: true
-        };
 
-        // Create the plot
-        Plotly.newPlot(plotDiv, data, layout);
-    </script>
-
-<!--    <div class="centered-content" id="download">-->
-<!--        <table class="table">-->
-<!--            <tbody>-->
-<!--                <tr>-->
-<!--                    <td>-->
-<!--                        <a class="nav-link"><h4>{{ gettext('Download section') }}:</h4></a><br>-->
-<!--                    </td>-->
-<!--                    <td><b>{{ gettext('Results') }}:</b></td>-->
-<!--                    <td>-->
-<!--                        <a class="link-dark" href="{{ url_for('static', filename='output-df/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.csv">-->
-<!--                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">-->
-<!--                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>-->
-<!--                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>-->
-<!--                            </svg>-->
-<!--                        </a>-->
-<!--                    </td>-->
-<!--                    <td><b>{{ gettext('Raw data') }}:</b></td>-->
-<!--                    <td>-->
-<!--                        <a class="link-dark" href="{{ url_for('static', filename='output/') }}{{ session['id_user'] }}_{{ sim_metadata[2] }}.zip">-->
-<!--                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download" viewBox="0 0 16 16">-->
-<!--                                  <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>-->
-<!--                                  <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>-->
-<!--                            </svg>-->
-<!--                        </a>-->
-<!--                    </td>-->
-<!--                </tr>-->
-<!--            </tbody>-->
-<!--        </table>-->
-<!--    </div>-->
     {% endif %}
 
 <footer>

@@ -11021,6 +11021,16 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
   align-items: flex-start;
 }
 
+.table-pos1-left,
+.table-pos2-right {
+  flex: 1;
+  border: 0px solid #ccc;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
 .table-p11,
 .table-p12,
 .table-p13,
@@ -11064,5 +11074,16 @@ body.sb-sidenav-toggled #wrapper #sidebar-wrapper {
 .plot {
   max-width: 100%;
   height: auto;
-  width: 1000px;
+  width: auto;
+}
+
+.graphs-container {
+    display: flex;
+    height: auto;
+    width: 80%;
+}
+
+.graph {
+    flex: 1;
+    padding: 20px;
 }

@@ -650,8 +650,32 @@ msgstr ""
 msgid "New company"
 msgstr ""
 
+#: templates/signup.html:42 templates/signup.html:43
+msgid "New company"
+msgstr ""
+
 #: templates/signup.html:46
 msgid "Signup"
+msgstr ""
+
+#: app.py:768
+msgid "Maintenance"
+msgstr ""
+
+#: app.py:772
+msgid "Consumption"
+msgstr ""
+
+#: app.py:777
+msgid "Annual expenditure and operative costs"
+msgstr ""
+
+#: templates/detail.html:261
+msgid "Break point analysis"
+msgstr ""
+
+#: templates/detail.html:146
+msgid "Total"
 msgstr ""
 
 #~ msgid "management section"

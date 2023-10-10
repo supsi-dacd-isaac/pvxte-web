@@ -652,6 +652,26 @@ msgstr "Nuova compagnia"
 msgid "Signup"
 msgstr "Iscrizioni"
 
+#: app.py:768
+msgid "Maintenance"
+msgstr "Manutenzione"
+
+#: app.py:772
+msgid "Consumption"
+msgstr "Consumo"
+
+#: app.py:777
+msgid "Annual expenditure and operative costs"
+msgstr "Spese annuali a costi operativi"
+
+#: templates/detail.html:261
+msgid "Break point analysis"
+msgstr "Analisi di break point"
+
+#: templates/detail.html:146
+msgid "Total"
+msgstr "Totale"
+
 #~ msgid "management section"
 #~ msgstr "sezione gestione"
 

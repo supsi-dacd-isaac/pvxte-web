@@ -43,7 +43,7 @@
             "18m": 690000,
             "else": 500000
         },
-        "investmentPeriod": 20
+        "investmentPeriod": 15
     },
     "weights": {
         "battery": 6.85

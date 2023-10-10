@@ -266,50 +266,47 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
     a_add_fee = calc_a(interest_rate, float(capex_features['capex_additional_fee_lifetime']))
 
     # CAPEX cost of the buses without the batteries (cost in CHF/bus)
-    capex_bus_cost = float(capex_features['capex_bus_cost']) * float(capex_features['capex_number_buses'])
+    capex_bus_cost_ann = a_bus * float(capex_features['capex_bus_cost']) * float(capex_features['capex_number_buses'])
 
     # CAPEX cost of the batteries installed in the buses (cost in CHF/battery pack)
     num_battery_packs = get_total_number_batteries_packs(capex_features['capex_number_batt_packs'])
-    capex_batt_cost = float(capex_features['capex_battery_cost']) * float(num_battery_packs)
+    capex_batt_cost_ann = a_batt * float(capex_features['capex_battery_cost']) * float(num_battery_packs)
 
     # CAPEX cost of the deposit charger (cost in CHF/bus because chargers=buses)
-    capex_char_cost = a_char * float(capex_features['capex_charger_cost']) * float(capex_features['capex_number_chargers'])
+    capex_char_cost_ann = a_char * float(capex_features['capex_charger_cost']) * float(capex_features['capex_number_chargers'])
 
     # CAPEX cost of other pantograph/plugin chargers (not deposit) (cost in CHF/kW)
     # Currently it is not possible to differentiate between pantographs and plugin charging stations
-    capex_panto_cost = a_panto * float(capex_features['capex_panto_cost']) * float(input_pars['p_max']) * num_pantographs
+    capex_panto_cost_ann = a_panto * float(capex_features['capex_panto_cost']) * float(input_pars['p_max']) * num_pantographs
 
     # CAPEX cost of fees (basically the connection one) (cost in CHF/kW)
     # Maximum power of the deposit (power calculated by the simulation)
     max_power_deposit = float(capex_features['capex_maximum_power_at_deposit'])
     # Maximum power of the (not deposit) chargers (power inputted by the user before the simulation (default 450 kW)
     max_power_panto = float(input_pars['p_max']) * num_pantographs
-    capex_add_fee = a_add_fee * float(capex_features['capex_additional_fee']) * (max_power_deposit + max_power_panto)
+    capex_add_fee_ann = a_add_fee * float(capex_features['capex_additional_fee']) * (max_power_deposit + max_power_panto)
 
-    # Calculate the total investment
-    capex_total_cost = capex_bus_cost + capex_batt_cost + capex_char_cost + capex_panto_cost
-
-    # Perform the annualization
-    capex_bus_cost *= a_bus
-    capex_batt_cost *= a_batt
-    capex_char_cost *= a_char
-    capex_panto_cost *= a_panto
+    # Calculate the total investment multiplying the annualized costs (in CHF/y) for the lifetime of the different components
+    capex_investment_cost = capex_bus_cost_ann * float(capex_features['capex_bus_lifetime'])
+    capex_investment_cost += capex_batt_cost_ann * float(capex_features['capex_battery_lifetime'])
+    capex_investment_cost += capex_char_cost_ann * float(capex_features['capex_charger_lifetime'])
+    capex_investment_cost += capex_panto_cost_ann * float(capex_features['capex_panto_lifetime'])
 
     # Get the total annualized capex
-    capex_cost = capex_bus_cost + capex_batt_cost + capex_char_cost + capex_panto_cost + capex_add_fee
+    capex_cost = capex_bus_cost_ann + capex_batt_cost_ann + capex_char_cost_ann + capex_panto_cost_ann + capex_add_fee_ann
 
     # Get the total cost for the diesel
     diesel_cost_single_bus = (main_cfg['defaultCosts']['diesel']['investment']['slope'] * float(input_bus_model_data['length']) +
                               main_cfg['defaultCosts']['diesel']['investment']['intercept'])
-    capex_total_cost_diesel = diesel_cost_single_bus * float(capex_features['capex_number_buses'])
-    capex_cost_diesel = a_bus * capex_total_cost_diesel
+    capex_investment_cost_diesel = diesel_cost_single_bus * float(capex_features['capex_number_buses'])
+    capex_cost_diesel = a_bus * capex_investment_cost_diesel
 
     # 2) OPEX SECTION
 
     # Calculate the OPEX costs for the electrical buses
-    opex_cost = (float(opex_features['opex_buses_maintainance']) +
-                 float(opex_features['opex_bus_efficiency_sim']) * float(opex_features['opex_energy_tariff'])) * \
-                 float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
+    opex_cost_consumption = float(opex_features['opex_buses_maintainance']) * float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
+    opex_cost_maintenance = float(opex_features['opex_bus_efficiency_sim']) * float(opex_features['opex_energy_tariff']) * float(opex_features['opex_annual_usage']) * float(capex_features['capex_number_buses'])
+    opex_cost = opex_cost_maintenance + opex_cost_consumption
 
     # Calculate the OPEX costs for the diesel buses
     # CHF/y = (0.02 x [length bus] + 0.1918) x [total km per year] x 1.6 [CHF/liter, user editable]
@@ -324,28 +321,29 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
     opex_cost_maintenance_diesel *= float(capex_features['capex_number_buses'])
     opex_cost_diesel = opex_cost_consumption_diesel + opex_cost_maintenance_diesel
 
-
     capex_opex_years = []
     capex_opex_cost_at_year = []
     capex_opex_cost_at_year_diesel = []
     for i in range(0, main_cfg['defaultCosts']['investmentPeriod']+1):
-        ye = opex_cost * i + capex_total_cost
-        yd = opex_cost_diesel * i + capex_total_cost_diesel
+        ye = opex_cost * i + capex_investment_cost
+        yd = opex_cost_diesel * i + capex_investment_cost_diesel
         capex_opex_years.append(i)
-        capex_opex_cost_at_year.append(round(ye/1e3))
-        capex_opex_cost_at_year_diesel.append(round(yd/1e3))
+        capex_opex_cost_at_year.append(round(ye/1e6, 2))
+        capex_opex_cost_at_year_diesel.append(round(yd/1e6, 2))
 
     capex_opex_costs = {
-        "capex_bus_cost":  capex_bus_cost/1e3,
-        "capex_batt_cost": capex_batt_cost/1e3,
-        "capex_depo_charger_cost": capex_char_cost/1e3,
-        "capex_not_depo_charger_cost": capex_panto_cost/1e3,
-        "capex_add_fee": capex_add_fee/1e3,
-        "capex_total_cost": capex_total_cost/1e3,
-        "capex_total_cost_diesel": capex_total_cost_diesel/1e3,
+        "capex_bus_cost":  capex_bus_cost_ann/1e3,
+        "capex_batt_cost": capex_batt_cost_ann/1e3,
+        "capex_depo_charger_cost": capex_char_cost_ann/1e3,
+        "capex_not_depo_charger_cost": capex_panto_cost_ann/1e3,
+        "capex_add_fee": capex_add_fee_ann/1e3,
+        "capex_investment_cost": capex_investment_cost/1e3,
+        "capex_investment_cost_diesel": capex_investment_cost_diesel/1e3,
         "capex_cost": capex_cost/1e3,
         "capex_cost_diesel": capex_cost_diesel/1e3,
         "opex_cost": opex_cost/1e3,
+        "opex_cost_consumption": opex_cost_consumption/1e3,
+        "opex_cost_maintenance": opex_cost_maintenance/1e3,
         "opex_cost_diesel": opex_cost_diesel/1e3,
         "opex_cost_consumption_diesel": opex_cost_consumption_diesel/1e3,
         "opex_cost_maintenance_diesel": opex_cost_maintenance_diesel/1e3,
@@ -740,10 +738,55 @@ def detail():
         # Calculate emissions
         ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
+        categories = [gettext('Electrical'), gettext('Diesel')]
+        vals_bus = [round(capex_opex_costs['capex_bus_cost']), round(capex_opex_costs['capex_cost_diesel'])]
+        vals_batt = [round(capex_opex_costs['capex_batt_cost']), 0]
+        vals_depo_char = [round(capex_opex_costs['capex_depo_charger_cost']), 0]
+        vals_no_depo_char = [round(capex_opex_costs['capex_not_depo_charger_cost']), 0]
+        vals_main = [round(capex_opex_costs['opex_cost_maintenance']), round(capex_opex_costs['opex_cost_maintenance_diesel'])]
+        vals_cons = [round(capex_opex_costs['opex_cost_consumption']), round(capex_opex_costs['opex_cost_consumption_diesel'])]
+
+        # Create traces for each set of values
+        trace_bus = go.Bar(x=categories, y=vals_bus, name='CAPEX - %s' % gettext('Buses'),
+                           marker=dict(color=['rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)',
+                                              'rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)']))
+
+        trace_batt = go.Bar(x=categories, y=vals_batt, name='CAPEX - %s' % gettext('Batteries'),
+                            marker=dict(color=['rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)',
+                                       'rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)']))
+
+        trace_depo_char = go.Bar(x=categories, y=vals_depo_char, name='CAPEX - %s' % gettext('Deposit charger'),
+                                 marker=dict(color=['rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)',
+                                                    'rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)']))
+
+        trace_no_depo_char = go.Bar(x=categories, y=vals_no_depo_char, name='CAPEX - %s' % gettext('Other chargers (e.g. pantographs)'),
+                                    marker=dict(color=['rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)',
+                                                       'rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)']))
+
+        trace_main = go.Bar(x=categories, y=vals_main, name='OPEX - %s' % gettext('Maintenance'),
+                            marker=dict(color=['rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)',
+                                               'rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)']))
+
+        trace_cons = go.Bar(x=categories, y=vals_cons, name='OPEX - %s' % gettext('Consumption'),
+                            marker=dict(color=['rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)',
+                                               'rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)']))
+
+        layout = go.Layout(
+            title=gettext('Annual expenditure and operative costs'),
+            xaxis=dict(title=''),
+            yaxis=dict(title='kCHF/%s' % gettext('year')),
+            barmode='stack',
+            plot_bgcolor='rgba(255, 255, 255, 0.8)',
+            paper_bgcolor='rgba(255, 255, 255, 0.8)'
+        )
+
+        fig = go.Figure(data=[trace_bus, trace_batt, trace_depo_char, trace_no_depo_char, trace_main, trace_cons], layout=layout)
+        plot_div = fig.to_html(full_html=False)
+
         return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
                                capex_features=capex_features, opex_features=opex_features, sim_name=sim_name,
                                capex_opex_costs=capex_opex_costs, flag_company_setup=flag_company_setup, emissions=ems,
-                               input_pars=input_pars, input_bus_model_data=input_bus_model_data)
+                               input_pars=input_pars, input_bus_model_data=input_bus_model_data, plot_div=plot_div)
     else:
         return redirect(url_for('login'))
 
