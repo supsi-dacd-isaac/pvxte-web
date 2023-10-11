@@ -119,8 +119,8 @@ if __name__ == "__main__":
                               int(ts))
         else:
             # Update the main results in the database
-            data_to_update = (main_results['strRoutes'], 'error', 'error', 'error', json.dumps(inputs['pars']),
-                              json.dumps(inputs['bus_model_data']), int(id_user), int(ts))
+            data_to_update = (main_results['strRoutes'], 'error', 'error', main_results['error'],
+                              json.dumps(inputs['pars']), json.dumps(inputs['bus_model_data']), int(id_user), int(ts))
 
         cursor.execute(update_query, data_to_update)
         conn.commit()

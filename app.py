@@ -727,6 +727,7 @@ def index():
                 'line': sim['line'],
                 'day_type': sim['day_type'],
                 'battery_size': sim['battery_size'],
+                'capex_pars': sim['capex_pars'],
                 'max_charging_powers': sim['max_charging_powers']
             }
 
@@ -793,7 +794,7 @@ def detail():
                                                            opex_features=opex_features, input_pars=input_pars,
                                                            num_pantographs=len(panto_ids),
                                                            input_bus_model_data=input_bus_model_data)
-
+        #
         # Calculate emissions
         ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
