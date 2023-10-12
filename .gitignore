@@ -7,6 +7,7 @@ static/input-csv/*.csv
 static/json-input-pars/*.json
 static/json-input-pars/*.csv
 static/sim-config/*.json
+static/sims-basic-config/key.json
 static/output/*.zip
 static/output-bsize/*.csv
 static/output-df/*.csv

@@ -25,10 +25,14 @@ from flask_babel import Babel, gettext
 with open('static/sims-basic-config/cfg.json', 'r') as f:
     main_cfg = json.load(f)
 
+# Get main conf
+with open('static/sims-basic-config/key.json', 'r') as f:
+    key_cfg = json.load(f)
+
 app = Flask(__name__)
 
 app.config.update(
-    SECRET_KEY=main_cfg['appSecretKey']
+    SECRET_KEY=key_cfg['appSecretKey']
 )
 
 # Set the Babel object for the translations
@@ -877,6 +881,7 @@ def new_sim_step2():
                 print('EXCEPTION: %s' % str(e))
                 conn = get_db_connection()
                 req_dict = request.args.to_dict()
+                defaults_costs = calculate_default_costs(req_dict)
                 step1_data = json.loads(req_dict['main_input_data'].replace('\'', '\"'))
                 lines, days_types = get_lines_daytypes_from_data_file(req_dict['data_file'])
                 bus_model_data = get_single_bus_model_data(conn, int(req_dict['id_bus_model']))
@@ -885,7 +890,8 @@ def new_sim_step2():
                                        error='Data file has a wrong format! The simulation cannot be run',
                                        data_file=req_dict['data_file'], lines=lines, days_types=days_types,
                                        bus_model_data=bus_model_data, step1_data=step1_data,
-                                       flag_company_setup=flag_company_setup, main_cfg=main_cfg)
+                                       flag_company_setup=flag_company_setup, main_cfg=main_cfg,
+                                       defaults_costs=defaults_costs)
         else:
             req_dict = request.args.to_dict()
             step1_data = json.loads(req_dict['main_input_data'].replace('\'', '\"'))

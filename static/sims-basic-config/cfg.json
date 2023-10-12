@@ -3,7 +3,6 @@
         "modelTimesteps": 1400,
         "chargingAtDeposit": true
     },
-    "appSecretKey": "8EuPLSnVQ47U1XcymcUcadLdk9H7P3Cg5tWH5Pc1aj27GtHsFt",
     "defaultPower": {
         "notDepoCharger": 450,
         "depoCharger": 150
