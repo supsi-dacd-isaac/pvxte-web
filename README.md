@@ -1,6 +1,6 @@
 # PVxTE web tool
 
-The PVxTE web tool allows public transportation companies to assess the feasibility of transitioning toward electric buses. With growing concerns over the climate impacts 
+The PVxTE web tool has been developed as part of the Swiss project PVTutt'Elettrico. It allows public transportation companies to assess the feasibility of transitioning toward electric buses. With growing concerns over the climate impacts 
 of the transportation sector and fossil fuel prices, many public transportation companies wish to evaluate the potential to gradually 
 transition away from fossil fuel-driven buses to an electric bus fleet. 
 Especially in Europe, buses are just one part of the highly interconnected and integrated public transportation system. 
@@ -8,7 +8,15 @@ For example, bus schedules are highly integrated with the intercity and regional
 Moreover, the erection of fast-charging infrastructure in public spaces is a contentious issue due to real estate availability and public opinion. 
 These factors make developing an optimal planning tool for electric buses an extremely complicated endeavour. 
 The PVxTE web tool, as such, is a simplified tool that we can deploy and run via an open-source web service based on Flask. 
+
+
+The project PVTutt'Elettrico was financed by the [Swiss Federal Office of Transport](https://www.bav.admin.ch/bav/it/home.html) as part of the 
+[SETP 2050](https://www.bav.admin.ch/bav/it/home/temi-generali/ricerca-e-innovazione/programmi-di-ricerca-e-d-innovazione/Energia2050.html) programme activities.
+PVTutt'Elettrico is an open-source project released under [MIT license](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/LICENSE).
+
+
 The rest of the documentation explains the architecture of the web tool. It also provides an easy-to-understand guide on how to use this web tool for your specific use case.  
+
 
 ![Landing Page](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/landing_page.png)
 
