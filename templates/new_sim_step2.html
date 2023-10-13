@@ -52,8 +52,16 @@
                         </td>
                     </tr>
                     <tr>
+                        <td colspan="2" align="center"><h3>{{ gettext('Energy model section') }}</h3></td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Energy model calibration parameter') }}</td>
+                        <td><input type="text" class="form-control-sm" name="energy_model_calibration_scale_factor" value="{{ main_cfg['defaultModelParameters']['scale'] }}"></td>
+                    </tr>
+                    <tr>
                         <td colspan="2" align="center"><h3>{{ gettext('CAPEX section') }}</h3></td>
-                    </tr>                    <tr>
+                    </tr>
+                    <tr>
                         <td colspan="2" align="center"><b>{{ gettext('Bus section') }}</b></td>
                     </tr>
                     <tr>

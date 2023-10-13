@@ -719,6 +719,14 @@ msgstr ""
 msgid "Not deposit charger cost"
 msgstr ""
 
+#: templates/new_sim_step2.html:55
+msgid "Energy model section"
+msgstr ""
+
+#: templates/new_sim_step2.html:58
+msgid "Energy model calibration parameter"
+msgstr ""
+
 #~ msgid "management section"
 #~ msgstr "Verwaltungsbereich"
 

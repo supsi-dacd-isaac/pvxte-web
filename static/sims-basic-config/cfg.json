@@ -74,6 +74,9 @@
         "depoCharger": 10,
         "pantoCharger": 12,
         "connectionFee": 20
+    },
+    "defaultModelParameters": {
+        "scale": 1.0
     }
 }
 

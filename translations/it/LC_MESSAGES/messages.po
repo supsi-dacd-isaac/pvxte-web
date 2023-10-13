@@ -684,6 +684,14 @@ msgstr "Costo di un caricatore da deposito"
 msgid "Not deposit charger cost"
 msgstr "Costo di un caricatore non da deposito"
 
+#: templates/new_sim_step2.html:55
+msgid "Energy model section"
+msgstr "Sezione relativa al modello energetico"
+
+#: templates/new_sim_step2.html:58
+msgid "Energy model calibration parameter"
+msgstr "Parametro di calibrazione del modello energetico"
+
 #~ msgid "management section"
 #~ msgstr "sezione gestione"
 
