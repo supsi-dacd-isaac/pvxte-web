@@ -484,7 +484,7 @@ msgid "Are you sure you want to delete the simulation?"
 msgstr "Sind Sie sicher dass Sie die Simulation löschen möchten?"
 
 #: templates/index.html:112
-msgid "PVTutt'Elettrico Web Tool"
+msgid "PVxTE"
 msgstr ""
 
 #: templates/login.html:17 templates/signup.html:18 templates/signup.html:19
