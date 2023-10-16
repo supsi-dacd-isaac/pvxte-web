@@ -329,12 +329,25 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
     capex_opex_cost_at_year = []
     capex_opex_cost_at_year_diesel = []
 
+    capex_investment_cost_batt = capex_batt_cost_ann * float(capex_features['capex_battery_lifetime'])
+    capex_investment_cost_char = capex_char_cost_ann * float(capex_features['capex_charger_lifetime'])
+    capex_investment_cost_panto = capex_panto_cost_ann * float(capex_features['capex_panto_lifetime'])
     for i in range(0, main_cfg['defaultCosts']['investmentPeriod']+1):
-        ye = opex_cost * i + capex_investment_cost
+        offset = 0
+        if main_cfg['breakPointAdvancedGraph'] is True:
+            if i > float(capex_features['capex_battery_lifetime']):
+                offset += capex_investment_cost_batt
+            if i > float(capex_features['capex_charger_lifetime']):
+                offset += capex_investment_cost_char
+            if i > float(capex_features['capex_panto_lifetime']):
+                offset += capex_investment_cost_panto
+
+        ye = opex_cost * i + capex_investment_cost + offset
         yd = opex_cost_diesel * i + capex_investment_cost_diesel
         capex_opex_years.append(i)
         capex_opex_cost_at_year.append(round(ye/1e6, 2))
         capex_opex_cost_at_year_diesel.append(round(yd/1e6, 2))
+
 
     capex_opex_costs = {
         "capex_bus_cost":  capex_bus_cost_ann/1e3,
