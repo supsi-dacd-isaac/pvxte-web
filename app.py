@@ -385,29 +385,29 @@ def create_costs_bargraph(capex_opex_costs):
 
     # Create traces for each set of values
     trace_bus = go.Bar(x=categories, y=vals_bus, name='CAPEX - %s' % gettext('Buses'),
-                       marker=dict(color=['rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)',
-                                          'rgba(0, 0, 255, 0.9)', 'rgba(0, 0, 255, 0.9)']))
+                       marker=dict(color=['rgba(0, 0, 139, 0.7)', 'rgba(0, 0, 139, 0.7)',
+                                          'rgba(0, 0, 139, 0.7)', 'rgba(0, 0, 139, 0.7)']))
 
     trace_batt = go.Bar(x=categories, y=vals_batt, name='CAPEX - %s' % gettext('Batteries'),
-                        marker=dict(color=['rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)',
-                                           'rgba(30, 144, 255, 0.8)', 'rgba(30, 144, 255, 0.8)']))
+                        marker=dict(color=['rgba(0, 0, 255, 0.7)', 'rgba(0, 0, 255, 0.7)',
+                                           'rgba(0, 0, 25, 0.7)', 'rgba(0, 0, 255, 0.7)']))
 
     trace_depo_char = go.Bar(x=categories, y=vals_depo_char, name='CAPEX - %s' % gettext('Deposit charger'),
-                             marker=dict(color=['rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)',
-                                                'rgba(70, 130, 180, 0.7)', 'rgba(70, 130, 180, 0.7)']))
+                             marker=dict(color=['rgba(30, 144, 255, 0.7)', 'rgba(30, 144, 255, 0.7)',
+                                                'rgba(30, 144, 255, 0.7)', 'rgba(30, 144, 255, 0.7)']))
 
     trace_no_depo_char = go.Bar(x=categories, y=vals_no_depo_char,
                                 name='CAPEX - %s' % gettext('Other chargers (e.g. pantographs)'),
-                                marker=dict(color=['rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)',
-                                                   'rgba(173, 216, 230, 0.5)', 'rgba(173, 216, 230, 0.5)']))
+                                marker=dict(color=['rgba(135, 206, 230, 0.7)', 'rgba(135, 206, 230, 0.7)',
+                                                   'rgba(135, 206, 230, 0.7)', 'rgba(135, 206, 230, 0.7)']))
 
     trace_main = go.Bar(x=categories, y=vals_main, name='OPEX - %s' % gettext('Maintenance'),
                         marker=dict(color=['rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)',
                                            'rgba(0, 100, 0, 0.7)', 'rgba(0, 100, 0, 0.7)']))
 
     trace_cons = go.Bar(x=categories, y=vals_cons, name='OPEX - %s' % gettext('Consumption'),
-                        marker=dict(color=['rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)',
-                                           'rgba(0, 128, 0, 0.7)', 'rgba(0, 128, 0, 0.7)']))
+                        marker=dict(color=['rgba(0, 150, 0, 0.7)', 'rgba(0, 150, 0, 0.7)',
+                                           'rgba(0, 150, 0, 0.7)', 'rgba(0, 150, 0, 0.7)']))
 
     layout = go.Layout(
         title=gettext('Annual expenditure and operative costs'),

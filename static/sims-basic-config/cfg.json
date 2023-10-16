@@ -35,7 +35,7 @@
         },
         "pantograph": 1830,
         "connectionFee": 100,
-        "interestRate": 3,
+        "interestRate": 2.5,
         "bus": {
             "9m":  390000,
             "12m": 440000,
