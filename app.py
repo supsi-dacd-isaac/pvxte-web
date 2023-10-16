@@ -297,13 +297,13 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
     capex_investment_cost += capex_panto_cost_ann * float(capex_features['capex_panto_lifetime'])
 
     # Get the total annualized capex
-    capex_cost = capex_bus_cost_ann + capex_batt_cost_ann + capex_char_cost_ann + capex_panto_cost_ann + capex_add_fee_ann
+    capex_cost_ann = capex_bus_cost_ann + capex_batt_cost_ann + capex_char_cost_ann + capex_panto_cost_ann + capex_add_fee_ann
 
     # Get the total cost for the diesel
     diesel_cost_single_bus = (main_cfg['defaultCosts']['diesel']['investment']['slope'] * float(input_bus_model_data['length']) +
                               main_cfg['defaultCosts']['diesel']['investment']['intercept'])
-    capex_investment_cost_diesel = diesel_cost_single_bus * float(capex_features['capex_number_buses'])
-    capex_cost_diesel = a_bus * capex_investment_cost_diesel
+    capex_cost_ann_diesel = a_bus * diesel_cost_single_bus * float(capex_features['capex_number_buses'])
+    capex_investment_cost_diesel = capex_cost_ann_diesel * float(capex_features['capex_bus_lifetime'])
 
     # 2) OPEX SECTION
 
@@ -328,6 +328,7 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
     capex_opex_years = []
     capex_opex_cost_at_year = []
     capex_opex_cost_at_year_diesel = []
+
     for i in range(0, main_cfg['defaultCosts']['investmentPeriod']+1):
         ye = opex_cost * i + capex_investment_cost
         yd = opex_cost_diesel * i + capex_investment_cost_diesel
@@ -343,8 +344,8 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
         "capex_add_fee": capex_add_fee_ann/1e3,
         "capex_investment_cost": capex_investment_cost/1e3,
         "capex_investment_cost_diesel": capex_investment_cost_diesel/1e3,
-        "capex_cost": capex_cost/1e3,
-        "capex_cost_diesel": capex_cost_diesel/1e3,
+        "capex_cost_ann": capex_cost_ann/1e3,
+        "capex_cost_ann_diesel": capex_cost_ann_diesel/1e3,
         "opex_cost": opex_cost/1e3,
         "opex_cost_consumption": opex_cost_consumption/1e3,
         "opex_cost_maintenance": opex_cost_maintenance/1e3,
@@ -360,7 +361,7 @@ def calculate_economical_parameters(main_cfg, capex_features, opex_features, inp
 
 def create_costs_bargraph(capex_opex_costs):
     categories = [gettext('Electrical'), gettext('Diesel')]
-    vals_bus = [round(capex_opex_costs['capex_bus_cost']), round(capex_opex_costs['capex_cost_diesel'])]
+    vals_bus = [round(capex_opex_costs['capex_bus_cost']), round(capex_opex_costs['capex_cost_ann_diesel'])]
     vals_batt = [round(capex_opex_costs['capex_batt_cost']), 0]
     vals_depo_char = [round(capex_opex_costs['capex_depo_charger_cost']), 0]
     vals_no_depo_char = [round(capex_opex_costs['capex_not_depo_charger_cost']), 0]
