@@ -45,10 +45,10 @@
                         <td style="text-align: left;">{{ gettext('Maximum charging power at deposit') }}</td>
                         <td style="text-align: right;">{{ input_pars['pd_max'] }} kW</td>
                     </tr>
-                    <tr>
-                        <td style="text-align: left;">{{ gettext('Buses efficiency') }}</td>
-                        <td style="text-align: right;">{{ input_pars['opex_buses_efficiency'] }} kWh/km</td>
-                    </tr>
+<!--                    <tr>-->
+<!--                        <td style="text-align: left;">{{ gettext('Buses efficiency') }}</td>-->
+<!--                        <td style="text-align: right;">{{ input_pars['opex_buses_efficiency'] }} kWh/km</td>-->
+<!--                    </tr>-->
                     <tr>
                         <td style="text-align: left;">{{ gettext('Buses maintainance') }}</td>
                         <td style="text-align: right;">{{ input_pars['opex_buses_maintainance'] }} CHF/km</td>
@@ -95,6 +95,10 @@
                     <tr>
                         <td style="text-align: left;"><b>{{ gettext('Minimum number of drivers') }}</b></td>
                         <td style="text-align: right;">{{ data['min_num_drivers'] }}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;"><b>{{ gettext('Buses efficiency') }}</b></td>
+                        <td style="text-align: right;">{{ opex_features['opex_bus_efficiency_sim']|round(2) }} kWh/km</td>
                     </tr>
                 </tbody>
             </table>
