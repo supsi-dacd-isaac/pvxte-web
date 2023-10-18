@@ -1,5 +1,5 @@
 {
-  "batt_pack_capacity": 80,
+  "batt_pack_capacity": 88,
   "batt_pack_weight": 600,
   "min_required_batt_packs": 2,
   "max_allowed_batt_packs": 6,
