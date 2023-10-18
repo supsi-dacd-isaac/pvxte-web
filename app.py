@@ -725,8 +725,13 @@ def index():
     if is_logged():
         conn = get_db_connection()
         if 'del' in request.args.keys() and 'id' in request.args.keys():
-            sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
-            delete_sim(conn, sim_metadata)
+            id_sim_to_delete = int(request.args.to_dict()['id'])
+            sim_metadata = get_single_sim_data(conn, id_sim_to_delete)
+            try:
+                delete_sim(conn, sim_metadata)
+            except Exception as e:
+                print('EXCEPTION: %s' % str(e))
+                print('Error deleting simulation %i: it does now exist' % id_sim_to_delete)
 
         flag_company_setup = check_company_setup(conn)
 
@@ -767,62 +772,67 @@ def detail():
     if is_logged():
         conn = get_db_connection()
         flag_company_setup = check_company_setup(conn)
-        sim_metadata = get_single_sim_data(conn, int(request.args.to_dict()['id']))
+        id_sim = int(request.args.to_dict()['id'])
+        sim_metadata = get_single_sim_data(conn, id_sim)
         conn.close()
+        try:
+            input_pars = json.loads(sim_metadata[14])
 
-        input_pars = json.loads(sim_metadata[14])
+            df_bsize_filename = 'static/output-bsize/%s_%i.csv' % (session['id_user'], sim_metadata[2])
+            df_bsize = pd.read_csv(df_bsize_filename)
 
-        df_bsize_filename = 'static/output-bsize/%s_%i.csv' % (session['id_user'], sim_metadata[2])
-        df_bsize = pd.read_csv(df_bsize_filename)
+            df_data_filename = 'static/output-df/%s_%i.csv' % (session['id_user'], sim_metadata[2])
+            df_data = pd.read_csv(df_data_filename)
 
-        df_data_filename = 'static/output-df/%s_%i.csv' % (session['id_user'], sim_metadata[2])
-        df_data = pd.read_csv(df_data_filename)
+            data = dict(request.args)
+            data['min_num_drivers'] = len(set(df_data["Driver#"]))
+            data['df_bsize'] = df_bsize
 
-        data = dict(request.args)
-        data['min_num_drivers'] = len(set(df_data["Driver#"]))
-        data['df_bsize'] = df_bsize
+            bus_data = {
+                'number': len(df_bsize),
+                'battery_packs_capacity': df_bsize.iloc[0]['Battery size (kWh)'],
+                'battery_packs_number': int(df_bsize.iloc[0]['Battery packs'])
+            }
 
-        bus_data = {
-            'number': len(df_bsize),
-            'battery_packs_capacity': df_bsize.iloc[0]['Battery size (kWh)'],
-            'battery_packs_number': int(df_bsize.iloc[0]['Battery packs'])
-        }
+            # Calculate CAPEX and OPEX costs
+            capex_features = json.loads(sim_metadata[11])
+            opex_features = json.loads(sim_metadata[12])
+            input_bus_model_data = json.loads(sim_metadata[15])
+            sim_name = sim_metadata[16]
+            terminals_selected = json.loads(sim_metadata[17])
+            terminals_metadata = json.loads(sim_metadata[18])
+            panto_ids = get_not_depo_charging_terminals_ids(terminals_metadata, terminals_selected)
 
-        # Calculate CAPEX and OPEX costs
-        capex_features = json.loads(sim_metadata[11])
-        opex_features = json.loads(sim_metadata[12])
-        input_bus_model_data = json.loads(sim_metadata[15])
-        sim_name = sim_metadata[16]
-        terminals_selected = json.loads(sim_metadata[17])
-        terminals_metadata = json.loads(sim_metadata[18])
-        panto_ids = get_not_depo_charging_terminals_ids(terminals_metadata, terminals_selected)
+            if 'opex_bus_efficiency_sim' not in opex_features.keys():
+                opex_features['opex_bus_efficiency_sim'] = float(opex_features['opex_buses_efficiency'])
 
-        if 'opex_bus_efficiency_sim' not in opex_features.keys():
-            opex_features['opex_bus_efficiency_sim'] = float(opex_features['opex_buses_efficiency'])
+            # Calculate the cost of a single not depo charging station and update costs
+            if len(panto_ids) > 0:
+                capex_features['capex_single_not_depo_charger_investment'] = float(capex_features['capex_panto_cost']) * float(input_pars['p_max'])/1e3
+            else:
+                capex_features['capex_single_not_depo_charger_investment'] = 0
+            input_pars['capex_bus_cost'] = float(input_pars['capex_bus_cost']) / 1e3
+            input_pars['capex_charger_cost'] = float(input_pars['capex_charger_cost']) / 1e3
 
-        # Calculate the cost of a single not depo charging station and update costs
-        if len(panto_ids) > 0:
-            capex_features['capex_single_not_depo_charger_investment'] = float(capex_features['capex_panto_cost']) * float(input_pars['p_max'])/1e3
-        else:
-            capex_features['capex_single_not_depo_charger_investment'] = 0
-        input_pars['capex_bus_cost'] = float(input_pars['capex_bus_cost']) / 1e3
-        input_pars['capex_charger_cost'] = float(input_pars['capex_charger_cost']) / 1e3
+            capex_opex_costs = calculate_economical_parameters(main_cfg=main_cfg, capex_features=capex_features,
+                                                               opex_features=opex_features, input_pars=input_pars,
+                                                               num_pantographs=len(panto_ids),
+                                                               input_bus_model_data=input_bus_model_data)
 
-        capex_opex_costs = calculate_economical_parameters(main_cfg=main_cfg, capex_features=capex_features,
-                                                           opex_features=opex_features, input_pars=input_pars,
-                                                           num_pantographs=len(panto_ids),
-                                                           input_bus_model_data=input_bus_model_data)
-        #
-        # Calculate emissions
-        ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
+            # Calculate emissions
+            ems = calculate_emissions(main_cfg['emissionsRates'], opex_features['opex_annual_usage'])
 
-        # Create bargraph object for the costs
-        plot_div = create_costs_bargraph(capex_opex_costs)
+            # Create bargraph object for the costs
+            plot_div = create_costs_bargraph(capex_opex_costs)
 
-        return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
-                               capex_features=capex_features, opex_features=opex_features, sim_name=sim_name,
-                               capex_opex_costs=capex_opex_costs, flag_company_setup=flag_company_setup, emissions=ems,
-                               input_pars=input_pars, input_bus_model_data=input_bus_model_data, plot_div=plot_div)
+            return render_template('detail.html', sim_metadata=sim_metadata, data=data, bus_data=bus_data,
+                                   capex_features=capex_features, opex_features=opex_features, sim_name=sim_name,
+                                   capex_opex_costs=capex_opex_costs, flag_company_setup=flag_company_setup, emissions=ems,
+                                   input_pars=input_pars, input_bus_model_data=input_bus_model_data, plot_div=plot_div)
+        except Exception as e:
+            print('EXCEPTION: %s' % str(e))
+            print('Error showing results of simulation %i: it does now exist' % id_sim)
+            return redirect(url_for('index'))
     else:
         return redirect(url_for('login'))
 
@@ -956,26 +966,46 @@ def edit_bus_model():
     if is_logged():
         conn = get_db_connection()
         flag_company_setup = check_company_setup(conn)
-        if request.method == 'POST':
-            # Update data on db
-            new_pars = request.form.to_dict()
-            bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
-            for k in bus_model_data.keys():
-                if k in new_pars.keys():
-                    bus_model_data[k] = new_pars[k]
-            update_bus_model(conn, bus_model_data)
+        try:
+            id_bus_model = int(request.args.to_dict()['id_bus_model'])
+            if request.method == 'POST':
+                # Update data on db
+                new_pars = request.form.to_dict()
+                bus_model_data = get_single_bus_model_data(conn, id_bus_model)
+                for k in bus_model_data.keys():
+                    if k in new_pars.keys():
+                        bus_model_data[k] = new_pars[k]
+                update_bus_model(conn, bus_model_data)
 
-            # Get data of bus model and pass them to the page
-            bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
-            conn.close()
+                # Get data of bus model and pass them to the page
+                try:
+                    bus_model_data = get_single_bus_model_data(conn, id_bus_model)
+                    conn.close()
+                except Exception as e:
+                    print('EXCEPTION: %s' % str(e))
+                    print('Error editing features of bus %i: it does now exist' % id_bus_model)
+                    conn.close()
+                    return redirect(url_for('company_manager'))
+
+                return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
+                                       flag_company_setup=flag_company_setup)
+            else:
+                # Get data of bus model and pass them to the page
+                try:
+                    bus_model_data = get_single_bus_model_data(conn, id_bus_model)
+                    conn.close()
+                except Exception as e:
+                    print('EXCEPTION: %s' % str(e))
+                    print('Error editing features of bus %i: it does now exist' % id_bus_model)
+                    conn.close()
+                    return redirect(url_for('company_manager'))
             return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
                                    flag_company_setup=flag_company_setup)
-        else:
-            # Get data of bus model and pass them to the page
-            bus_model_data = get_single_bus_model_data(conn, int(request.args.to_dict()['id_bus_model']))
+        except Exception as e:
+            print('EXCEPTION: %s' % str(e))
+            print('Error: identifier of bus is not provided')
             conn.close()
-            return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
-                                   flag_company_setup=flag_company_setup)
+            return redirect(url_for('company_manager'))
     else:
         return redirect(url_for('login'))
 
