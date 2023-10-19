@@ -56,7 +56,6 @@
     "weights": {
         "battery": 6.85
     },
-    "simulatorUrl": "http://localhost:8000/send-sim-data",
     "languages": {
         "en": "English",
         "fr": "Français",

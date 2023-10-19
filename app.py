@@ -25,7 +25,11 @@ from flask_babel import Babel, gettext
 with open('static/sims-basic-config/cfg.json', 'r') as f:
     main_cfg = json.load(f)
 
-# Get main conf
+# Get private conf
+with open('static/sims-basic-config/private.json', 'r') as f:
+    private_cfg = json.load(f)
+
+# Get key conf
 with open('static/sims-basic-config/key.json', 'r') as f:
     key_cfg = json.load(f)
 
@@ -474,7 +478,7 @@ def calculate_default_costs(input_data):
     return default_costs
 
 
-def launch_sim_instance(conn, main_cfg, pars):
+def launch_sim_instance(conn, main_cfg, private_cfg, pars):
     cur = conn.cursor()
 
     ts = pars['data_file'].replace('.csv', '').split(os.sep)[-1].split('_')[-1]
@@ -506,7 +510,7 @@ def launch_sim_instance(conn, main_cfg, pars):
     }
 
     # Send the POST request
-    response = requests.post(main_cfg['simulatorUrl'], files=files_to_send)
+    response = requests.post(private_cfg['simulatorUrl'], files=files_to_send)
     data_response = json.loads(response.text)
 
     if response.status_code == http.HTTPStatus.OK and data_response['error'] is False:
@@ -905,7 +909,7 @@ def new_sim_step2():
             try:
                 # Run the simulation and save the output in the DB
                 sim_pars = request.form.to_dict()
-                launch_sim_instance(conn=conn, main_cfg=main_cfg, pars=sim_pars)
+                launch_sim_instance(conn=conn, main_cfg=main_cfg, private_cfg=private_cfg, pars=sim_pars)
                 conn.close()
                 return redirect(url_for('index'))
             except Exception as e:
