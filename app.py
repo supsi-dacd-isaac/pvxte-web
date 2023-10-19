@@ -97,8 +97,8 @@ def check_login_data(conn, u, p):
 
 
 def check_company_setup(conn):
-    terminal_data = conn.execute("SELECT * FROM terminal WHERE company='%s'" % session['company_user']).fetchall()
-    distance_data = conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
+    terminal_data = conn.execute("SELECT * FROM terminal WHERE id_user='%s'" % session['id_user']).fetchall()
+    distance_data = conn.execute("SELECT * FROM distance WHERE id_user='%s'" % session['id_user']).fetchall()
     if len(terminal_data) > 0 and len(distance_data) > 0:
         return True
     else:
