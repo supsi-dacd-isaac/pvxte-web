@@ -168,6 +168,11 @@ def get_buses_models_data(conn):
         bus_data.append(row_dict)
     return bus_data
 
+def check_id_bus_model(buses_models, id_bus):
+    for bm in buses_models:
+        if id_bus == int(bm['id']):
+            return True
+    return False
 
 def get_available_buses_models():
     bm_files = []
@@ -968,37 +973,43 @@ def edit_bus_model():
         flag_company_setup = check_company_setup(conn)
         try:
             id_bus_model = int(request.args.to_dict()['id_bus_model'])
-            if request.method == 'POST':
-                # Update data on db
-                new_pars = request.form.to_dict()
-                bus_model_data = get_single_bus_model_data(conn, id_bus_model)
-                for k in bus_model_data.keys():
-                    if k in new_pars.keys():
-                        bus_model_data[k] = new_pars[k]
-                update_bus_model(conn, bus_model_data)
+            buses_models = get_buses_models_data(conn)
 
-                # Get data of bus model and pass them to the page
-                try:
+            # Check if the bus model is owned by the user
+            if check_id_bus_model(buses_models, id_bus_model) is True:
+                if request.method == 'POST':
+                    # Update data on db
+                    new_pars = request.form.to_dict()
                     bus_model_data = get_single_bus_model_data(conn, id_bus_model)
-                    conn.close()
-                except Exception as e:
-                    print('EXCEPTION: %s' % str(e))
-                    print('Error editing features of bus %i: it does now exist' % id_bus_model)
-                    conn.close()
-                    return redirect(url_for('company_manager'))
+                    for k in bus_model_data.keys():
+                        if k in new_pars.keys():
+                            bus_model_data[k] = new_pars[k]
+                    update_bus_model(conn, bus_model_data)
 
-                return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
-                                       flag_company_setup=flag_company_setup)
+                    # Get data of bus model and pass them to the page
+                    try:
+                        bus_model_data = get_single_bus_model_data(conn, id_bus_model)
+                        conn.close()
+                    except Exception as e:
+                        print('EXCEPTION: %s' % str(e))
+                        print('Error editing features of bus %i: it does now exist' % id_bus_model)
+                        conn.close()
+                        return redirect(url_for('company_manager'))
+
+                    return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
+                                           flag_company_setup=flag_company_setup)
+                else:
+                    # Get data of bus model and pass them to the page
+                    try:
+                        bus_model_data = get_single_bus_model_data(conn, id_bus_model)
+                        conn.close()
+                    except Exception as e:
+                        print('EXCEPTION: %s' % str(e))
+                        print('Error editing features of bus %i: it does now exist' % id_bus_model)
+                        conn.close()
+                        return redirect(url_for('company_manager'))
             else:
-                # Get data of bus model and pass them to the page
-                try:
-                    bus_model_data = get_single_bus_model_data(conn, id_bus_model)
-                    conn.close()
-                except Exception as e:
-                    print('EXCEPTION: %s' % str(e))
-                    print('Error editing features of bus %i: it does now exist' % id_bus_model)
-                    conn.close()
-                    return redirect(url_for('company_manager'))
+                return redirect(url_for('company_manager'))
             return render_template('edit_bus_model.html', bus_model_data=bus_model_data,
                                    flag_company_setup=flag_company_setup)
         except Exception as e:
@@ -1088,8 +1099,11 @@ def company_manager():
 
         elif request.method == 'GET':
             if 'del' in request.args.keys() and 'id_bus_model' in request.args.keys():
-                delete_bus_model(conn, request.args['id_bus_model'])
-                buses_models = get_buses_models_data(conn)
+                id_bus_model_to_delete = int(request.args['id_bus_model'])
+                # Check if the bus model is owned by the user
+                if check_id_bus_model(buses_models, id_bus_model_to_delete) is True:
+                    delete_bus_model(conn, id_bus_model_to_delete)
+                    buses_models = get_buses_models_data(conn)
 
             terminals_raw_data = get_terminals_metadata(conn)
             terminals_data = handle_terminals_metadata(terminals_raw_data)
