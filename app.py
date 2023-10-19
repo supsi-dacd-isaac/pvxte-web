@@ -592,27 +592,28 @@ def generate_graph(nodes_list, edges_list):
     return graph
 
 def clean_terminals(conn):
-    conn.execute("DELETE FROM terminal WHERE company = ?", (session['company_user'],))
+    conn.execute("DELETE FROM terminal WHERE id_user = ?", (session['id_user'],))
     conn.commit()
 
 
 def clean_distances(conn):
-    conn.execute("DELETE FROM distance WHERE company = ?", (session['company_user'],))
+    conn.execute("DELETE FROM distance WHERE id_user = ?", (session['id_user'],))
     conn.commit()
 
 
 def update_terminals(conn, terminals_file_path):
     df = pd.read_csv(terminals_file_path)
     df = df.assign(id=df.index)
+    df = df.assign(id_user=np.array([session['id_user'] for _ in range(len(df.index))]))
     df = df.assign(company=np.array([session['company_user'] for _ in range(len(df.index))]))
     df = df.rename(columns={'terminal_station': 'name'})
-    df = df.reindex(columns=['name', 'company', 'elevation_m', 'is_charging_station'])
+    df = df.reindex(columns=['id_user', 'company', 'name', 'elevation_m', 'is_charging_station'])
     df.to_sql('terminal', conn, if_exists='append', index=False)
 
     terms = get_terminals_metadata(conn)
     terms_dict = {}
     for term in terms:
-        terms_dict[term[1]] = term[0]
+        terms_dict[term[2]] = term[0]
     return terms_dict
 
 
@@ -627,29 +628,30 @@ def update_distances(conn, distances_file_path, terms_dict):
     df = df.assign(id_starting_station=starting_stations_ids)
     df = df.assign(id_arrival_station=arrival_stations_ids)
     df = df.assign(company=np.array([session['company_user'] for _ in range(len(df.index))]))
+    df = df.assign(id_user=np.array([session['id_user'] for _ in range(len(df.index))]))
     df = df.drop(['starting_station', 'arrival_station'], axis=1)
-    df = df.reindex(columns=['id_starting_station', 'id_arrival_station', 'distance_km', 'avg_travel_time_min', 'company'])
+    df = df.reindex(columns=['id_user', 'id_starting_station', 'id_arrival_station', 'distance_km', 'avg_travel_time_min', 'company'])
     df.to_sql('distance', conn, if_exists='append', index=False)
 
 
 def get_terminals_metadata(conn):
-    return conn.execute("SELECT * FROM terminal WHERE company='%s' ORDER BY name" % session['company_user']).fetchall()
+    return conn.execute("SELECT * FROM terminal WHERE id_user='%s' ORDER BY name" % session['id_user']).fetchall()
 
 def handle_terminals_metadata(raw_data):
     res_data = []
     for rd in raw_data:
-        res_data.append({'name': rd[1], 'company': rd[2], 'elevation': rd[3], 'is_charging_station': rd[4]})
+        res_data.append({'name': rd[2], 'company': rd[3], 'elevation': rd[4], 'is_charging_station': rd[5]})
     return res_data
 
 def get_distances_matrix(conn):
-    return conn.execute("SELECT * FROM distance WHERE company='%s'" % session['company_user']).fetchall()
+    return conn.execute("SELECT * FROM distance WHERE id_user='%s'" % session['id_user']).fetchall()
 
 
 def get_terminals_metadata_dict(conn):
     terms = get_terminals_metadata(conn)
     terms_dict = {}
     for term in terms:
-        terms_dict[term[1]] = {'id': term[0], 'elevation': term[3], 'is_charging_station': term[4]}
+        terms_dict[term[2]] = {'id': term[0], 'elevation': term[4], 'is_charging_station': term[5]}
     return terms_dict
 
 
@@ -657,7 +659,7 @@ def get_distances_matrix_dict(conn):
     distances = get_distances_matrix(conn)
     distances_dict = {}
     for d in distances:
-        distances_dict[d[0], d[1]] = {'distance_km': d[2], 'avg_travel_time_min': d[3]}
+        distances_dict[d[1], d[2]] = {'distance_km': d[3], 'avg_travel_time_min': d[4]}
     return distances_dict
 
 
@@ -1084,6 +1086,7 @@ def company_manager():
                 # Get the new data from the DB
                 terminals_raw_data = get_terminals_metadata(conn)
                 terminals_data = handle_terminals_metadata(terminals_raw_data)
+                print(terminals_data)
 
             except Exception as e:
                 # Delete the uploaded files
