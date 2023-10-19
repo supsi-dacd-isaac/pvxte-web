@@ -1,9 +1,9 @@
 terminal_station,elevation_m,is_charging_station
-Depot,230,depo_charger
-Chiasso_Stazione,230,no
-Cantine_di_Sotto,200,not_depo_charger
-Crocione,241,no
-Serfontana,267,no
-Seseglio,269,no
-Morbio_Posta,346,no
-Vacallo,317,no
+TERMINAL_A,230,depo_charger
+TERMINAL_B,230,no
+TERMINAL_C,200,not_depo_charger
+TERMINAL_D,241,no
+TERMINAL_E,267,no
+TERMINAL_F,269,no
+TERMINAL_G,346,no
+TERMINAL_H,317,no
