@@ -26,6 +26,25 @@
                         <td><input type="text" class="form-control-sm" name="email" value="{{ user_data['email'] }}"></td>
                     </tr>
                     <tr>
+                        <td>{{ gettext('Company') }}:</td>
+                        <td>
+                            <select id="companies_select" placeholder="{{ gettext('Company') }}" class="company" name="company">
+                                {% for company in companies %}
+                                    {% if session['company_user'] == company  %}
+                                        <option value="{{company}}" selected="selected">{{ company }}</option>
+                                    {% else  %}
+                                        <option value="{{company}}">{{ company }}</option>
+                                    {% endif %}
+                                {% endfor %}
+                                <option value="new">{{ 'New' }}</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('New company') }}:</td>
+                        <td><input id="new_company" type="text" placeholder="{{ gettext('New company') }}" name="new_company" value=""></td>
+                    </tr>
+                    <tr>
                         <td>{{ gettext('Language') }}</td>
                         <td>
                             <select class="form-select" name="language">

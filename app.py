@@ -140,8 +140,14 @@ def get_user_data(conn):
 
 def update_user_data(conn, new_data):
     cur = conn.cursor()
-    cur.execute("UPDATE user SET username=?, email=?, language=? WHERE id=?",
-                (new_data['username'], new_data['email'], new_data['language'], session['id_user']))
+    if new_data['company'] == 'new':
+        company = new_data['new_company']
+    else:
+        company = new_data['company']
+    session['company_user'] = company
+
+    cur.execute("UPDATE user SET username=?, email=?, company=?, language=? WHERE id=?",
+                (new_data['username'], new_data['email'], company, new_data['language'], session['id_user']))
     session['username'] = new_data['username']
     session['email'] = new_data['email']
     session['language'] = new_data['language']
@@ -1034,12 +1040,13 @@ def edit_user():
         conn = get_db_connection()
         flag_company_setup = check_company_setup(conn)
 
+        companies = get_companies_names(conn)
         if request.method == 'POST':
             form_data = request.form.to_dict()
             if form_data['type'] == 'change_settings':
                 # Update main settings
-
                 update_user_data(conn, form_data)
+                companies = get_companies_names(conn)
             elif form_data['type'] == 'change_pwd':
                 # Update password
                 res = change_user_password(conn, form_data)
@@ -1049,13 +1056,15 @@ def edit_user():
             user_data = get_user_data(conn)
             conn.close()
             return render_template('edit_user.html', user_data=user_data, error=err,
-                                   languages=main_cfg['languages'], flag_company_setup=flag_company_setup)
+                                   languages=main_cfg['languages'], flag_company_setup=flag_company_setup,
+                                   companies=companies)
         else:
             # Get data from DB
             user_data = get_user_data(conn)
             conn.close()
             return render_template('edit_user.html', user_data=user_data,
-                                   languages=main_cfg['languages'], flag_company_setup=flag_company_setup)
+                                   languages=main_cfg['languages'], flag_company_setup=flag_company_setup,
+                                   companies=companies)
     else:
         return redirect(url_for('login'))
 
