@@ -103,7 +103,9 @@ def check_login_data(conn, u, p):
 def check_company_setup(conn):
     terminal_data = conn.execute("SELECT * FROM terminal WHERE id_user='%s'" % session['id_user']).fetchall()
     distance_data = conn.execute("SELECT * FROM distance WHERE id_user='%s'" % session['id_user']).fetchall()
-    if len(terminal_data) > 0 and len(distance_data) > 0:
+    bus_model_data = conn.execute("SELECT * FROM bus_model WHERE id_user='%s'" % session['id_user']).fetchall()
+
+    if len(terminal_data) > 0 and len(distance_data) > 0 and len(bus_model_data):
         return True
     else:
         return False
@@ -1099,8 +1101,9 @@ def company_manager():
                 # Get the new data from the DB
                 terminals_raw_data = get_terminals_metadata(conn)
                 terminals_data = handle_terminals_metadata(terminals_raw_data)
-                print(terminals_data)
 
+                # Update the company setup
+                flag_company_setup = check_company_setup(conn)
             except Exception as e:
                 # Delete the uploaded files
                 os.unlink(terminals_file_path)
@@ -1120,6 +1123,9 @@ def company_manager():
                 if check_id_bus_model(buses_models, id_bus_model_to_delete) is True:
                     delete_bus_model(conn, id_bus_model_to_delete)
                     buses_models = get_buses_models_data(conn)
+
+                    # Update the company setup
+                    flag_company_setup = check_company_setup(conn)
 
             terminals_raw_data = get_terminals_metadata(conn)
             terminals_data = handle_terminals_metadata(terminals_raw_data)

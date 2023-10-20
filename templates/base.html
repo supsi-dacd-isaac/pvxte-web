@@ -13,8 +13,8 @@
         <div class="border-end bg-light" id="sidebar-wrapper">
             <div class="sidebar-heading border-bottom bg-pvxte-top-bar nav-link-pvxte-white">{{ gettext('PVXTE Web GUI') }}</div>
             <div class="list-group list-group-flush">
+                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('index') }}">{{ gettext('Simulations') }}</a></a>
                 {% if flag_company_setup == True %}
-                    <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('index') }}">{{ gettext('Simulations') }}</a></a>
                     <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('new_sim_step1') }}">{{ gettext('Create simulation') }}</a>
                 {% endif %}
                 <a class="list-group-item list-group-item-action list-group-item-light p-3" href="{{ url_for('company_manager') }}">{{ gettext('Company management') }}</a>
