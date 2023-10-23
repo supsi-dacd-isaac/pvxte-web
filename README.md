@@ -87,11 +87,15 @@ Next, you  must also provide the schedule of the buses serving the line/ lines t
 ### Step2
 
 In the 2nd step, you must choose which bus lines and the day type the simulation must include. The selection window automatically displays all the available bus lines and day types extracted from the timetable you uploaded in the first step, 
-as shown in the following picture.
+as shown in the following picture. 
 
 ![Step2 Top](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_top_selected.png)
 
-If the bus line you want to simulate is interconnected or shares buses with some other lines, you must include all the interconnected bus lines in the simulation as well. This step also provides you with the space to include economic parameters 
+If the bus line you want to simulate is interconnected or shares buses with some other lines, you must include all the interconnected bus lines in the simulation as well. 
+
+For a detailed explanation of the _Energy model calibration parameter_ shown in the bottom of the image above, please refer to the [related section](https://github.com/supsi-dacd-isaac/pvxte-web#energy-consumption-calibration).
+
+This step also provides you with the space to include economic parameters 
 that the model uses to estimate the investment and operational costs of the electric bus fleet, as depicted in the next picture. After that, you can simulate by clicking “Launch simulation.” 
 
 ![Step2 Bottom](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_bottom.png)
