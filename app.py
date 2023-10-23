@@ -508,6 +508,13 @@ def launch_sim_instance(conn, main_cfg, private_cfg, pars):
         "distances_matrix": distances_matrix
     }
 
+    # Create the lines string
+    str_lines = ''
+    for par in pars:
+        if 'line_' in par:
+            str_lines = '%s%s,' % (str_lines, par.replace('line_', ''))
+    str_lines = str_lines[:-1]
+
     input_pars_file = pars['data_file'].replace('input-csv', 'json-input-pars').replace('csv', 'json')
     with open(input_pars_file, "w") as fw:
         json.dump(form_data, fw)
@@ -522,10 +529,10 @@ def launch_sim_instance(conn, main_cfg, private_cfg, pars):
     data_response = json.loads(response.text)
 
     if response.status_code == http.HTTPStatus.OK and data_response['error'] is False:
-        cur.execute("INSERT INTO sim (id_user, created_at, company, day_type, battery_size, max_charging_power, "
+        cur.execute("INSERT INTO sim (id_user, created_at, company, line, day_type, battery_size, max_charging_power, "
                     "elevation_deposit, elevation_starting_station, elevation_arrival_station, name, "
-                    "input_terminals_selected, input_terminals_metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (int(session['id_user']), int(ts), session['company_user'], pars['day_type'],
+                    "input_terminals_selected, input_terminals_metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (int(session['id_user']), int(ts), session['company_user'], str_lines, pars['day_type'],
                      float(bus_model_data['batt_pack_capacity']), float(pars['p_max']), 0, 0, 0, pars['sim_name'],
                      json.dumps(terminals_selected), json.dumps(terminals_metadata)))
         conn.commit()

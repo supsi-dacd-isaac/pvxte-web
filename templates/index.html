@@ -48,8 +48,8 @@
                 {% endif %}
                     <td>{{ sim['name'] }}</td>
                     <td>{{ sim['created_at_dt'] }}</td>
-                    {% if sim['line'] != None %}
-                        <td>{{ sim['line'] }}</td>
+                    <td>{{ sim['line'] }}</td>
+                    {% if sim['capex_pars'] != None %}
                         <td>
                             {% if sim['capex_pars'] != 'error' %}
                                 <a class="link-dark" href="{{ url_for('detail', id=sim['id']) }}">
@@ -76,11 +76,6 @@
                         </td>
                     {% else %}
                         <td>&nbsp;</td>
-                        <td> </td>
-<!--                        <td>&nbsp;</td>-->
-<!--                        <td>&nbsp;</td>-->
-<!--                        <td>&nbsp;</td>-->
-<!--                        <td>&nbsp;</td>-->
                         <td>
                             <a class="link-dark" href="{{ url_for('index', id=sim['id'], del='y') }}" onclick="return confirm('{{ gettext('Are you sure you want to delete the simulation?') }}')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-eraser" viewBox="0 0 16 16">
