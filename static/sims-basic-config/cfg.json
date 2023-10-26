@@ -68,11 +68,11 @@
         "PM10": 0.015
     },
     "lifetimes": {
-        "bus": 12,
-        "battery": 6,
-        "depoCharger": 10,
-        "pantoCharger": 12,
-        "connectionFee": 20
+        "bus": 11,
+        "battery": 9,
+        "depoCharger": 11,
+        "pantoCharger": 14,
+        "connectionFee": 22
     },
     "defaultModelParameters": {
         "scale": 1.0
