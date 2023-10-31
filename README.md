@@ -11,8 +11,8 @@ The PVxTE web tool, as such, is a simplified tool that we can deploy and run via
 
 
 The project PVTutt'Elettrico was financed by the [Swiss Federal Office of Transport](https://www.bav.admin.ch/bav/it/home.html) as part of the 
-[SETP 2050](https://www.bav.admin.ch/bav/it/home/temi-generali/ricerca-e-innovazione/programmi-di-ricerca-e-d-innovazione/Energia2050.html) programme activities.
-PVTutt'Elettrico is an open-source project released under [MIT license](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/LICENSE).
+[SETP 2050](https://www.bav.admin.ch/bav/it/home/temi-generali/ricerca-e-innovazione/programmi-di-ricerca-e-d-innovazione/Energia2050.html) programme activities with the grant agreement 0780000887.
+PVxTE is an open-source project released under [MIT license](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/LICENSE).
 
 
 The rest of the documentation explains the architecture of the web tool. It also provides an easy-to-understand guide on how to use this web tool for your specific use case.  
