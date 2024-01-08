@@ -98,7 +98,7 @@ For a detailed explanation of the _Energy model calibration parameter_ shown in 
 This step also provides you with the space to include economic parameters 
 that the model uses to estimate the investment and operational costs of the electric bus fleet, as depicted in the next picture. After that, you can simulate by clicking “Launch simulation.” 
 
-![Step2 Bottom](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_bottom.png)
+![Step2 Bottom](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/capex-opex-section.png)
 
 ## Viewing results
 
