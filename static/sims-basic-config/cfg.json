@@ -48,7 +48,7 @@
         "powerTariff": 0
     },
     "defaultOperativeFeatures": {
-        "busesEfficiency": 1.15,
+        "busesEfficiency": 0.9,
         "busesMaintenance": 0.21,
         "chargingEfficiency": 2,
         "annualUsage": 100000

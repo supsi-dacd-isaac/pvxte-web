@@ -141,10 +141,7 @@
                     <tr>
                         <td colspan="2" align="center"><h3>{{ gettext('OPEX section') }}</h3></td>
                     </tr>
-                    <tr>
-                        <td>{{ gettext('Buses efficiency') }}</td>
-                        <td><input type="text" class="form-control-sm" name="opex_buses_efficiency" value="{{ main_cfg['defaultOperativeFeatures']['busesEfficiency'] }}"> kWh/km</td>
-                    </tr>
+                    <input type="hidden" class="form-control-sm" name="opex_buses_efficiency" value="{{ main_cfg['defaultOperativeFeatures']['busesEfficiency'] }}">
                     <tr>
                         <td>{{ gettext('Buses maintainance') }}</td>
                         <td><input type="text" class="form-control-sm" name="opex_buses_maintainance" value="{{ main_cfg['defaultOperativeFeatures']['busesMaintenance'] }}"> CHF/km</td>
