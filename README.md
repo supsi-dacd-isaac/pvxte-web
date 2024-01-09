@@ -72,7 +72,7 @@ A new simulation can be created by clicking “Create simulation” in the left 
 Although this simplifies, it does correspond to most real-world cases where, typically, only one type of bus is used to serve a particular line. If you need to simulate several bus lines simultaneously and they use different bus types, 
 we recommend you separate them into different simulations. 
 
-![Step1](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step1.png)
+![Step1](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/create-sim-step-1.png)
 
 Next, you  must also provide the schedule of the buses serving the line/ lines that you wish to simulate. To avoid unexpected conflicts, we recommend the users to follow the example file. The accepted timetable is a table format that has the following columns:
 
@@ -98,7 +98,7 @@ For a detailed explanation of the _Energy model calibration parameter_ shown in 
 This step also provides you with the space to include economic parameters 
 that the model uses to estimate the investment and operational costs of the electric bus fleet, as depicted in the next picture. After that, you can simulate by clicking “Launch simulation.” 
 
-![Step2 Bottom](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_bottom.png)
+![Step2 Bottom](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/capex-opex-section.png)
 
 ## Viewing results
 
