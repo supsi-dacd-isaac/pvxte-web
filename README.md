@@ -17,8 +17,10 @@ PVxTE is an open-source project released under [MIT license](https://github.com/
 
 The rest of the documentation explains the architecture of the web tool. It also provides an easy-to-understand guide on how to use this web tool for your specific use case.  
 
-
-![Landing Page](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/landing_page.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/landing_page.png" alt="Landing page" width="85%"/>
+</p>
+<p align="center"><em>Figure 1: Landing page</em></p>
 
 ## Model basics
 The workhorse of the web tool is a non-linear mixed integer (MINLP) optimization model. 
