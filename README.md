@@ -46,8 +46,8 @@ Bus model description:
 * Investment cost of a battery pack in CHF (real)
 
 Schedule, terminal, and distance information:
-* Terminals file (CSV format described in tool documentation) providing elevation and charging infrastructure availability at each terminal location,
-* Distance matrix (CSV format described in tool documentation) providing distances between each pair of terminal stations,
+* Terminals file (CSV format described [here](https://github.com/supsi-dacd-isaac/pvxte-web?tab=readme-ov-file#terminals-and-distance-matrix)) providing elevation and charging infrastructure availability at each terminal location,
+* Distance matrix (CSV format described [here](https://github.com/supsi-dacd-isaac/pvxte-web?tab=readme-ov-file#terminals-and-distance-matrix)) providing distances between each pair of terminal stations,
 * Charging power in kW (real),
 * Daily trips schedule (CSV format described [here](https://github.com/supsi-dacd-isaac/pvxte-web?tab=readme-ov-file#step1)).
 
