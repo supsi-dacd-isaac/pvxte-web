@@ -31,6 +31,40 @@ would need to execute the optimal bus schedule, which is the result of the MINLP
 
 ## User Interface
 
+### Inputs
+Bus model description:
+* Bus model identifier (string) – A name to uniquely identify the bus model,
+* Bus length in meters (integer),
+* Empty weight of a bus without battery in kg (integer),
+* Maximum passenger capacity (integer),
+* Minimum number of battery packs required (integer),
+* Maximum number of battery packs allowed (integer),
+* Size of one battery pack in kWh (integer),
+* Bus lifetime in years (integer),
+* Lifetime of a battery pack in years (integer),
+* Investment cost of a bus in CHF (real),
+* Investment cost of a battery pack in CHF (real)
+
+Schedule, terminal, and distance information:
+* Terminals file (CSV format described in tool documentation) providing elevation and charging infrastructure availability at each terminal location,
+* Distance matrix (CSV format described in tool documentation) providing distances between each pair of terminal stations,
+* Charging power in kW (real),
+* Daily trips schedule (CSV format described in tool documentation).
+
+Other inputs:
+* Investment cost of a charger in CHF (real),
+* Grid connection cost in CHF/ kW (real),
+* Lifetime of a charger in years (real),
+* Lifetime of the transformer in years (real),
+* Interest rate as a percentage (real),
+* Bus maintenance cost in CHF/km (real),
+* Charging efficiency (real),
+* Annual usage per single bus in km (integer),
+* Energy cost in CHF/ kWh (real),
+* Annual increase in energy cost in percentage,
+* Demand tariff in CHF/ kW (real),
+* Diesel cost in CHF/liter (real),
+
 ### Signup and login page
 
 You can access the PVxTE web tool via [pvxte.isaac.supsi.ch](https://pvxte.isaac.supsi.ch). On the landing page, you can login if you already have an account or, if not, 
