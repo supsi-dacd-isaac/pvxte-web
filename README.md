@@ -49,7 +49,7 @@ Schedule, terminal, and distance information:
 * Terminals file (CSV format described in tool documentation) providing elevation and charging infrastructure availability at each terminal location,
 * Distance matrix (CSV format described in tool documentation) providing distances between each pair of terminal stations,
 * Charging power in kW (real),
-* Daily trips schedule (CSV format described in tool documentation).
+* Daily trips schedule (CSV format described [here](https://github.com/supsi-dacd-isaac/pvxte-web?tab=readme-ov-file#step1)).
 
 Other inputs:
 * Investment cost of a charger in CHF (real),
@@ -92,6 +92,8 @@ The following two pictures show how to add/edit buses model.
 ![New Bus](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/new_bus.png)
 
 ![Edit Bus](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/edit-bus.png)
+
+### Terminals and distance matrix
 
 The terminals file describes the depot and starting and destination terminals of the buses, including their elevation above sea level as shown in teh following picture. We recommend the users download and edit the example file provided to ensure there will be no conflicts with the acceptable data formats. Currently, only one depot can be designated. Multiple depot simulations are extremely heavy in computational complexity and, therefore, are not supported by the web tool. 
 The distances file provides the travel distance (in km) and time (minutes) between any two entries in the terminals file. If there are k terminal stations (including the depot) in the terminals file, then there should be a k2 number of rows in the distance file. If you want to manually restrict buses from transiting between two terminal stations, you may add a large number (i.e., 1000) for distance and time. Make sure to use the correct units for both time and distance.  Once again, we recommend downloading and editing the example file provided. 
