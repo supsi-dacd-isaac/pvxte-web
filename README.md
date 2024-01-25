@@ -105,15 +105,35 @@ The data is not shared between user accounts.
 <p align="center">
   <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/new_bus.png" alt="new bus" width="65%"/>
 </p>
-<p align="center"><em>Figure 5: Create new bus model.</em></p>
+<p align="center"><em>Figure 5: Create new bus model</em></p>
 
 ### Terminals and distance matrix
 
-The terminals file describes the depot and starting and destination terminals of the buses, including their elevation above sea level as shown in teh following picture. We recommend the users download and edit the example file provided to ensure there will be no conflicts with the acceptable data formats. Currently, only one depot can be designated. Multiple depot simulations are extremely heavy in computational complexity and, therefore, are not supported by the web tool. 
-The distances file provides the travel distance (in km) and time (minutes) between any two entries in the terminals file. If there are k terminal stations (including the depot) in the terminals file, then there should be a k2 number of rows in the distance file. If you want to manually restrict buses from transiting between two terminal stations, you may add a large number (i.e., 1000) for distance and time. Make sure to use the correct units for both time and distance.  Once again, we recommend downloading and editing the example file provided. 
-The data entered/ uploaded using your login is not visible or accessible to someone with a different login. Therefore, if multiple people within the same organization want to use the web tool, creating a single organizational login that all organization users can share might be convenient.
+The two inputs that we use to characterize the public transportation network are the information pertaining to the terminals and the distance matrix.
+They are uploaded in a pre-defined CSV format. We recommend the users download and edit the example file provided to ensure there will be no conflicts with the acceptable data formats (See Figure 6). 
+The terminals file contains the following columns.
 
-![Terminals](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/terminals.png)
+* `terminal_station:` Terminal station name (string), if the terminal station is the depot, then the name must be “Depot”,
+* `elevation_m:` Elevation above sea level in meters (real),
+* `is_charging_station:` Type of charging infrastructure available at the terminal (string, categorical), the options are “no”, “depo_charger”, and “not_depo_charger”.
+
+The web tool is limited to simulating single-depot problems. Therefore, only one terminal station can be designated as the depot with the name "Depot" (Case sensitive). 
+The depot must have charging infrastructure of the type "depo_charger". Failure to assign charging infrastructure to the depot results in model infeasibility.
+Non depot chargers can be used to assign fast-charging infrastructure such as pantographs at terminal stations other than the depot.
+
+The inability of the web tool to simulate multi-depot scenarios is not a problem for the vast majority of practical applications concerning urban and suburban bus lines. 
+Even in a rare multi-depot scenario, if all buses return to the same depot they originate from, the user can disaggregate the multi-depot problem into several single-depot problems as a workaround.
+The cases in which a bus may not return to the same depot it originates from is a typical use case for long-distance buses, such as FlixBus, which is beyond the scope of this project.
+
+The distances file describes the travel distance (in km) and time (minutes) between any two terminal stations. 
+If there are *k* terminal stations (including the depot) in the terminals file, then there should be a *k<sup>2</sup>* number of rows in the distance file. 
+The user can manually restrict buses from transiting between two terminal stations by setting the travel distance and time between the two terminals to a very large number (i.e., 1000). 
+Make sure to use the correct units for both time and distance. 
+
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/terminals.png" alt="terminals" width="65%"/>
+</p>
+<p align="center"><em>Figure 6: Description of the public transport network using terminals and distance information </em></p>
 
 
 ## Create a new simulation
@@ -187,6 +207,7 @@ First, simulate with the default calibration parameter value of 1.0 and observe 
 
 ## Limitations of the web tool
 * The current model only supports evaluating the feasibility of a fully electrified fleet. Therefore, only electric bus models may be inserted,
+* Currently, only one depot can be designated
 
 ## References
 <a id="1">[1]</a> 
