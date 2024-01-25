@@ -84,13 +84,21 @@ The user profile encapsulates all the information related to a particular user t
 
 ### Company management section
 
-If you use the tool for the first time, you must set up a company profile. Click on “company management,” and you will be taken to a page, shown in the following image, 
-that lets you describe information related to your bus fleet, terminal stations, and trip distances. This is fundamental information that is required to set up the optimization model.
+The company management section is where you can manage your company specific input data. These include the type of buses you wish to simulate, the bus terminals, 
+and the distances between the terminal stations. Specifying these data under company profile makes it easier to reuse the same data for multiple simulations.
 
-![Company Page](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/buses.png)
+As shown in Figure 3, the pre-existing bus models appears in at the top of the company management section as a table. 
 
-The pre-existing bus models are displayed in a table. You can add a new bus model by clicking “Add new”. You may also edit an existing bus model by clicking on the name of 
-the existing bus model in the table. The information required to describe a bus model accurately is available from the electric bus manufacturers. Some important points to note:
+shows a section of the company management section. The left menu shows the different options available under the company management section. You can add 
+a new bus model by clicking “Add new”. You may also edit an existing bus model by clicking on the name of 
+the existing bus model in the table.
+
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/buses.png" alt="bus models" width="85%"/>
+</p>
+<p align="center"><em>Figure 4: Company management - Bus models</em></p>
+
+The information required to describe a bus model accurately is available from the electric bus manufacturers. Some important points to note:
 * The current model only supports evaluating the feasibility of a fully electrified fleet. Therefore, only electric bus models may be inserted,
 * All bus models inserted into the web tool will be stored in a database under the company profile that you create. That means you can reuse the same bus model for a feasibility assessment again using the same login. This is true for all other inputs as well.
 
