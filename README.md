@@ -212,7 +212,8 @@ The current version of the web tool that is developed within the scope of the PV
 * The model supports evaluating the one-to-one replacement of diesel buses with electric buses. Therefore, the number of electric buses must be equal to the number of diesel buses in the original fleet. Moreover, the model assumes that the electric buses are homogeneous. 
 * The fleet must consist of electric buses only, i.e., the user cannot simulate a mixed fleet of diesel and electric buses in the same simulation,
 * The fleet must consist of only one bus type, i.e., the user cannot simulate multiple bus types (e.g., 12m and 18m) in the same simulation.
-* Multi-depot scenarios are not supported; however, the user can simulate multi-depot scenarios by disaggregating the problem into several single-depot problems.
+* Multi-depot scenarios are not supported; however, the user can simulate multi-depot scenarios by disaggregating the problem into several single-depot problems,
+* The simplified energy consumption model can lead to inaccuracies. The user is advised to compare the results with measured observations calibrate the energy consumption model for better results.
 
 ## References
 <a id="1">[1]</a> 
