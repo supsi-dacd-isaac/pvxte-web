@@ -149,7 +149,7 @@ From the web tool's point of view, one simulation corresponds to;
 
 The simulation setup is divided into two steps.
 
-### Step1
+### Step 1
 
 The first step is to choose the bus model, the timetable, and the charging power. 
 The bus models that you have already created will appear as a drop-down list. Choose the appropriate bus model from the list for your simulation. 
@@ -173,7 +173,11 @@ The trip timetable is a CSV file that contains the following columns:
 To avoid unexpected conflicts, we recommend the users to follow the example file.
 As shown in Figure 7, the charging power for the types of charging infrastructure available at the terminals must also be specified.
 
-### Step2
+A special case is when several bus lines are operationally integrated, i.e., the same bus can operate in different bus lines at different times of the day. 
+In such cases, we have a shared timetable for the integrated bus lines. As a result, trying to simulate only one line leads to infeasibility as some of the trips (and connections) cannot be satisfied. 
+Therefore, if lines are operationally integrated, the simulation must include all the interconnected bus lines and fleet that corresponds to it.
+
+### Step 2
 
 In the 2nd step, you must choose which bus lines and the day type the simulation must include. The selection window automatically displays all the available bus lines and day types extracted from the timetable you uploaded in the first step, 
 as shown in the following picture. 
