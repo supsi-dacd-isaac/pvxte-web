@@ -206,8 +206,13 @@ Hjelkrem et al. modeled each trip as a sequence of many small trip segments, eac
 First, simulate with the default calibration parameter value of 1.0 and observe the resulting bus energy efficiency (kWh/km). If it approximately matches your previous knowledge, then the energy consumption model already generates a reasonable approximation of the energy consumption of your bus line. Otherwise, either increase or decrease the calibration parameter accordingly. 
 
 ## Limitations of the web tool
-* The current model only supports evaluating the feasibility of a fully electrified fleet. Therefore, only electric bus models may be inserted,
-* Currently, only one depot can be designated
+
+The current version of the web tool that is developed with the scope of the PVTutt'Elettrico project has the following limitations.
+
+* The model supports evaluating the one-to-one replacement of diesel buses with electric buses. Therefore, the number of electric buses must be equal to the number of diesel buses in the original fleet. Moreover, the model assumes that the electric buses are homogeneous. 
+* The fleet must consist of electric buses only, i.e., the user cannot simulate a mixed fleet of diesel and electric buses in the same simulation,
+* The fleet must consist of only one bus type, i.e., the user cannot simulate multiple bus types (e.g., 12m and 18m) in the same simulation.
+* Multi-depot scenarios are not supported; however, the user can simulate multi-depot scenarios by disaggregating the problem into several single-depot problems.
 
 ## References
 <a id="1">[1]</a> 
