@@ -67,8 +67,8 @@ Other inputs:
 
 ### Signup and login page
 
-You can access the PVxTE web tool via [pvxte.isaac.supsi.ch](https://pvxte.isaac.supsi.ch). If you do not have a user account, you may create one by clicking “Sign up” on the top right corner of the landing page (Figure 2).
-If you already have an account, you can login to the web tool as shown in Figure 3.  
+You can access the PVxTE web tool via [pvxte.isaac.supsi.ch](https://pvxte.isaac.supsi.ch). If you do not have a user account, you may create one by clicking “Sign up” in the top right corner of the landing page (Figure 2).
+If you already have an account, you can log in to the web tool as shown in Figure 3.  
 
 <p align="center">
   <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/new_user.png" alt="New user" width="85%"/>
@@ -79,6 +79,8 @@ If you already have an account, you can login to the web tool as shown in Figure
   <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/log-in.png" alt="Login" width="85%"/>
 </p>
 <p align="center"><em>Figure 3: Login page</em></p>
+
+The user profile encapsulates all the information related to a particular user that includes input data, simulations, and results. 
 
 ### Company management section
 
