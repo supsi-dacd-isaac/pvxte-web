@@ -135,26 +135,43 @@ Make sure to use the correct units for both time and distance.
 </p>
 <p align="center"><em>Figure 6: Description of the public transport network using terminals and distance information </em></p>
 
-
 ## Create a new simulation
+
+Now that you have created a user account and uploaded the company-specific data, you can start creating a new simulation. 
+To start setting up a new simulation, click “Create simulation” in the left menu.
+
+From the web tool's point of view, one simulation corresponds to;
+* One bus line, 
+* Two or more terminal stations, 
+* One electric bus type,
+* One depot, and,
+* A trip timetable for the bus line giving information about the departure and arrival times of the buses at each terminal station.
+
+The simulation setup is divided into two steps.
 
 ### Step1
 
-A new simulation can be created by clicking “Create simulation” in the left menu.  You must choose one of the bus models you already created from the drop-down list, as shown in the following picture. Currently, we can only assign one bus type per simulation. 
-Although this simplifies, it does correspond to most real-world cases where, typically, only one type of bus is used to serve a particular line. If you need to simulate several bus lines simultaneously and they use different bus types, 
-we recommend you separate them into different simulations. 
+The first step is to choose the bus model, the timetable, and the charging power. 
+The bus models that you have already created will appear as a drop-down list. Choose the appropriate bus model from the list for your simulation. 
+Currently, we can only assign one bus type per simulation. 
 
-![Step1](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/create-sim-step-1.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/create-sim-step-1.png" alt="step 1" width="85%"/>
+</p>
+<p align="center"><em>Figure 7: Setup bus model, timetable, and charging power for a new simulation </em></p>
 
-Next, you  must also provide the schedule of the buses serving the line/ lines that you wish to simulate. To avoid unexpected conflicts, we recommend the users to follow the example file. The accepted timetable is a table format that has the following columns:
+The trip timetable is a CSV file that contains the following columns:
 
-* 	`bus_id`: bus identifier(data type: string)
+* `bus_id`: bus identifier(data type: string)
 * `line_id`: bus line (data type: string)
-*	`starting_city`: departure station (data type: string), it must be one of the terminal stations in the terminals file.
-*	`arrival_city`: destination station (data type: string), it must be one of the terminal stations in the terminals file.
-*	`departure_time`: departure time in minutes after midnight (data type: integer)
-*	`arrival_time`: arrival time in minutes after midnight (data type: integer)
-*	`day_type`: type of day you want to simulate (data type: string). For example, this is useful to simulate weekday and weekend schedules.
+* `starting_city`: departure station (data type: string), it must be one of the terminal stations in the terminals file.
+* `arrival_city`: destination station (data type: string), it must be one of the terminal stations in the terminals file.
+* `departure_time`: departure time in minutes after midnight (data type: integer)
+* `arrival_time`: arrival time in minutes after midnight (data type: integer)
+* `day_type`: type of day you want to simulate (data type: string). For example, this is useful to simulate weekday and weekend schedules.
+
+To avoid unexpected conflicts, we recommend the users to follow the example file.
+As shown in Figure 7, the charging power for the types of charging infrastructure available at the terminals must also be specified.
 
 ### Step2
 
