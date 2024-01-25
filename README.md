@@ -87,7 +87,7 @@ The user profile encapsulates all the information related to a particular user t
 The company management section is where you can manage your company specific input data. These include the type of buses you wish to simulate, the bus terminals, 
 and the distances between the terminal stations. Specifying these data under company profile makes it easier to reuse the same data for multiple simulations.
 
-As shown in Figure 3, the pre-existing bus models appears in at the top of the company management section as a table. 
+As shown in Figure 4, the pre-existing bus models appears in at the top of the company management section as a table. 
 
 shows a section of the company management section. The left menu shows the different options available under the company management section. You can add 
 a new bus model by clicking “Add new”. You may also edit an existing bus model by clicking on the name of 
@@ -98,15 +98,14 @@ the existing bus model in the table.
 </p>
 <p align="center"><em>Figure 4: Company management - Bus models</em></p>
 
-The information required to describe a bus model accurately is available from the electric bus manufacturers. Some important points to note:
-* The current model only supports evaluating the feasibility of a fully electrified fleet. Therefore, only electric bus models may be inserted,
-* All bus models inserted into the web tool will be stored in a database under the company profile that you create. That means you can reuse the same bus model for a feasibility assessment again using the same login. This is true for all other inputs as well.
+Figure 5 shows the data that is required to set up a new bus model. These data are typically available from the electric bus manufacturers. 
+The created bus models are stored in a database linked to the company profile. Therefore, you can reuse the same bus model for multiple feasibility evaluations using the same login. 
+The data is not shared between user accounts.  
 
-The following two pictures show how to add/edit buses model.
-
-![New Bus](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/new_bus.png)
-
-![Edit Bus](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/edit-bus.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/new_bus.png" alt="new bus" width="65%"/>
+</p>
+<p align="center"><em>Figure 5: Create new bus model.</em></p>
 
 ### Terminals and distance matrix
 
@@ -185,6 +184,9 @@ We use a generic energy consumption model, taking into account many important pa
 Hjelkrem et al. modeled each trip as a sequence of many small trip segments, each with a known elevation profile. In reality, the transportation companies do not have such detailed elevation profiles of the roads. Consequently, in our simplified model, we only consider the elevations of the start and end points of the trip for the energy calculation. This approximation and the use of other approximate parameters, such as rolling resistance, average velocity, etc., leads to inaccuracies in the energy consumption estimates. To minimize the impact of these inaccuracies, we introduce a calibration parameter that the user can change based on their current knowledge about the energy intensity (kWH/km) of each bus line.  
 
 First, simulate with the default calibration parameter value of 1.0 and observe the resulting bus energy efficiency (kWh/km). If it approximately matches your previous knowledge, then the energy consumption model already generates a reasonable approximation of the energy consumption of your bus line. Otherwise, either increase or decrease the calibration parameter accordingly. 
+
+## Limitations of the web tool
+* The current model only supports evaluating the feasibility of a fully electrified fleet. Therefore, only electric bus models may be inserted,
 
 ## References
 <a id="1">[1]</a> 
