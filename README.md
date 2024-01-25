@@ -67,13 +67,18 @@ Other inputs:
 
 ### Signup and login page
 
-You can access the PVxTE web tool via [pvxte.isaac.supsi.ch](https://pvxte.isaac.supsi.ch). On the landing page, you can login if you already have an account or, if not, 
-you must create your profile using a personal username and a password as shown in the following pictures.  
+You can access the PVxTE web tool via [pvxte.isaac.supsi.ch](https://pvxte.isaac.supsi.ch). If you do not have a user account, you may create one by clicking “Sign up” on the top right corner of the landing page (Figure 2).
+If you already have an account, you can login to the web tool as shown in Figure 3.  
 
-![Login Page](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/login.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/new_user.png" alt="New user" width="85%"/>
+</p>
+<p align="center"><em>Figure 2: Create new user account</em></p>
 
-![Signup Page](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/signup.png)
-
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/log-in.png" alt="Login" width="85%"/>
+</p>
+<p align="center"><em>Figure 3: Login page</em></p>
 
 ### Company management section
 
