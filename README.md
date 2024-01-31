@@ -186,7 +186,7 @@ as shown in the following picture.
 <p align="center">
   <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_top_selected.png" alt="step 2" width="85%"/>
 </p>
-<p align="center"><em>Figure 8: Simulation step 2: Line and day type selection </em></p>
+<p align="center"><em>Figure 8: Simulation step 2 - Line and day type selection </em></p>
 
 A very critical point to note is the case when the bus line you want to simulate is integrated with some other lines. 
 In this scenario, you must include all the interconnected bus lines in the simulation. Failure to do so can result in discontinuity in the timetable and vehicle flow, leading to infeasibility.  
@@ -194,10 +194,13 @@ In this scenario, you must include all the interconnected bus lines in the simul
 Energy model calibration parameter is a parameter that allows you to calibrate the energy consumption model to match your current knowledge about the energy intensity (kWh/km) of the bus line you want to simulate.
 For a detailed explanation of the _Energy model calibration parameter_, please refer to the [related section](https://github.com/supsi-dacd-isaac/pvxte-web#energy-consumption-calibration).
 
-This step also provides you with the space to include economic parameters 
-that the model uses to estimate the investment and operational costs of the electric bus fleet, as depicted in the next picture. After that, you can simulate by clicking “Launch simulation.” 
+At this step, you are asked to provide the economic parameters that the model uses to estimate the investment and operational costs of the electric bus fleet, as depicted in Figure 9. 
+After that, you can simulate by clicking “Launch simulation.” 
 
-![Step2 Bottom](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/capex-opex-section.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/capex-opex-section.png" alt="step 2" width="85%"/>
+</p>
+<p align="center"><em>Figure 9: Economic parameters </em></p>
 
 ## Viewing results
 
