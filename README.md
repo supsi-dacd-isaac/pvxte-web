@@ -210,7 +210,7 @@ The results of the completed simulations are stored in the database. You can acc
 If a valid solution (a feasible solution) is not found, those instances will be highlighted as seen in the figure. In such a case, the user is advised to ensure all inputs are correct, 
 especially if the trip timetable does not have discontinuities. Common causes of infeasibility are;
 1.	_Maximum battery size is insufficient_: The user can choose a higher battery pack size or increase the maximum number of battery packs, if possible. 
-2.	_Discontinuous timetables_: If the buses perform empty rides (trips without passengers to relocate the bus to a different station), make sure these trips are also included in the timetable.
+2.	_Discontinuous timetables_: Make sure all integrated bus lines are included in the simulation. Make sure there are no conflicts between the end time of one trip and the start time of the next strip. If the buses perform empty rides (trips without passengers to relocate the bus to a different station), make sure these trips are also included in the timetable.
 3.	_Unable to fully recharge_: In some cases, with the maximum allowed charging power given, the buses may not be able to recharge fully. If that is the case, try with higher charging power or with the fast charging option.
 
 <p align="center">
