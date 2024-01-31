@@ -204,18 +204,21 @@ After that, you can simulate by clicking “Launch simulation.”
 
 ## Viewing results
 
-Once the simulation is complete, you will get an email notifying you that your simulation is finished.
+Once the simulation is complete, you get an email notifying you that your simulation has finished. The email also states whether the simulation returned a feasible solution or not.
 
-Saved simulation results can be accessed by clicking “Simulations” on the main menu, as shown in the following image (Figure 11). 
+The results of the completed simulations are stored in the database. You can access the results by clicking “Simulations” on the main menu, as shown in the following image (Figure 10).
 If a valid solution (a feasible solution) is not found, those instances will be highlighted as seen in the figure. In such a case, the user is advised to ensure all inputs are correct, 
 especially if the trip timetable does not have discontinuities. Common causes of infeasibility are;
 1.	_Maximum battery size is insufficient_: The user can choose a higher battery pack size or increase the maximum number of battery packs, if possible. 
 2.	_Discontinuous timetables_: If the buses perform empty rides (trips without passengers to relocate the bus to a different station), make sure these trips are also included in the timetable.
 3.	_Unable to fully recharge_: In some cases, with the maximum allowed charging power given, the buses may not be able to recharge fully. If that is the case, try with higher charging power or with the fast charging option.
 
-![Simulations List](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulations_list.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulations_list.png" alt="sim list" width="85%"/>
+</p>
+<p align="center"><em>Figure 10: List of completed simulations. Simulations that did not return a feasible solution are highlighted in red </em></p>
 
-There might be other edge instances that result in infeasibilities that must be evaluated case-by-case with the specific user inputs. 
+There might be other edge instances that result in infeasibility that must be evaluated case-by-case with the specific user inputs. 
 You can access the detailed results (including the option to download raw results files in CSV format). Accessing “details” takes you to the following window.
 
 ![Simulation Detail](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulation_detail1.png)
