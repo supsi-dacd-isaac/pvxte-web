@@ -222,9 +222,9 @@ There might be other edge instances that result in infeasibility that must be ev
 You can access the detailed results (including the option to download raw results files in CSV format). Accessing “details” takes you to the following window.
 
 <p align="center">
-  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulation_detail1.png" alt="results" width="99%"/>
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulation_detail1.png" alt="results" width="85%"/>
 </p>
-<p align="center"><em>Figure 10: Simulation results </em></p>
+<p align="center"><em>Figure 11: Simulation results </em></p>
 
 The simulation detail page basically contains four tables. 
 * The first table reports the most important inputs used in the simulation
