@@ -179,14 +179,20 @@ Therefore, if lines are operationally integrated, the simulation must include al
 
 ### Step 2
 
-In the 2nd step, you must choose which bus lines and the day type the simulation must include. The selection window automatically displays all the available bus lines and day types extracted from the timetable you uploaded in the first step, 
+The next step is to choose the bus line and the day type you want to simulate. The purpose of this step is to let you use a single timetable (CSV file uploaded in the previous step) 
+to simulate multiple bus lines and day types. The selection window automatically displays all the available bus lines and day types extracted from the timetable you uploaded in the first step, 
 as shown in the following picture. 
 
-![Step2 Top](https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_top_selected.png)
+<p align="center">
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/run_step2_top_selected.png" alt="step 2" width="85%"/>
+</p>
+<p align="center"><em>Figure 8: Simulation step 2: Line and day type selection </em></p>
 
-If the bus line you want to simulate is interconnected or shares buses with some other lines, you must include all the interconnected bus lines in the simulation as well. 
+A very critical point to note is the case when the bus line you want to simulate is integrated with some other lines. 
+In this scenario, you must include all the interconnected bus lines in the simulation. Failure to do so can result in discontinuity in the timetable and vehicle flow, leading to infeasibility.  
 
-For a detailed explanation of the _Energy model calibration parameter_ shown in the bottom of the image above, please refer to the [related section](https://github.com/supsi-dacd-isaac/pvxte-web#energy-consumption-calibration).
+Energy model calibration parameter is a parameter that allows you to calibrate the energy consumption model to match your current knowledge about the energy intensity (kWh/km) of the bus line you want to simulate.
+For a detailed explanation of the _Energy model calibration parameter_, please refer to the [related section](https://github.com/supsi-dacd-isaac/pvxte-web#energy-consumption-calibration).
 
 This step also provides you with the space to include economic parameters 
 that the model uses to estimate the investment and operational costs of the electric bus fleet, as depicted in the next picture. After that, you can simulate by clicking “Launch simulation.” 
