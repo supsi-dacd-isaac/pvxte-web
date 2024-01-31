@@ -222,7 +222,7 @@ There might be other edge instances that result in infeasibility that must be ev
 You can access the detailed results (including the option to download raw results files in CSV format). Accessing “details” takes you to the following window.
 
 <p align="center">
-  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulation_detail1.png" alt="results" width="100%"/>
+  <img src="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/docs/img/simulation_detail1.png" alt="results" width="99%"/>
 </p>
 <p align="center"><em>Figure 10: Simulation results </em></p>
 
