@@ -77,7 +77,7 @@
     "defaultModelParameters": {
         "scale": 1.0
     },
-    "breakPointAdvancedGraph": false
+    "breakPointAdvancedGraph": true
 }
 
 
