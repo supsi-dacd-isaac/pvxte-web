@@ -20,6 +20,12 @@ def get_user_email(conn, user_id):
     else:
         return False
 
+def move_file(input_file_path, output_folder_path):
+    try:
+        shutil.copy(input_file_path, output_folder_path)
+    except Exception as e:
+        logger.error('EXCEPTION: %s' % str(e))
+
 # --------------------------------------------------------------------------- #
 # Main
 # --------------------------------------------------------------------------- #
@@ -95,18 +101,18 @@ if __name__ == "__main__":
 
         # Copy the files results
         logger.info('Simulation %s: Files copy' % sim_id)
-        shutil.copy('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/input-csv')
-        shutil.copy('%s/input-json/%s.json' % (target_folder, sim_id), 'static/json-input-pars')
+        move_file('%s/input-csv/%s.csv' % (target_folder, sim_id), 'static/input-csv')
+        move_file('%s/input-json/%s.json' % (target_folder, sim_id), 'static/json-input-pars')
 
         update_query = ("UPDATE sim SET line = ?, capex_pars = ?, opex_pars = ?, max_charging_powers = ?, "
                         "input_pars = ?, input_bus_model_data = ? WHERE id_user = ? and  created_at = ?;")
         if 'error' not in main_results.keys():
-            shutil.copy('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
-            shutil.copy('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
-            shutil.copy('%s/output-bsize/%s.csv' % (target_folder, sim_id), 'static/output-bsize')
-            shutil.copy('%s/output-df/%s.csv' % (target_folder, sim_id), 'static/output-df')
-            shutil.copy('%s/plot/%s.png' % (target_folder, sim_id), 'static/plot')
-            shutil.copy('%s/plot/%s_charge_profile.png' % (target_folder, sim_id), 'static/plot')
+            move_file('%s/sim-config/%s.json' % (target_folder, sim_id), 'static/sim-config')
+            move_file('%s/output/%s.zip' % (target_folder, sim_id), 'static/output')
+            move_file('%s/output-bsize/%s.csv' % (target_folder, sim_id), 'static/output-bsize')
+            move_file('%s/output-df/%s.csv' % (target_folder, sim_id), 'static/output-df')
+            move_file('%s/plot/%s.png' % (target_folder, sim_id), 'static/plot')
+            move_file('%s/plot/%s_charge_profile.png' % (target_folder, sim_id), 'static/plot')
 
             # Update the main results in the database
             data_to_update = (main_results['strRoutes'],
