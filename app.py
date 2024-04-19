@@ -807,11 +807,11 @@ def detail():
             df_bsize_filename = 'static/output-bsize/%s_%i.csv' % (session['id_user'], sim_metadata[2])
             df_bsize = pd.read_csv(df_bsize_filename)
 
-            df_data_filename = 'static/output-df/%s_%i.csv' % (session['id_user'], sim_metadata[2])
-            df_data = pd.read_csv(df_data_filename)
+            # df_data_filename = 'static/output-df/%s_%i.csv' % (session['id_user'], sim_metadata[2])
+            # df_data = pd.read_csv(df_data_filename)
 
             data = dict(request.args)
-            data['min_num_drivers'] = len(set(df_data["Driver#"]))
+            # data['min_num_drivers'] = len(set(df_data["Driver#"]))
             data['df_bsize'] = df_bsize
 
             bus_data = {
