@@ -20,6 +20,11 @@ from collections import defaultdict
 from cryptography.fernet import Fernet
 from flask import Flask, render_template, request, url_for, redirect, session, flash
 from flask_babel import Babel, gettext
+from flask_wtf import FlaskForm
+from flask_wtf.recaptcha import RecaptchaField
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Length, Regexp, EqualTo
+
 
 # Get main conf
 with open('static/sims-basic-config/cfg.json', 'r') as f:
@@ -38,6 +43,9 @@ app = Flask(__name__)
 app.config.update(
     SECRET_KEY=key_cfg['appSecretKey']
 )
+
+app.config['RECAPTCHA_PUBLIC_KEY'] = 'recaptcha_public'
+app.config['RECAPTCHA_PRIVATE_KEY'] = 'recaptcha_private'
 
 # Set the Babel object for the translations
 
@@ -720,6 +728,21 @@ def logout():
     session.pop('email_user', None)
     return redirect(url_for('index'))
 
+class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=12, message=gettext('Password must be at least 12 characters long')),
+        Regexp(r'(?=.*\d)', message=gettext('Password must contain a number')),
+        Regexp(r'(?=.*[A-Z])', message=gettext('Password must contain an uppercase letter')),
+        Regexp(r'(?=.*[a-z])', message=gettext('Password must contain a lowercase letter'))
+    ])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(),
+        EqualTo('password', message=gettext('Passwords must match'))
+    ])
+    # recaptcha = RecaptchaField()
+    submit = SubmitField('Register')
 
 # Route for handling the login page logic
 @app.route('/signup', methods=['GET', 'POST'])
@@ -729,21 +752,32 @@ def signup():
     if 'lang' in request.args.keys():
         session['language'] = request.args['lang']
 
+    if request.method == 'POST':
+        session['language'] = request.form['language']
+
     conn = get_db_connection()
     companies = get_companies_names(conn)
 
-    if request.method == 'POST':
-        if request.form['company'] == 'new':
-            insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
-                        request.form['new_company'], request.form['language'])
-        else:
-            insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
-                        request.form['company'], request.form['language'])
-        conn.close()
-        return redirect(url_for('login'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
 
-    return render_template('signup.html', language=session['language'], error=error,
-                           companies=companies)
+        if request.method == 'POST':
+            if request.form['company'] == 'new':
+                insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
+                            request.form['new_company'], request.form['language'])
+            else:
+                insert_user(conn, request.form['username'], request.form['email'], request.form['password'],
+                            request.form['company'], request.form['language'])
+            conn.close()
+            return redirect(url_for('login'))
+        else:
+            conn.close()
+            return render_template('signup.html', language=session['language'], error=error,
+                                   companies=companies, form=form)
+    else:
+        conn.close()
+        return render_template('signup.html', language=session['language'], companies=companies,
+                               form=form)
 
 
 @app.route('/', methods=('GET', 'POST'))

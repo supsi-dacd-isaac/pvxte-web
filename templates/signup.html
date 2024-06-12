@@ -9,18 +9,23 @@
                   </li>
             </ul>
         </nav>
-        <form action="" method="post">
+        <form method="POST" action="{{ url_for('signup') }}">
           <input type="hidden" class="form-control-sm" name="language" value="{{ language }}">
+          {{ form.hidden_tag() }}
           <fieldset>
               <table class="table-sm-form-simple-left">
                 <tbody>
                     <tr>
                         <td>{{ gettext('Username') }}:</td>
-                        <td><input type="text" placeholder="{{ gettext('Username') }}" name="username" value="{{request.form.username }}"></td>
+                        <td>{{ form.username(size=32) }}</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Password') }}:</td>
-                        <td><input type="password" placeholder="{{ gettext('Password') }}" name="password" value="{{request.form.password }}"></td>
+                        <td>{{ form.password(size=32) }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ gettext('Confirm Password') }}:</td>
+                        <td>{{ form.confirm_password(size=32) }}</td>
                     </tr>
                     <tr>
                         <td>{{ gettext('Email') }}:</td>
@@ -52,8 +57,34 @@
       {% if error %}
         <p class="error"><strong>{{ gettext('Error') }}Error:</strong> {{ error }}
       {% endif %}
-    </div>
-    <br><br>
+
+    {% if form.username.errors|length > 0 or form.password.errors|length > 0 or form.confirm_password.errors|length > 0 %}
+        <br>
+        <table class="table-sm-form-simple-left">
+            <tbody>
+            <thead>
+                    <td>{{ gettext('ATTENTION! We have found the following errors during the signup process.') }}</td>
+            </thead>
+            {% for error in form.username.errors %}
+                <tr>
+                    <td>{{ error }}</td>
+                </tr>
+            {% endfor %}
+            {% for error in form.password.errors %}
+                <tr>
+                    <td>{{ error }}</td>
+                </tr>
+            {% endfor %}
+            {% for error in form.confirm_password.errors %}
+                <tr>
+                    <td>{{ error }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+  </div>
+  <br><br>
 {% endblock %}
 
 
