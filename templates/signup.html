@@ -48,6 +48,9 @@
                         <td><input id="new_company" type="text" placeholder="{{ gettext('New company') }}" name="new_company" value="{{request.form.company }}"></td>
                     </tr>
                     <tr>
+                        <td colspan="2" class="center-align-cell">{{ form.recaptcha }}</td>
+                    </tr>
+                    <tr>
                         <td colspan="2" class="center-align-cell"><button type="submit" class="btn btn-primary" >{{ gettext('Signup') }}</button></td>
                     </tr>
                 </tbody>
@@ -76,6 +79,11 @@
                 </tr>
             {% endfor %}
             {% for error in form.confirm_password.errors %}
+                <tr>
+                    <td>{{ error }}</td>
+                </tr>
+            {% endfor %}
+            {% for error in form.recaptcha.errors %}
                 <tr>
                     <td>{{ error }}</td>
                 </tr>

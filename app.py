@@ -36,16 +36,18 @@ with open('static/sims-basic-config/private.json', 'r') as f:
 
 # Get key conf
 with open('static/sims-basic-config/key.json', 'r') as f:
-    key_cfg = json.load(f)
+    key_cfg = json.load(f)# Get key conf
+
+with open('static/sims-basic-config/captcha_keys.json', 'r') as f:
+    captcha_keys_cfg = json.load(f)
 
 app = Flask(__name__)
 
 app.config.update(
-    SECRET_KEY=key_cfg['appSecretKey']
+    SECRET_KEY=key_cfg['appSecretKey'],
+    RECAPTCHA_PUBLIC_KEY=captcha_keys_cfg['siteKey'],
+    RECAPTCHA_PRIVATE_KEY=captcha_keys_cfg['secretKey']
 )
-
-app.config['RECAPTCHA_PUBLIC_KEY'] = 'recaptcha_public'
-app.config['RECAPTCHA_PRIVATE_KEY'] = 'recaptcha_private'
 
 # Set the Babel object for the translations
 
@@ -741,7 +743,7 @@ class RegistrationForm(FlaskForm):
         DataRequired(),
         EqualTo('password', message=gettext('Passwords must match'))
     ])
-    # recaptcha = RecaptchaField()
+    recaptcha = RecaptchaField()
     submit = SubmitField('Register')
 
 # Route for handling the login page logic
