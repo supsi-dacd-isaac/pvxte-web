@@ -467,8 +467,9 @@ msgid "Are you sure you want to delete the simulation?"
 msgstr "È sicuro di voler eliminare la simulazione?"
 
 #: templates/index.html:112
-msgid "PVxTE"
-msgstr ""
+#, fuzzy
+msgid "PVxTE Web Tool"
+msgstr "GUI Web PVXTE"
 
 #: templates/login.html:17 templates/signup.html:18 templates/signup.html:19
 msgid "Username"
@@ -629,16 +630,16 @@ msgid "Diesel cost for comparison"
 msgstr "Costo nel caso diesel"
 
 #: templates/new_sim_step2.html:169
-msgid "Are you sure? You will receive a notification via email when the simulation will be completed"
-msgstr "Sei sicuro? Riceverai una notifica via email quando la simulazione sarà conclusa"
+msgid ""
+"Are you sure? You will receive a notification via email when the "
+"simulation will be completed"
+msgstr ""
+"Sei sicuro? Riceverai una notifica via email quando la simulazione sarà "
+"conclusa"
 
 #: templates/new_sim_step2.html:169
 msgid "Launch Simulation"
 msgstr "Simulazione di lancio"
-
-#: templates/new_sim_step2.html:197
-msgid "Please select at least one line"
-msgstr "Per favore seleziona almeno una linea"
 
 #: templates/signup.html:30 templates/signup.html:32
 msgid "Company"
@@ -651,46 +652,6 @@ msgstr "Nuova compagnia"
 #: templates/signup.html:46
 msgid "Signup"
 msgstr "Iscrizioni"
-
-#: app.py:768
-msgid "Maintenance"
-msgstr "Manutenzione"
-
-#: app.py:772
-msgid "Consumption"
-msgstr "Consumo"
-
-#: app.py:777
-msgid "Annual expenditure and operative costs"
-msgstr "Spese annuali e costi operativi"
-
-#: templates/detail.html:261
-msgid "Break point analysis"
-msgstr "Analisi di break point"
-
-#: templates/detail.html:146
-msgid "Total"
-msgstr "Totale"
-
-#: templates/detail.html:18
-msgid "Main simulation inputs"
-msgstr "Input principali della simulazione"
-
-#: templates/detail.html:33
-msgid "Deposit charger cost"
-msgstr "Costo di un caricatore da deposito"
-
-#: templates/detail.html:37
-msgid "Not deposit charger cost"
-msgstr "Costo di un caricatore non da deposito"
-
-#: templates/new_sim_step2.html:55
-msgid "Energy model section"
-msgstr "Sezione relativa al modello energetico"
-
-#: templates/new_sim_step2.html:58
-msgid "Energy model calibration parameter"
-msgstr "Parametro di calibrazione del modello energetico"
 
 #~ msgid "management section"
 #~ msgstr "sezione gestione"
@@ -721,4 +682,60 @@ msgstr "Parametro di calibrazione del modello energetico"
 
 #~ msgid "Home"
 #~ msgstr "Home"
+
+#~ msgid "PVxTE"
+#~ msgstr ""
+
+#~ msgid "Please select at least one line"
+#~ msgstr "Per favore seleziona almeno una linea"
+
+#~ msgid "Maintenance"
+#~ msgstr "Manutenzione"
+
+#~ msgid "Consumption"
+#~ msgstr "Consumo"
+
+#~ msgid "Annual expenditure and operative costs"
+#~ msgstr "Spese annuali e costi operativi"
+
+#~ msgid "Break point analysis"
+#~ msgstr "Analisi di break point"
+
+#~ msgid "Total"
+#~ msgstr "Totale"
+
+#~ msgid "Main simulation inputs"
+#~ msgstr "Input principali della simulazione"
+
+#~ msgid "Deposit charger cost"
+#~ msgstr "Costo di un caricatore da deposito"
+
+#~ msgid "Not deposit charger cost"
+#~ msgstr "Costo di un caricatore non da deposito"
+
+#~ msgid "Energy model section"
+#~ msgstr "Sezione relativa al modello energetico"
+
+#~ msgid "Energy model calibration parameter"
+#~ msgstr "Parametro di calibrazione del modello energetico"
+
+#~ msgid "Password must contain a number"
+#~ msgstr "La password deve contenere almeno un numero"
+
+#~ msgid "Password must contain an uppercase letter"
+#~ msgstr "La password deve contenere almeno una lettera maiuscola"
+
+#~ msgid "Password must contain a lowercase letter"
+#~ msgstr "La password deve contenere almeno una lettera minuscola"
+
+#~ msgid "Passwords must match"
+#~ msgstr "Le password devono corrispondere"
+
+#~ msgid ""
+#~ "ATTENTION! We have found the following"
+#~ " errors during the signup process."
+#~ msgstr ""
+#~ "ATTENZIONE! Si sono riscontrati i "
+#~ "seguenti errori durante il processo di"
+#~ " registrazione."
 

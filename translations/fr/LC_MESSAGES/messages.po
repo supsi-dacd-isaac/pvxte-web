@@ -486,8 +486,9 @@ msgid "Are you sure you want to delete the simulation?"
 msgstr "Etes-vous sûr de vouloir supprimer la simulation ?"
 
 #: templates/index.html:112
-msgid "PVxTE"
-msgstr ""
+#, fuzzy
+msgid "PVxTE Web Tool"
+msgstr "PVXTE Web GUI"
 
 #: templates/login.html:17 templates/signup.html:18 templates/signup.html:19
 msgid "Username"
@@ -673,10 +674,6 @@ msgstr ""
 msgid "Launch Simulation"
 msgstr "Simulation de lancement"
 
-#: templates/new_sim_step2.html:197
-msgid "Please select at least one line"
-msgstr ""
-
 #: templates/signup.html:30 templates/signup.html:32
 msgid "Company"
 msgstr "Entreprise"
@@ -688,46 +685,6 @@ msgstr "Nouvelle entreprise"
 #: templates/signup.html:46
 msgid "Signup"
 msgstr "S'inscrire"
-
-#: app.py:768
-msgid "Maintenance"
-msgstr ""
-
-#: app.py:772
-msgid "Consumption"
-msgstr ""
-
-#: app.py:777
-msgid "Annual expenditure and operative costs"
-msgstr ""
-
-#: templates/detail.html:261
-msgid "Break point analysis"
-msgstr ""
-
-#: templates/detail.html:146
-msgid "Total"
-msgstr ""
-
-#: templates/detail.html:18
-msgid "Main simulation inputs"
-msgstr ""
-
-#: templates/detail.html:33
-msgid "Deposit charger cost"
-msgstr ""
-
-#: templates/detail.html:37
-msgid "Not deposit charger cost"
-msgstr ""
-
-#: templates/new_sim_step2.html:55
-msgid "Energy model section"
-msgstr ""
-
-#: templates/new_sim_step2.html:58
-msgid "Energy model calibration parameter"
-msgstr ""
 
 #~ msgid "management section"
 #~ msgstr "section de gestion"
@@ -758,4 +715,63 @@ msgstr ""
 
 #~ msgid "Home"
 #~ msgstr "Accueil"
+
+#~ msgid "PVxTE"
+#~ msgstr ""
+
+#~ msgid "Please select at least one line"
+#~ msgstr ""
+
+#~ msgid "Maintenance"
+#~ msgstr ""
+
+#~ msgid "Consumption"
+#~ msgstr ""
+
+#~ msgid "Annual expenditure and operative costs"
+#~ msgstr ""
+
+#~ msgid "Break point analysis"
+#~ msgstr ""
+
+#~ msgid "Total"
+#~ msgstr ""
+
+#~ msgid "Main simulation inputs"
+#~ msgstr ""
+
+#~ msgid "Deposit charger cost"
+#~ msgstr ""
+
+#~ msgid "Not deposit charger cost"
+#~ msgstr ""
+
+#~ msgid "Energy model section"
+#~ msgstr ""
+
+#~ msgid "Energy model calibration parameter"
+#~ msgstr ""
+
+#~ msgid "Password must be at least 12 characters long"
+#~ msgstr "Le mot de passe doit comporter au moins 12 caractères"
+
+#~ msgid "Password must contain a number"
+#~ msgstr "Le mot de passe doit contenir un chiffre"
+
+#~ msgid "Password must contain an uppercase letter"
+#~ msgstr "Le mot de passe doit contenir une lettre majuscule"
+
+#~ msgid "Password must contain a lowercase letter"
+#~ msgstr "Le mot de passe doit contenir une lettre minuscule"
+
+#~ msgid "Passwords must match"
+#~ msgstr "Les mots de passe doivent correspondre"
+
+#~ msgid ""
+#~ "ATTENTION! We have found the following"
+#~ " errors during the signup process."
+#~ msgstr ""
+#~ "ATTENTION! Nous avons trouvé les erreurs"
+#~ " suivantes lors de la procédure "
+#~ "d'inscription."
 

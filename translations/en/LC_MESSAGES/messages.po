@@ -638,10 +638,6 @@ msgstr ""
 msgid "Launch Simulation"
 msgstr ""
 
-#: templates/new_sim_step2.html:197
-msgid "Please select at least one line"
-msgstr ""
-
 #: templates/signup.html:30 templates/signup.html:32
 msgid "Company"
 msgstr ""
@@ -650,52 +646,8 @@ msgstr ""
 msgid "New company"
 msgstr ""
 
-#: templates/signup.html:42 templates/signup.html:43
-msgid "New company"
-msgstr ""
-
 #: templates/signup.html:46
 msgid "Signup"
-msgstr ""
-
-#: app.py:768
-msgid "Maintenance"
-msgstr ""
-
-#: app.py:772
-msgid "Consumption"
-msgstr ""
-
-#: app.py:777
-msgid "Annual expenditure and operative costs"
-msgstr ""
-
-#: templates/detail.html:261
-msgid "Break point analysis"
-msgstr ""
-
-#: templates/detail.html:146
-msgid "Total"
-msgstr ""
-
-#: templates/detail.html:18
-msgid "Main simulation inputs"
-msgstr ""
-
-#: templates/detail.html:33
-msgid "Deposit charger cost"
-msgstr ""
-
-#: templates/detail.html:37
-msgid "Not deposit charger cost"
-msgstr ""
-
-#: templates/new_sim_step2.html:55
-msgid "Energy model section"
-msgstr ""
-
-#: templates/new_sim_step2.html:58
-msgid "Energy model calibration parameter"
 msgstr ""
 
 #~ msgid "management section"
@@ -768,5 +720,58 @@ msgstr ""
 #~ msgstr ""
 
 #~ msgid "Home"
+#~ msgstr ""
+
+#~ msgid "Please select at least one line"
+#~ msgstr ""
+
+#~ msgid "Maintenance"
+#~ msgstr ""
+
+#~ msgid "Consumption"
+#~ msgstr ""
+
+#~ msgid "Annual expenditure and operative costs"
+#~ msgstr ""
+
+#~ msgid "Break point analysis"
+#~ msgstr ""
+
+#~ msgid "Total"
+#~ msgstr ""
+
+#~ msgid "Main simulation inputs"
+#~ msgstr ""
+
+#~ msgid "Deposit charger cost"
+#~ msgstr ""
+
+#~ msgid "Not deposit charger cost"
+#~ msgstr ""
+
+#~ msgid "Energy model section"
+#~ msgstr ""
+
+#~ msgid "Energy model calibration parameter"
+#~ msgstr ""
+
+#~ msgid "Password must be at least 12 characters long"
+#~ msgstr ""
+
+#~ msgid "Password must contain a number"
+#~ msgstr ""
+
+#~ msgid "Password must contain an uppercase letter"
+#~ msgstr ""
+
+#~ msgid "Password must contain a lowercase letter"
+#~ msgstr ""
+
+#~ msgid "Passwords must match"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "ATTENTION! We have found the following"
+#~ " errors during the signup process!"
 #~ msgstr ""
 
