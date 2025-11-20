@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-10-06 15:54+0200\n"
+"POT-Creation-Date: 2025-11-20 11:24+0100\n"
 "PO-Revision-Date: 2023-09-06 11:46+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: fr\n"
@@ -16,13 +16,76 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.12.1\n"
+"Generated-By: Babel 2.10.3\n"
+
+#: app.py:410 templates/detail.html:169 templates/detail.html:230
+msgid "Electrical"
+msgstr "Électrique"
+
+#: app.py:410 templates/detail.html:170 templates/detail.html:237
+msgid "Diesel"
+msgstr "Diesel"
+
+#: app.py:421 templates/detail.html:124
+msgid "Buses"
+msgstr "Bus"
+
+#: app.py:425 templates/detail.html:129
+msgid "Batteries"
+msgstr "Batteries"
+
+#: app.py:429 templates/detail.html:134
+msgid "Deposit charger"
+msgstr "Chargeur au dépôt"
+
+#: app.py:434 templates/detail.html:139
+msgid "Other chargers (e.g. pantographs)"
+msgstr "Autres chargeurs (p. ex. pantographes)"
+
+#: app.py:438 templates/detail.html:175
+msgid "Maintenance"
+msgstr "Entretien"
+
+#: app.py:442 templates/detail.html:180
+msgid "Consumption"
+msgstr "Consommation"
+
+#: app.py:447
+msgid "Annual expenditure and operative costs"
+msgstr "Dépenses annuelles et coûts d’exploitation"
+
+#: app.py:449 templates/detail.html:114 templates/detail.html:119
+#: templates/detail.html:165 templates/detail.html:201
+#: templates/detail.html:206 templates/detail.html:211
+#: templates/new_sim_step2.html:155
+msgid "year"
+msgstr "année"
+
+#: app.py:744
+msgid "Password must be at least 12 characters long"
+msgstr ""
+
+#: app.py:745
+msgid "Password must contain a number"
+msgstr ""
+
+#: app.py:746
+msgid "Password must contain an uppercase letter"
+msgstr ""
+
+#: app.py:747
+msgid "Password must contain a lowercase letter"
+msgstr ""
+
+#: app.py:751
+msgid "Passwords must match"
+msgstr ""
 
 #: templates/base.html:5 templates/base.html:14 templates/signup.html:8
 msgid "PVXTE Web GUI"
 msgstr "PVXTE Web GUI"
 
-#: templates/base.html:17 templates/index.html:12
+#: templates/base.html:16 templates/index.html:12
 msgid "Simulations"
 msgstr "Simulations"
 
@@ -47,11 +110,14 @@ msgstr "Êtes-vous sûr de vouloir vous déconnecter ?"
 msgid "Logout"
 msgstr "Déconnexion"
 
-#: templates/base_not_logged.html:17 templates/base_not_logged_home.html:17
+#: templates/base_not_logged.html:16
+msgid "Home"
+msgstr "Accueil"
+
+#: templates/base_not_logged.html:18 templates/base_not_logged_home.html:17
 #: templates/login.html:8
-#, fuzzy
 msgid "Login"
-msgstr "Lignes"
+msgstr "Connexion"
 
 #: templates/buses_models_list.html:8 templates/company_manager.html:16
 msgid "Buses models list"
@@ -65,8 +131,7 @@ msgid "Name"
 msgstr "Nom"
 
 #: templates/buses_models_list.html:17 templates/company_manager.html:22
-#: templates/detail.html:39 templates/edit_bus_model.html:24
-#: templates/new_bus_model.html:24
+#: templates/edit_bus_model.html:24 templates/new_bus_model.html:24
 msgid "Length"
 msgstr "Longueur"
 
@@ -75,28 +140,27 @@ msgstr "Longueur"
 msgid "Maximum passengers capacity"
 msgstr "Capacité maximale de passagers"
 
-#: templates/buses_models_list.html:19 templates/detail.html:27
-#: templates/edit_bus_model.html:47 templates/new_bus_model.html:47
+#: templates/buses_models_list.html:19 templates/edit_bus_model.html:47
+#: templates/new_bus_model.html:47
 msgid "Minimum required battery packs"
 msgstr "Packs de batteries minimums requis"
 
-#: templates/buses_models_list.html:20 templates/detail.html:31
-#: templates/edit_bus_model.html:51 templates/new_bus_model.html:51
+#: templates/buses_models_list.html:20 templates/edit_bus_model.html:51
+#: templates/new_bus_model.html:51
 msgid "Maximum allowed battery packs"
 msgstr "Nombre maximal de batteries autorisé"
 
-#: templates/buses_models_list.html:21 templates/detail.html:23
-#: templates/edit_bus_model.html:55 templates/new_bus_model.html:55
+#: templates/buses_models_list.html:21 templates/edit_bus_model.html:55
+#: templates/new_bus_model.html:55
 msgid "Capacity of a battery pack"
 msgstr "Capacité d'une batterie"
 
-#: templates/buses_models_list.html:22 templates/detail.html:35
-#: templates/edit_bus_model.html:36 templates/new_bus_model.html:36
+#: templates/buses_models_list.html:22 templates/edit_bus_model.html:36
+#: templates/new_bus_model.html:36
 msgid "Empty weight of a bus without battery"
 msgstr "Poids à vide d'un autobus sans batterie"
 
-#: templates/buses_models_list.html:23 templates/detail.html:43
-#: templates/edit_bus_model.html:63
+#: templates/buses_models_list.html:23 templates/edit_bus_model.html:63
 msgid "Weight of a battery pack"
 msgstr "Poids d'une batterie"
 
@@ -107,10 +171,10 @@ msgstr "Supprimer"
 
 #: templates/company_manager.html:23
 msgid "Weight"
-msgstr ""
+msgstr "Poids"
 
-#: templates/company_manager.html:24 templates/edit_bus_model.html:28
-#: templates/new_bus_model.html:28
+#: templates/company_manager.html:24 templates/detail.html:29
+#: templates/edit_bus_model.html:28 templates/new_bus_model.html:28
 msgid "Bus cost"
 msgstr "Coût du bus"
 
@@ -120,7 +184,7 @@ msgstr "Capacité des batteries"
 
 #: templates/company_manager.html:26
 msgid "Single pack cost"
-msgstr ""
+msgstr "Coût d’un pack"
 
 #: templates/company_manager.html:27
 #, fuzzy
@@ -144,7 +208,7 @@ msgstr "Ajouter une nouvelle section"
 #: templates/company_manager.html:66 templates/company_manager.html:69
 #: templates/company_manager.html:72 templates/new_bus_model.html:7
 msgid "meters"
-msgstr ""
+msgstr "mètres"
 
 #: templates/company_manager.html:84
 msgid "Terminals and distances setting"
@@ -184,222 +248,164 @@ msgid "Charging station"
 msgstr "Station de recharge"
 
 #: templates/company_manager.html:143
-#, fuzzy
 msgid "Plugin charger station at deposit"
-msgstr "Puissance de charge maximale au dépôt"
+msgstr "Chargeur au dépôt (prise)"
 
 #: templates/company_manager.html:145
 msgid "Charger (e.g. pantograph, plugin)"
-msgstr ""
+msgstr "Chargeur (p. ex. pantographe, prise)"
 
 #: templates/company_manager.html:147
 msgid "None"
-msgstr ""
+msgstr "Aucun"
 
 #: templates/detail.html:8
 msgid "Simulation results"
 msgstr "Résultats de la simulation"
 
 #: templates/detail.html:18
-msgid "Buses and batteries sizing"
-msgstr "Dimensionnement des bus et des batteries"
+msgid "Main simulation inputs"
+msgstr "Principaux paramètres de simulation"
 
-#: templates/detail.html:47 templates/index.html:26
+#: templates/detail.html:23 templates/new_sim_step1.html:19
+#: templates/new_sim_step2.html:24
+msgid "Bus model"
+msgstr "Modèle de bus"
+
+#: templates/detail.html:33
+msgid "Deposit charger cost"
+msgstr "Coût du chargeur au dépôt"
+
+#: templates/detail.html:37
+msgid "Not deposit charger cost"
+msgstr "Coût du chargeur hors dépôt"
+
+#: templates/detail.html:41 templates/index.html:26
 msgid "Pantograph maximum charging power"
 msgstr "Puissance de charge maximale du pantographe"
 
-#: templates/detail.html:51 templates/index.html:25
+#: templates/detail.html:45 templates/index.html:25
 msgid "Maximum charging power at deposit"
 msgstr "Puissance de charge maximale au dépôt"
 
-#: templates/detail.html:58
-msgid "Number of buses"
-msgstr ""
-
-#: templates/detail.html:62
-#, fuzzy
-msgid "Battery packs for each bus"
-msgstr "Packs de batteries"
-
-#: templates/detail.html:66
-#, fuzzy
-msgid "Total capacity of a bus"
-msgstr "Capacité d'une batterie"
-
-#: templates/detail.html:70
-#, fuzzy
-msgid "Minimum number of drivers"
-msgstr "Nombre minimum"
-
-#: templates/detail.html:80 templates/detail.html:111
-msgid "Investment costs"
-msgstr "Coûts d'investissement"
-
-#: templates/detail.html:83 templates/detail.html:235
-msgid "Cost"
-msgstr "Coût"
-
-#: templates/detail.html:83
-#, fuzzy
-msgid "unit"
-msgstr "Soumettre"
-
-#: templates/detail.html:83
-msgid "Lifetime"
-msgstr "Durée de vie"
-
-#: templates/detail.html:83 templates/edit_bus_model.html:33
-#: templates/edit_bus_model.html:68 templates/new_bus_model.html:33
-#: templates/new_bus_model.html:60 templates/new_sim_step2.html:66
-#: templates/new_sim_step2.html:76 templates/new_sim_step2.html:96
-#: templates/new_sim_step2.html:112 templates/new_sim_step2.html:127
-msgid "years"
-msgstr "années"
-
-#: templates/detail.html:88
-msgid "Bus"
-msgstr "Bus"
-
-#: templates/detail.html:93
-msgid "Battery"
-msgstr "Batterie"
-
-#: templates/detail.html:98 templates/detail.html:124
-#, fuzzy
-msgid "Deposit charger"
-msgstr "chargeur"
-
-#: templates/detail.html:103
-msgid "Pantographs"
-msgstr ""
-
-#: templates/detail.html:111 templates/detail.html:183
-#: templates/detail.html:195 templates/detail.html:199
-#: templates/detail.html:203 templates/new_sim_step2.html:150
-msgid "year"
-msgstr "année"
-
-#: templates/detail.html:111
-#, fuzzy
-msgid "rate"
-msgstr "Mise à jour"
-
-#: templates/detail.html:116
-#, fuzzy
-msgid "Buses"
-msgstr "Bus"
-
-#: templates/detail.html:120
-#, fuzzy
-msgid "Batteries"
-msgstr "batterie"
-
-#: templates/detail.html:128
-msgid "Other chargers (e.g. pantographs)"
-msgstr ""
-
-#: templates/detail.html:132
-#, fuzzy
-msgid "Connection fee"
-msgstr "Coût de connexion"
-
-#: templates/detail.html:138 templates/new_sim_step2.html:130
-msgid "Interest rate"
-msgstr "Taux d'intérêt"
-
-#: templates/detail.html:142
-msgid "Additional fee"
-msgstr "Frais supplémentaires"
-
-#: templates/detail.html:146 templates/detail.html:150
-msgid "CAPEX"
-msgstr "CAPEX"
-
-#: templates/detail.html:150
-msgid "equivalent diesel buses"
-msgstr ""
-
-#: templates/detail.html:160
-msgid "Operational costs"
-msgstr "Coûts opérationnels"
-
-#: templates/detail.html:165 templates/new_sim_step2.html:153
-msgid "Energy tariff"
-msgstr "Tarif de l'énergie"
-
-#: templates/detail.html:169
-msgid "Buses maintenance"
-msgstr "Entretien des bus"
-
-#: templates/detail.html:173 templates/new_sim_step2.html:137
+#: templates/detail.html:49 templates/detail.html:104
 msgid "Buses efficiency"
 msgstr "Efficacité des bus"
 
-#: templates/detail.html:177
-msgid "Annual usage"
-msgstr "Utilisation annuelle"
+#: templates/detail.html:53 templates/new_sim_step2.html:146
+msgid "Buses maintainance"
+msgstr "Entretien des bus"
 
-#: templates/detail.html:182
-msgid "OPEX"
-msgstr "OPEX"
+#: templates/detail.html:57 templates/new_sim_step2.html:154
+msgid "Annual usage per single bus"
+msgstr "Utilisation annuelle par bus"
 
-#: templates/detail.html:189
-msgid "TTW emissions saved (diesel comparison)"
-msgstr "Réduction des émissions de TTW (comparaison avec le diesel)"
+#: templates/detail.html:61 templates/new_sim_step2.html:158
+msgid "Energy tariff"
+msgstr "Tarif de l'énergie"
 
-#: templates/detail.html:221
-msgid "Electrical"
-msgstr ""
+#: templates/detail.html:65 templates/new_sim_step2.html:130
+msgid "Connection cost"
+msgstr "Coût de connexion"
 
-#: templates/detail.html:228
-msgid "Diesel"
-msgstr ""
+#: templates/detail.html:69 templates/new_sim_step2.html:58
+msgid "Energy model calibration parameter"
+msgstr "Paramètre d’étalonnage du modèle énergétique"
 
-#: templates/detail.html:233
-msgid "Electrical vs. Diesel"
-msgstr ""
+#: templates/detail.html:73 templates/new_sim_step2.html:170
+msgid "Diesel cost for comparison"
+msgstr "Coût du diesel pour comparaison"
 
-#: templates/detail.html:234
-#, fuzzy
-msgid "Year"
-msgstr "année"
-
-#: templates/detail.html:248
-msgid "Download section"
-msgstr "Section de téléchargement"
-
-#: templates/detail.html:250
+#: templates/detail.html:83 templates/detail.html:114 templates/detail.html:165
 msgid "Results"
 msgstr "Résultats"
 
-#: templates/detail.html:259
-msgid "Raw data"
-msgstr "Données brutes"
+#: templates/detail.html:83
+msgid "Buses and batteries sizing"
+msgstr "Dimensionnement des bus et des batteries"
+
+#: templates/detail.html:88
+msgid "Number of buses"
+msgstr "Nombre de bus"
+
+#: templates/detail.html:92
+msgid "Battery packs for each bus"
+msgstr "Packs de batteries par bus"
+
+#: templates/detail.html:96
+msgid "Total capacity of a bus"
+msgstr "Capacité totale d’un bus"
+
+#: templates/detail.html:100
+msgid "Minimum number of drivers"
+msgstr "Nombre minimal de conducteurs"
+
+#: templates/detail.html:114
+msgid "Investment costs"
+msgstr "Coûts d'investissement"
+
+#: templates/detail.html:118 templates/edit_bus_model.html:33
+#: templates/edit_bus_model.html:68 templates/new_bus_model.html:33
+#: templates/new_bus_model.html:60 templates/new_sim_step2.html:74
+#: templates/new_sim_step2.html:84 templates/new_sim_step2.html:104
+#: templates/new_sim_step2.html:120 templates/new_sim_step2.html:135
+msgid "years"
+msgstr "années"
+
+#: templates/detail.html:144
+msgid "Connection fee"
+msgstr "Coût de connexion"
+
+#: templates/detail.html:151 templates/detail.html:155
+#: templates/detail.html:185
+msgid "Total"
+msgstr "Total"
+
+#: templates/detail.html:155
+msgid "diesel"
+msgstr "diesel"
+
+#: templates/detail.html:165
+msgid "Operational costs"
+msgstr "Coûts opérationnels"
+
+#: templates/detail.html:168 templates/detail.html:244
+msgid "Cost"
+msgstr "Coût"
+
+#: templates/detail.html:194
+msgid "TTW emissions saved (diesel comparison)"
+msgstr "Réduction des émissions de TTW (comparaison avec le diesel)"
+
+#: templates/detail.html:242
+msgid "Break point analysis"
+msgstr "Analyse du point de bascule"
+
+#: templates/detail.html:243
+msgid "Year"
+msgstr "Année"
 
 #: templates/edit_bus_model.html:7
 msgid "Edit bus model"
 msgstr "Modifier le modèle de bus"
 
 #: templates/edit_bus_model.html:21 templates/new_bus_model.html:21
-#: templates/new_sim_step2.html:57
-#, fuzzy
+#: templates/new_sim_step2.html:65
 msgid "Bus section"
-msgstr "Tracer la section"
+msgstr "Section bus"
 
 #: templates/edit_bus_model.html:32 templates/new_bus_model.html:32
-#: templates/new_sim_step2.html:65
+#: templates/new_sim_step2.html:73
 msgid "Bus lifetime"
 msgstr "Durée de vie du bus"
 
 #: templates/edit_bus_model.html:44 templates/new_bus_model.html:44
-#, fuzzy
 msgid "Batteries section"
-msgstr "Section des bornes"
+msgstr "Section batteries"
 
 #: templates/edit_bus_model.html:59
-#, fuzzy
 msgid "Cost of a battery pack"
-msgstr "Capacité d'une batterie"
+msgstr "Coût d’un pack batterie"
 
 #: templates/edit_bus_model.html:67 templates/new_bus_model.html:59
 msgid "Battery lifetime"
@@ -417,43 +423,52 @@ msgstr "Gestion des utilisateurs"
 msgid "Main settings"
 msgstr "Paramètres principaux"
 
-#: templates/edit_user.html:25 templates/signup.html:26
-#: templates/signup.html:27
+#: templates/edit_user.html:25 templates/signup.html:31
+#: templates/signup.html:32
 msgid "Email"
 msgstr "Courriel"
 
-#: templates/edit_user.html:29
+#: templates/edit_user.html:29 templates/edit_user.html:31
+#: templates/signup.html:35 templates/signup.html:37
+msgid "Company"
+msgstr "Entreprise"
+
+#: templates/edit_user.html:44 templates/edit_user.html:45
+#: templates/signup.html:47 templates/signup.html:48
+msgid "New company"
+msgstr "Nouvelle entreprise"
+
+#: templates/edit_user.html:48
 msgid "Language"
 msgstr "Langue"
 
-#: templates/edit_user.html:43
+#: templates/edit_user.html:62
 msgid "You are updating your profile settings! Are you sure?"
 msgstr ""
 "Vous mettez à jour les paramètres de votre profil ! Êtes-vous sûr de vous"
 " ?"
 
-#: templates/edit_user.html:43
+#: templates/edit_user.html:62
 msgid "Update"
 msgstr "Mise à jour"
 
-#: templates/edit_user.html:56 templates/login.html:21 templates/signup.html:22
-#: templates/signup.html:23
+#: templates/edit_user.html:75 templates/login.html:21 templates/signup.html:23
 msgid "Password"
 msgstr "Mot de passe"
 
-#: templates/edit_user.html:60
+#: templates/edit_user.html:79
 msgid "New password"
 msgstr "Nouveau mot de passe"
 
-#: templates/edit_user.html:64
+#: templates/edit_user.html:83
 msgid "Retype New password"
 msgstr "Confirmer le nouveau mot de passe"
 
-#: templates/edit_user.html:68
+#: templates/edit_user.html:87
 msgid "You are changing your password! Are you sure?"
 msgstr "Vous modifiez votre mot de passe ! Êtes-vous sûr ?"
 
-#: templates/edit_user.html:68
+#: templates/edit_user.html:87
 msgid "Change password"
 msgstr "Modifier le mot de passe"
 
@@ -477,20 +492,20 @@ msgstr "Taille de la batterie"
 msgid "Detail"
 msgstr "Détail"
 
-#: templates/index.html:66
+#: templates/index.html:62
 msgid "Unfeasible simulation"
 msgstr "Simulation irréalisable"
 
-#: templates/index.html:75 templates/index.html:89
+#: templates/index.html:71 templates/index.html:80
 msgid "Are you sure you want to delete the simulation?"
 msgstr "Etes-vous sûr de vouloir supprimer la simulation ?"
 
-#: templates/index.html:112
+#: templates/index.html:103
 #, fuzzy
 msgid "PVxTE Web Tool"
 msgstr "PVXTE Web GUI"
 
-#: templates/login.html:17 templates/signup.html:18 templates/signup.html:19
+#: templates/login.html:17 templates/signup.html:19
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
@@ -499,8 +514,8 @@ msgid "Registration"
 msgstr "Inscription"
 
 #: templates/login.html:56 templates/new_bus_model.html:71
-#: templates/new_sim_step1.html:62 templates/new_sim_step2.html:177
-#: templates/signup.html:53
+#: templates/new_sim_step1.html:62 templates/new_sim_step2.html:182
+#: templates/signup.html:61
 msgid "Error"
 msgstr "Erreur"
 
@@ -531,31 +546,24 @@ msgid "New simulation - step1"
 msgstr "Nouvelle simulation - étape 1"
 
 #: templates/new_sim_step1.html:16
-#, fuzzy
 msgid "Bus/lines section"
-msgstr "Section des bornes"
-
-#: templates/new_sim_step1.html:19 templates/new_sim_step2.html:24
-msgid "Bus model"
-msgstr "Modèle de bus"
+msgstr "Section bus/lignes"
 
 #: templates/new_sim_step1.html:29
 msgid "Timetable/line file"
 msgstr "Horaire/fichier de ligne"
 
 #: templates/new_sim_step1.html:39
-#, fuzzy
 msgid "Nominal charging power section"
-msgstr "Puissance de charge"
+msgstr "Section puissance de charge nominale"
 
 #: templates/new_sim_step1.html:42
-#, fuzzy
 msgid "Single charger in the deposit"
-msgstr "Puissance de charge maximale au dépôt"
+msgstr "Chargeur unique au dépôt"
 
 #: templates/new_sim_step1.html:47
 msgid "Other charger (pantograph or plugin) not in the deposit"
-msgstr ""
+msgstr "Autre chargeur (pantographe ou prise) hors dépôt"
 
 #: templates/new_sim_step1.html:54
 msgid "Go to step 2"
@@ -574,95 +582,80 @@ msgid "Day type"
 msgstr "Type de jour"
 
 #: templates/new_sim_step2.html:55
+#, fuzzy
+msgid "Energy model section"
+msgstr "Section des bornes"
+
+#: templates/new_sim_step2.html:62
 msgid "CAPEX section"
 msgstr "Section CAPEX"
 
-#: templates/new_sim_step2.html:60
-#, fuzzy
+#: templates/new_sim_step2.html:68
 msgid "Single bus cost"
-msgstr "Coût du bus"
+msgstr "Coût d’un bus"
 
-#: templates/new_sim_step2.html:70
-#, fuzzy
+#: templates/new_sim_step2.html:78
 msgid "Single pack battery cost"
-msgstr "Coût de la batterie"
+msgstr "Coût d’un pack batterie"
 
-#: templates/new_sim_step2.html:75
-#, fuzzy
+#: templates/new_sim_step2.html:83
 msgid "Battery pack lifetime"
-msgstr "Durée de vie de la batterie"
+msgstr "Durée de vie du pack batterie"
 
-#: templates/new_sim_step2.html:80
-#, fuzzy
+#: templates/new_sim_step2.html:88
 msgid "Minimum/maximum required/allowed battery packs"
-msgstr "Packs de batteries minimums requis"
+msgstr "Packs de batteries requis/autorisés (min/max)"
 
-#: templates/new_sim_step2.html:84
-#, fuzzy
+#: templates/new_sim_step2.html:92
 msgid "Deposit charger section"
-msgstr "Tracer la section"
+msgstr "Section chargeur au dépôt"
 
-#: templates/new_sim_step2.html:87 templates/new_sim_step2.html:104
-#, fuzzy
+#: templates/new_sim_step2.html:95 templates/new_sim_step2.html:112
 msgid "Nominal charging power"
-msgstr "Puissance de charge"
+msgstr "Puissance de charge nominale"
 
-#: templates/new_sim_step2.html:92 templates/new_sim_step2.html:108
-#, fuzzy
+#: templates/new_sim_step2.html:100 templates/new_sim_step2.html:116
 msgid "Single charger cost"
-msgstr "Coût du chargeur"
+msgstr "Coût d’un chargeur"
 
-#: templates/new_sim_step2.html:95 templates/new_sim_step2.html:111
+#: templates/new_sim_step2.html:103 templates/new_sim_step2.html:119
 msgid "Charger lifetime"
 msgstr "Durée de vie du chargeur"
 
-#: templates/new_sim_step2.html:101
+#: templates/new_sim_step2.html:109
 msgid "Additional chargers section (pantograph or plugin)"
-msgstr ""
+msgstr "Section chargeurs supplémentaires (pantographe ou prise)"
 
-#: templates/new_sim_step2.html:119
+#: templates/new_sim_step2.html:127
 msgid "Connection fee and interest rate"
-msgstr ""
+msgstr "Frais de connexion et taux d’intérêt"
 
-#: templates/new_sim_step2.html:122
-msgid "Connection cost"
-msgstr "Coût de connexion"
-
-#: templates/new_sim_step2.html:126
+#: templates/new_sim_step2.html:134
 #, fuzzy
 msgid "Connection lifetime"
 msgstr "Coût de connexion"
 
-#: templates/new_sim_step2.html:134
+#: templates/new_sim_step2.html:138
+msgid "Interest rate"
+msgstr "Taux d'intérêt"
+
+#: templates/new_sim_step2.html:142
 msgid "OPEX section"
 msgstr "Section OPEX"
 
-#: templates/new_sim_step2.html:141
-msgid "Buses maintainance"
-msgstr "Entretien des bus"
-
-#: templates/new_sim_step2.html:145
+#: templates/new_sim_step2.html:150
 msgid "Charging efficiency"
 msgstr "Efficacité de la charge"
 
-#: templates/new_sim_step2.html:149
-msgid "Annual usage per single bus"
-msgstr "Utilisation annuelle par bus"
-
-#: templates/new_sim_step2.html:157
+#: templates/new_sim_step2.html:162
 msgid "Energy tariff increase per year"
 msgstr "Augmentation du tarif de l'énergie par an"
 
-#: templates/new_sim_step2.html:161
-#, fuzzy
+#: templates/new_sim_step2.html:166
 msgid "Additional power tariff"
-msgstr "Tarif de l'électricité"
+msgstr "Tarif de puissance supplémentaire"
 
-#: templates/new_sim_step2.html:165
-msgid "Diesel cost for comparison"
-msgstr ""
-
-#: templates/new_sim_step2.html:169
+#: templates/new_sim_step2.html:174
 msgid ""
 "Are you sure? You will receive a notification via email when the "
 "simulation will be completed"
@@ -670,21 +663,26 @@ msgstr ""
 "Êtes-vous sûr ? Vous recevrez une notification par courrier électronique "
 "lorsque la simulation sera terminée."
 
-#: templates/new_sim_step2.html:169
+#: templates/new_sim_step2.html:174
 msgid "Launch Simulation"
-msgstr "Simulation de lancement"
+msgstr "Lancer la simulation"
 
-#: templates/signup.html:30 templates/signup.html:32
-msgid "Company"
-msgstr "Entreprise"
+#: templates/new_sim_step2.html:202
+msgid "Please select at least one line"
+msgstr "Veuillez sélectionner au moins une ligne"
 
-#: templates/signup.html:42 templates/signup.html:43
-msgid "New company"
-msgstr "Nouvelle entreprise"
+#: templates/signup.html:27
+#, fuzzy
+msgid "Confirm Password"
+msgstr "Modifier le mot de passe"
 
-#: templates/signup.html:46
+#: templates/signup.html:54
 msgid "Signup"
 msgstr "S'inscrire"
+
+#: templates/signup.html:69
+msgid "ATTENTION! We have found the following errors during the signup process."
+msgstr ""
 
 #~ msgid "management section"
 #~ msgstr "section de gestion"
@@ -774,4 +772,46 @@ msgstr "S'inscrire"
 #~ "ATTENTION! Nous avons trouvé les erreurs"
 #~ " suivantes lors de la procédure "
 #~ "d'inscription."
+
+#~ msgid "unit"
+#~ msgstr "Soumettre"
+
+#~ msgid "Lifetime"
+#~ msgstr "Durée de vie"
+
+#~ msgid "Bus"
+#~ msgstr "Bus"
+
+#~ msgid "Battery"
+#~ msgstr "Batterie"
+
+#~ msgid "Pantographs"
+#~ msgstr ""
+
+#~ msgid "rate"
+#~ msgstr "Mise à jour"
+
+#~ msgid "Additional fee"
+#~ msgstr "Frais supplémentaires"
+
+#~ msgid "CAPEX"
+#~ msgstr "CAPEX"
+
+#~ msgid "equivalent diesel buses"
+#~ msgstr ""
+
+#~ msgid "Annual usage"
+#~ msgstr "Utilisation annuelle"
+
+#~ msgid "OPEX"
+#~ msgstr "OPEX"
+
+#~ msgid "Electrical vs. Diesel"
+#~ msgstr ""
+
+#~ msgid "Download section"
+#~ msgstr "Section de téléchargement"
+
+#~ msgid "Raw data"
+#~ msgstr "Données brutes"
 
