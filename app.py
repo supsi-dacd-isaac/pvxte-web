@@ -51,6 +51,13 @@ app.config.update(
 
 # Set the Babel object for the translations
 
+@app.before_request
+def _set_language_from_query():
+    # Allow changing language globally via ?lang=xx on any route
+    lang = request.args.get('lang')
+    if lang and lang in main_cfg.get('languages', {}).keys():
+        session['language'] = lang
+
 def get_locale():
     if 'language' in session.keys():
         return session['language']
