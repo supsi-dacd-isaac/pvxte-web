@@ -93,8 +93,15 @@
                         <td style="text-align: right;">{{ bus_data['battery_packs_number'] }}</td>
                     </tr>
                     <tr>
-                        <td style="text-align: left;"><b>{{ gettext('Total capacity of a bus') }}</b></td>
-                        <td style="text-align: right;">{{ bus_data['battery_packs_capacity']|int }} kWh</td>
+                        <td style="text-align: left;"><b>{{ gettext('Minimum required capacity') }}</b></td>
+                        <td style="text-align: right;">{{ bus_data['battery_packs_capacity']|round(1) }} kWh</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left;"><b>{{ gettext('Installable capacity') }}</b></td>
+                        <td style="text-align: right;">
+                            {{ bus_data['battery_installed_capacity']|round(1) }} kWh
+                            ({{ bus_data['battery_packs_number'] }} x {{ bus_data['battery_pack_capacity']|round(1) }} kWh)
+                        </td>
                     </tr>
 <!--                    <tr>-->
 <!--                        <td style="text-align: left;"><b>{{ gettext('Minimum number of drivers') }}</b></td>-->

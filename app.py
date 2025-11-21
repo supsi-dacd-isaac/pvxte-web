@@ -857,16 +857,22 @@ def detail():
             # data['min_num_drivers'] = len(set(df_data["Driver#"]))
             data['df_bsize'] = df_bsize
 
-            bus_data = {
-                'number': len(df_bsize),
-                'battery_packs_capacity': df_bsize.iloc[0]['Battery size (kWh)'],
-                'battery_packs_number': int(df_bsize.iloc[0]['Battery packs'])
-            }
-
             # Calculate CAPEX and OPEX costs
             capex_features = json.loads(sim_metadata[11])
             opex_features = json.loads(sim_metadata[12])
             input_bus_model_data = json.loads(sim_metadata[15])
+            packs_per_bus = int(df_bsize.iloc[0]['Battery packs'])
+            min_required_kwh = float(df_bsize.iloc[0]['Battery size (kWh)'])
+            pack_capacity = float(input_bus_model_data['batt_pack_capacity'])
+            installed_kwh = packs_per_bus * pack_capacity
+
+            bus_data = {
+                'number': len(df_bsize),
+                'battery_packs_capacity': min_required_kwh,
+                'battery_packs_number': packs_per_bus,
+                'battery_installed_capacity': installed_kwh,
+                'battery_pack_capacity': pack_capacity
+            }
             sim_name = sim_metadata[16]
             terminals_selected = json.loads(sim_metadata[17])
             terminals_metadata = json.loads(sim_metadata[18])
