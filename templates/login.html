@@ -34,19 +34,7 @@
         <p class="info"><strong>{{ gettext('Registration') }}:</strong> {{ signup_info }}
     </div>
     <div class="container">
-        <a class="link-dark" href="{{ url_for('signup', lang='en') }}">Not registered? Please sign up here!</a>
-    </div>
-    <br>
-    <div class="container">
-        <a class="link-dark" href="{{ url_for('signup', lang='it') }}">Non hai un account? Registrati qui!</a>
-    </div>
-    <br>
-    <div class="container">
-        <a class="link-dark" href="{{ url_for('signup', lang='de') }}">Nicht registriert? Bitte melden Sie sich hier an!</a>
-    </div>
-    <br>
-    <div class="container">
-        <a class="link-dark" href="{{ url_for('signup', lang='fr') }}">Vous n'êtes pas encore inscrit? Inscrivez-vous ici!</a>
+        <a class="link-dark" href="{{ url_for('signup', lang=session.get('language', 'en')) }}">{{ gettext('Not registered? Please sign up here!') }}</a>
     </div>
 
 

@@ -1,37 +1,10 @@
 {% block content %}
 <div class="container" align="justify">
-    PVxTE è un tool web sviluppato nell'ambito del progetto PVTutt'Elettrico, questi è un progetto che mira a
-    sviluppare strategie avanzate per l'elettrificazione della flotta di autobus di una società di trasporti pubblici.
-    L'obiettivo principale è ridurre le emissioni
-    inquinanti e promuovere una mobilità urbana sostenibile. Attraverso l'adozione di tecnologie all'avanguardia,
-    la nostra missione è migliorare l'efficienza energetica dei veicoli, ridurre i costi operativi e contribuire a
-    creare un ambiente urbano più pulito e salutare. PVTutt'Elettrico è un passo avanti verso una città più verde e
-    la riduzione dell'impatto ambientale del trasporto pubblico, contribuendo in modo significativo alla qualità
-    della vita dei cittadini.<br>
-    Il progetto è stato finanziato dall' <a href="https://www.bav.admin.ch/bav/it/home.html" target="_blank">Ufficio
-    Federale dei Trasporti</a> all'interno delle attività del programma
-    <a href="https://www.bav.admin.ch/bav/it/home/temi-generali/ricerca-e-innovazione/programmi-di-ricerca-e-d-innovazione/Energia2050.html" target="_blank">SETP 2050</a>.
-    PVxTE è un progetto open-source, il cui codice è pubblicato al seguente link: <a href="https://github.com/supsi-dacd-isaac/pvxte-web" target="_blank">github.com/supsi-dacd-isaac/pvxte-web</a>.
-    <br><br>
-    Prima di iniziare a utilizzare lo strumento si prega per favore di consultare la
-    <a href="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/README.md" target="_blank"><b>documentazione online</b></a>, la quale
-    fornisce una guida completa di tutte le sezioni dell'applicazione.
+    {{ gettext('landing_about_html')|safe }}
 </div>
 <br><br>
 <div class="container" align="justify">
-    PVxTE is a web tool developed as part of the PVEverything Electric project, which is a project that aims to develop
-    advanced strategies for the electrification of a public transport company's bus fleet. The main objective is to
-    reduce polluting emissions and promote sustainable urban mobility.
-    Through the adoption of state-of-the-art technologies, our mission is to improve the energy efficiency of vehicles,
-    reduce operating costs and contribute to a cleaner and healthier urban environment. PVTutt'Elettrico is a step
-    towards a greener city and the reduction of the environmental impact of public transport, contributing significantly
-    to citizens' quality of life.<br>
-    The project was financed by the <a href="https://www.bav.admin.ch/bav/it/home.html" target="_blank">Federal Office of Transport</a>
-    as part of the <a href="https://www.bav.admin.ch/bav/it/home/temi-generali/ricerca-e-innovazione/programmi-di-ricerca-e-d-innovazione/Energia2050.html" target="_blank">SETP 2050</a> programme activities.
-    PVxTE is an open-source project, its code is published at the following link: <a href="https://github.com/supsi-dacd-isaac/pvxte-web" target="_blank">github.com/supsi-dacd-isaac/pvxte-web</a>.
-    <br><br>
-    Before starting using the tool please refer to the <a href="https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/README.md" target="_blank"><b>online documentation</b></a>,
-    which provides a guideline comprehensive of all the application's sections.
+    {{ gettext('landing_documentation_html')|safe }}
 </div>
 <br>
 
@@ -42,5 +15,9 @@
     <div class="cell_logos"><img src="static/logos/fart.png" style="width:192px;height:144px;"></div>
     <div class="cell_logos"><img src="static/logos/protoscar.png" style="width:280px;height:132px;"></div>
     <div class="cell_logos"><img src="static/logos/ch.png" style="width:256px;height:64px;"></div>
+</div>
+
+<div class="privacy-policy-link-container container">
+    <a href="https://www.supsi.ch/informativa-privacy" target="_blank" rel="noopener">Privacy Policy</a>
 </div>
 {% endblock %}

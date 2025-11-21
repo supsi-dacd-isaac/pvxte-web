@@ -51,6 +51,15 @@ app.config.update(
 
 # Set the Babel object for the translations
 
+def _preferred_language_from_request():
+    languages = list(main_cfg.get('languages', {}).keys())
+    if request.accept_languages and languages:
+        best_match = request.accept_languages.best_match(languages)
+        if best_match:
+            return best_match
+    return 'en'
+
+
 @app.before_request
 def _set_language_from_query():
     # Allow changing language globally via ?lang=xx on any route
@@ -58,11 +67,14 @@ def _set_language_from_query():
     if lang and lang in main_cfg.get('languages', {}).keys():
         session['language'] = lang
 
+
 def get_locale():
-    if 'language' in session.keys():
+    languages = main_cfg.get('languages', {})
+    if 'language' in session.keys() and session['language'] in languages:
         return session['language']
-    else:
-        return 'it'
+    preferred_language = _preferred_language_from_request()
+    session['language'] = preferred_language
+    return preferred_language
 
 babel = Babel(app)
 babel.init_app(app, locale_selector=get_locale)
@@ -703,10 +715,11 @@ def get_distances_matrix_dict(conn):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
-    if 'lang' in request.args.keys():
+    languages = main_cfg.get('languages', {})
+    if 'lang' in request.args.keys() and request.args['lang'] in languages:
         session['language'] = request.args['lang']
-    else:
-        session['language'] = 'it'
+    elif 'language' not in session.keys():
+        session['language'] = _preferred_language_from_request()
 
     if request.method == 'POST':
         conn = get_db_connection()
@@ -723,7 +736,7 @@ def login():
             session['username'] = request.form['username']
             session['password'] = request.form['password']
             return redirect(url_for('index'))
-    return render_template('login.html', error=error)
+    return render_template('login.html', error=error, languages=languages)
 
 
 @app.route('/logout', methods=['GET', 'POST'])
@@ -757,9 +770,11 @@ class RegistrationForm(FlaskForm):
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     error = None
-    session['language'] = 'en'
-    if 'lang' in request.args.keys():
+    languages = main_cfg.get('languages', {})
+    if 'lang' in request.args.keys() and request.args['lang'] in languages:
         session['language'] = request.args['lang']
+    elif 'language' not in session.keys():
+        session['language'] = _preferred_language_from_request()
 
     if request.method == 'POST':
         session['language'] = request.form['language']
@@ -782,11 +797,11 @@ def signup():
         else:
             conn.close()
             return render_template('signup.html', language=session['language'], error=error,
-                                   companies=companies, form=form)
+                                   companies=companies, form=form, languages=languages)
     else:
         conn.close()
         return render_template('signup.html', language=session['language'], companies=companies,
-                               form=form)
+                               form=form, languages=languages)
 
 
 @app.route('/', methods=('GET', 'POST'))
@@ -833,7 +848,18 @@ def index():
 
         return render_template('index.html', sims_list=sims_list, flag_company_setup=flag_company_setup)
     else:
-        return render_template('index.html', sims_list=[], flag_company_setup=False, language='it')
+        current_language = session.get('language')
+        if current_language is None:
+            current_language = _preferred_language_from_request()
+            session['language'] = current_language
+        return render_template(
+            'index.html',
+            sims_list=[],
+            flag_company_setup=False,
+            language=current_language,
+            languages=main_cfg.get('languages', {}),
+            current_language=current_language
+        )
 
 
 @app.route('/detail', methods=('GET', 'POST'))

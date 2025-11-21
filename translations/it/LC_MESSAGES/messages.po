@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2025-11-20 11:24+0100\n"
+"POT-Creation-Date: 2025-11-21 13:34+0100\n"
 "PO-Revision-Date: 2023-09-06 11:46+0200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: it\n"
@@ -16,69 +16,69 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.10.3\n"
+"Generated-By: Babel 2.14.0\n"
 
-#: app.py:410 templates/detail.html:169 templates/detail.html:230
+#: app.py:422 templates/detail.html:176 templates/detail.html:237
 msgid "Electrical"
 msgstr "Elettrico"
 
-#: app.py:410 templates/detail.html:170 templates/detail.html:237
+#: app.py:422 templates/detail.html:177 templates/detail.html:244
 msgid "Diesel"
 msgstr "Diesel"
 
-#: app.py:421 templates/detail.html:124
+#: app.py:433 templates/detail.html:131
 msgid "Buses"
 msgstr "Bus"
 
-#: app.py:425 templates/detail.html:129
+#: app.py:437 templates/detail.html:136
 msgid "Batteries"
 msgstr "Batterie"
 
-#: app.py:429 templates/detail.html:134
+#: app.py:441 templates/detail.html:141
 msgid "Deposit charger"
 msgstr "Caricatore al deposito"
 
-#: app.py:434 templates/detail.html:139
+#: app.py:446 templates/detail.html:146
 msgid "Other chargers (e.g. pantographs)"
 msgstr "Altri caricatori (es. pantografi)"
 
-#: app.py:438 templates/detail.html:175
+#: app.py:450 templates/detail.html:182
 #, fuzzy
 msgid "Maintenance"
 msgstr "Manutenzione degli autobus"
 
-#: app.py:442 templates/detail.html:180
+#: app.py:454 templates/detail.html:187
 msgid "Consumption"
 msgstr ""
 
-#: app.py:447
+#: app.py:459
 msgid "Annual expenditure and operative costs"
 msgstr ""
 
-#: app.py:449 templates/detail.html:114 templates/detail.html:119
-#: templates/detail.html:165 templates/detail.html:201
-#: templates/detail.html:206 templates/detail.html:211
+#: app.py:461 templates/detail.html:121 templates/detail.html:126
+#: templates/detail.html:172 templates/detail.html:208
+#: templates/detail.html:213 templates/detail.html:218
 #: templates/new_sim_step2.html:155
 msgid "year"
 msgstr "anno"
 
-#: app.py:744
+#: app.py:757
 msgid "Password must be at least 12 characters long"
 msgstr ""
 
-#: app.py:745
+#: app.py:758
 msgid "Password must contain a number"
 msgstr ""
 
-#: app.py:746
+#: app.py:759
 msgid "Password must contain an uppercase letter"
 msgstr ""
 
-#: app.py:747
+#: app.py:760
 msgid "Password must contain a lowercase letter"
 msgstr ""
 
-#: app.py:751
+#: app.py:764
 msgid "Passwords must match"
 msgstr ""
 
@@ -111,14 +111,24 @@ msgstr "Sei sicuro di voler fare il logout?"
 msgid "Logout"
 msgstr "Disconnessione"
 
-#: templates/base_not_logged.html:16
+#: templates/base_not_logged.html:17 templates/base_not_logged_home.html:16
 msgid "Home"
-msgstr ""
+msgstr "Home"
 
-#: templates/base_not_logged.html:18 templates/base_not_logged_home.html:17
+#: templates/base_not_logged.html:20 templates/base_not_logged_home.html:19
 #: templates/login.html:8
 msgid "Login"
-msgstr "Login"
+msgstr "Accedi"
+
+#: templates/base_not_logged.html:24 templates/base_not_logged_home.html:23
+#: templates/signup.html:54
+msgid "Signup"
+msgstr "Registrati"
+
+#: templates/base_not_logged.html:33 templates/base_not_logged_home.html:32
+#: templates/edit_user.html:48
+msgid "Language"
+msgstr "Lingua"
 
 #: templates/buses_models_list.html:8 templates/company_manager.html:16
 msgid "Buses models list"
@@ -290,7 +300,7 @@ msgstr "Potenza massima di carica del pantografo"
 msgid "Maximum charging power at deposit"
 msgstr "Potenza massima di carica al deposito"
 
-#: templates/detail.html:49 templates/detail.html:104
+#: templates/detail.html:49 templates/detail.html:111
 msgid "Buses efficiency"
 msgstr "Efficienza degli autobus"
 
@@ -318,7 +328,7 @@ msgstr ""
 msgid "Diesel cost for comparison"
 msgstr "Costo nel caso diesel"
 
-#: templates/detail.html:83 templates/detail.html:114 templates/detail.html:165
+#: templates/detail.html:83 templates/detail.html:121 templates/detail.html:172
 msgid "Results"
 msgstr "Risultati"
 
@@ -342,15 +352,15 @@ msgstr "Capacità minima richiesta"
 msgid "Installable capacity"
 msgstr "Capacità installabile"
 
-#: templates/detail.html:106
+#: templates/detail.html:107
 msgid "Minimum number of drivers"
 msgstr "Numero minimo di piloti"
 
-#: templates/detail.html:114
+#: templates/detail.html:121
 msgid "Investment costs"
 msgstr "Costi di investimento"
 
-#: templates/detail.html:118 templates/edit_bus_model.html:33
+#: templates/detail.html:125 templates/edit_bus_model.html:33
 #: templates/edit_bus_model.html:68 templates/new_bus_model.html:33
 #: templates/new_bus_model.html:60 templates/new_sim_step2.html:74
 #: templates/new_sim_step2.html:84 templates/new_sim_step2.html:104
@@ -358,37 +368,37 @@ msgstr "Costi di investimento"
 msgid "years"
 msgstr "anni"
 
-#: templates/detail.html:144
+#: templates/detail.html:151
 msgid "Connection fee"
 msgstr "Costo della connessione"
 
-#: templates/detail.html:151 templates/detail.html:155
-#: templates/detail.html:185
+#: templates/detail.html:158 templates/detail.html:162
+#: templates/detail.html:192
 msgid "Total"
 msgstr ""
 
-#: templates/detail.html:155
+#: templates/detail.html:162
 #, fuzzy
 msgid "diesel"
 msgstr "Diesel"
 
-#: templates/detail.html:165
+#: templates/detail.html:172
 msgid "Operational costs"
 msgstr "Costi operativi"
 
-#: templates/detail.html:168 templates/detail.html:244
+#: templates/detail.html:175 templates/detail.html:251
 msgid "Cost"
 msgstr "Costo"
 
-#: templates/detail.html:194
+#: templates/detail.html:201
 msgid "TTW emissions saved (diesel comparison)"
 msgstr "Emissioni TTW risparmiate (confronto con il diesel)"
 
-#: templates/detail.html:242
+#: templates/detail.html:249
 msgid "Break point analysis"
 msgstr ""
 
-#: templates/detail.html:243
+#: templates/detail.html:250
 msgid "Year"
 msgstr "Anno"
 
@@ -445,10 +455,6 @@ msgstr "Azienda"
 msgid "New company"
 msgstr "Nuova compagnia"
 
-#: templates/edit_user.html:48
-msgid "Language"
-msgstr "Lingua"
-
 #: templates/edit_user.html:62
 msgid "You are updating your profile settings! Are you sure?"
 msgstr "Stai aggiornando le impostazioni del tuo profilo! Sei sicuro?"
@@ -476,6 +482,37 @@ msgstr "Stai cambiando la tua password! Sei sicuro?"
 #: templates/edit_user.html:87
 msgid "Change password"
 msgstr "Cambia password"
+
+#: templates/footer_not_logged_home.html:3
+msgid "landing_about_html"
+msgstr ""
+"<p>PVxTE è un tool web sviluppato nell'ambito del progetto PV "
+"Tutt'Elettrico, che mira a sviluppare strategie avanzate per "
+"l'elettrificazione della flotta di autobus di una società di trasporto "
+"pubblico. L'obiettivo principale è ridurre le emissioni inquinanti e "
+"promuovere una mobilità urbana sostenibile. Attraverso l'adozione di "
+"tecnologie all'avanguardia, la nostra missione è migliorare l'efficienza "
+"energetica dei veicoli, ridurre i costi operativi e contribuire a creare "
+"un ambiente urbano più pulito e salutare. PV Tutt'Elettrico è un passo "
+"avanti verso una città più verde e verso la riduzione dell'impatto "
+"ambientale del trasporto pubblico, contribuendo in modo significativo "
+"alla qualità della vita dei cittadini.</p>\n"
+"<p>Il progetto è stato finanziato dall'<a "
+"href='https://www.bav.admin.ch/bav/it/home.html' target='_blank'>Ufficio "
+"Federale dei Trasporti</a> nell'ambito dell'iniziativa <a "
+"href='https://www.bav.admin.ch/it/strategia-energetica-2050' "
+"target='_blank'>Strategia energetica per i trasporti pubblici – SETraP "
+"2050</a>. PVxTE è un progetto open-source, il cui codice è pubblicato al "
+"seguente link: <a href='https://github.com/supsi-dacd-isaac/pvxte-web' "
+"target='_blank'>github.com/supsi-dacd-isaac/pvxte-web</a>.</p>"
+
+#: templates/footer_not_logged_home.html:7
+msgid "landing_documentation_html"
+msgstr ""
+"Prima di iniziare a utilizzare lo strumento, si prega di consultare la <a"
+" href='https://github.com/supsi-dacd-isaac/pvxte-web/blob/main/README.md'"
+" target='_blank'><b>documentazione online</b></a>, che fornisce una guida"
+" completa a tutte le sezioni dell'applicazione."
 
 #: templates/index.html:21
 msgid "Created at"
@@ -518,7 +555,11 @@ msgstr "Nome utente"
 msgid "Registration"
 msgstr "Registrazione"
 
-#: templates/login.html:56 templates/new_bus_model.html:71
+#: templates/login.html:37
+msgid "Not registered? Please sign up here!"
+msgstr "Non hai un account? Registrati qui!"
+
+#: templates/login.html:44 templates/new_bus_model.html:71
 #: templates/new_sim_step1.html:62 templates/new_sim_step2.html:182
 #: templates/signup.html:61
 msgid "Error"
@@ -677,10 +718,6 @@ msgstr ""
 #, fuzzy
 msgid "Confirm Password"
 msgstr "Cambia password"
-
-#: templates/signup.html:54
-msgid "Signup"
-msgstr "Iscrizioni"
 
 #: templates/signup.html:69
 msgid "ATTENTION! We have found the following errors during the signup process."

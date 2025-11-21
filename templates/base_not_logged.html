@@ -12,18 +12,37 @@
             <nav class="navbar navbar-expand-lg navbar-light bg-pvxte-top-bar border-bottom">
                 <div class="container-fluid-coloured-pvxte">
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('index') }}">{{ gettext('Home') }}</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('login') }}">{{ gettext('Login') }}</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('signup', lang='it') }}">{{ 'Registrazione' }}</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('signup', lang='de') }}">{{ 'Anmeldung' }}</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('signup', lang='fr') }}">{{ 'Inscription' }}</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="#">&nbsp;&nbsp;&nbsp;&nbsp;</a></li>
-                            <li class="nav-item active"><a class="nav-link-pvxte" href="{{ url_for('signup', lang='en') }}">{{ 'Signup' }}</a></li>
+                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0 align-items-center gap-3">
+                            <li class="nav-item active d-flex align-items-center">
+                                <a class="nav-link-pvxte" href="{{ url_for('index') }}">{{ gettext('Home') }}</a>
+                            </li>
+                            <li class="nav-item active d-flex align-items-center">
+                                <a class="nav-link-pvxte" href="{{ url_for('login') }}">{{ gettext('Login') }}</a>
+                            </li>
+                            {% set selected_language = current_language if current_language is defined else session.get('language', 'en') %}
+                            <li class="nav-item active d-flex align-items-center">
+                                <a class="nav-link-pvxte" href="{{ url_for('signup', lang=selected_language) }}">{{ gettext('Signup') }}</a>
+                            </li>
+                            {% if languages is defined and languages %}
+                                <li class="nav-item active language-selector-nav-item d-flex align-items-center">
+                                    <form method="get"
+                                          action="{{ request.path }}"
+                                          class="language-selector-form d-flex align-items-center">
+                                        <label for="auth-language-select"
+                                               class="language-selector-label nav-link-pvxte">
+                                            {{ gettext('Language') }}
+                                        </label>
+                                        <select id="auth-language-select"
+                                                name="lang"
+                                                class="form-select form-select-sm language-selector-select"
+                                                onchange="this.form.submit()">
+                                            {% for code, label in languages.items() %}
+                                                <option value="{{ code }}" {% if code == selected_language %}selected{% endif %}>{{ label }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
