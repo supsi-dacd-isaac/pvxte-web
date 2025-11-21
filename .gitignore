@@ -1,4 +1,5 @@
 venv
+.venv/
 .idea
 database.db
 archive/*.zip

@@ -333,10 +333,14 @@ msgid "Battery packs for each bus"
 msgstr "Batteriepacks pro Bus"
 
 #: templates/detail.html:96
-msgid "Total capacity of a bus"
-msgstr "Gesamtkapazität eines Busses"
+msgid "Minimum required capacity"
+msgstr "Erforderliche Mindestkapazität"
 
 #: templates/detail.html:100
+msgid "Installable capacity"
+msgstr "Installierbare Kapazität"
+
+#: templates/detail.html:106
 msgid "Minimum number of drivers"
 msgstr "Mindestanzahl an Fahrern"
 
