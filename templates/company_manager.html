@@ -87,7 +87,7 @@
                 <tbody>
                     <tr>
                         <td>{{ gettext('Terminals file') }}:</td>
-                        <td><input class="form-control" type="file" name="terminals_file" /></td>
+                        <td><input class="form-control" type="file" name="terminals_file" id="terminals_file_input" /></td>
                         <td>{{ gettext('Example file') }}:</td>
                         <td>
                             <a class="link-dark" href="static/company_file_examples/terminals.csv">
@@ -100,7 +100,7 @@
                     </tr>
                     <tr>
                         <td>{{ gettext('Distances file') }}:</td>
-                        <td><input class="form-control" type="file" name="distances_file" /></td>
+                        <td><input class="form-control" type="file" name="distances_file" id="distances_file_input" /></td>
                         <td>{{ gettext('Example file') }}:</td>
                         <td>
                             <a class="link-dark" href="static/company_file_examples/distances.csv">
@@ -112,7 +112,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="4" align="center"><button type="submit" class="btn btn-primary" onclick="return confirm('{{ gettext('Have you checked the files format before uploading them?') }}')">{{ gettext('Upload terminal and distances files') }}</button></td>
+                        <td colspan="4" align="center"><button type="submit" class="btn btn-primary" id="upload_terminals_distances_btn" disabled onclick="return confirm('{{ gettext('Have you checked the files format before uploading them?') }}')">{{ gettext('Upload terminal and distances files') }}</button></td>
                     </tr>
                 </tbody>
             </table>
@@ -164,6 +164,26 @@
 <footer>
     {% include 'footer_logged.html' %}
 </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const terminalInput = document.getElementById('terminals_file_input');
+    const distanceInput = document.getElementById('distances_file_input');
+    const uploadButton = document.getElementById('upload_terminals_distances_btn');
+
+    function toggleUploadButton() {
+        const hasTerminal = terminalInput && terminalInput.files.length > 0;
+        const hasDistance = distanceInput && distanceInput.files.length > 0;
+        uploadButton.disabled = !(hasTerminal && hasDistance);
+    }
+
+    if (terminalInput && distanceInput && uploadButton) {
+        terminalInput.addEventListener('change', toggleUploadButton);
+        distanceInput.addEventListener('change', toggleUploadButton);
+        toggleUploadButton();
+    }
+});
+</script>
 
 {% endblock %}
 
