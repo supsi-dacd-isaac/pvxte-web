@@ -24,13 +24,13 @@ Battery pack capacity,Capacité des batteries
 Minimum required packs,Packs minimums requis
 Maximum allowed packs,Nombre maximum de packs autorisés
 Are you sure you want to delete the bus model?,Êtes-vous sûr de vouloir supprimer le modèle de bus ?
-Terminals and distances setting,Paramétrage des bornes et des distances
-Terminals file,Fichier de bornes
+Terminals and distances setting,Paramétrage des terminus et des distances
+Terminals file,Fichier de terminus
 Example file,Fichier d'exemples
 Distances file,Fichier de distances
 Have you checked the files format before uploading them?,Avez-vous vérifié le format des fichiers avant de les télécharger ?
-Terminals section,Section des bornes
-Elevation,Elévation
+Terminals section,Section des terminus
+Elevation,Élévation
 Charging station,Station de recharge
 Simulation results,Résultats de la simulation
 Buses and batteries sizing,Dimensionnement des bus et des batteries
@@ -43,18 +43,18 @@ Drivers sizing,Dimensionnement des conducteurs
 Minimum number,Nombre minimum
 Investment costs,Coûts d'investissement
 Lifetime,Durée de vie
-years,années
+years,ans
 Bus,Bus
 Battery,Batterie
 Charger,Chargeur
 Interest rate,Taux d'intérêt
 Additional fee,Frais supplémentaires
 CAPEX,CAPEX
-year,année
+year,an
 Operational costs,Coûts opérationnels
 Energy tariff,Tarif de l'énergie
 Buses maintenance,Entretien des bus
-Buses efficiency,Efficacité des bus
+Buses efficiency,Consommation spécifique des bus
 Annual usage,Utilisation annuelle
 OPEX,OPEX
 Plot section,Tracer la section
@@ -74,12 +74,12 @@ New password,Nouveau mot de passe
 Retype New password,Confirmer le nouveau mot de passe
 You are changing your password! Are you sure?,Vous modifiez votre mot de passe ! Êtes-vous sûr ?
 Change password,Modifier le mot de passe
-Created at,Créé à
+Created at,Date de création
 Company,Entreprise
 Bus Line,Ligne de bus
 Day Type,Type de jour
 Max. Charge,Max. Frais
-Detail,Détail
+Detail,Détails
 Are you sure you want to delete the simulation?,Etes-vous sûr de vouloir supprimer la simulation ?
 Username,Nom d'utilisateur
 Password,Mot de passe
@@ -110,7 +110,7 @@ Battery lifetime,Durée de vie de la batterie
 Charger cost,Coût du chargeur
 charger,chargeur
 Charger lifetime,Durée de vie du chargeur
-Connection cost,Coût de connexion
+Connection cost,Coût de raccordement
 OPEX section,Section OPEX
 Buses maintainance,Entretien des bus
 Charging efficiency,Efficacité de la charge

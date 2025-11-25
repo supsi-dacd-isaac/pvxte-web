@@ -59,7 +59,7 @@ msgstr "Dépenses annuelles et coûts d’exploitation"
 #: templates/detail.html:213 templates/detail.html:218
 #: templates/new_sim_step2.html:155
 msgid "year"
-msgstr "année"
+msgstr "an"
 
 #: app.py:757
 msgid "Password must be at least 12 characters long"
@@ -222,11 +222,11 @@ msgstr "mètres"
 
 #: templates/company_manager.html:84
 msgid "Terminals and distances setting"
-msgstr "Paramétrage des bornes et des distances"
+msgstr "Paramétrage des terminus et des distances"
 
 #: templates/company_manager.html:89
 msgid "Terminals file"
-msgstr "Fichier de bornes"
+msgstr "Fichier de terminus"
 
 #: templates/company_manager.html:91 templates/company_manager.html:104
 #: templates/new_sim_step1.html:31
@@ -247,11 +247,11 @@ msgstr "Télécharger des fichiers"
 
 #: templates/company_manager.html:125
 msgid "Terminals section"
-msgstr "Section des bornes"
+msgstr "Section des terminus"
 
 #: templates/company_manager.html:132
 msgid "Elevation"
-msgstr "Elévation"
+msgstr "Élévation"
 
 #: templates/company_manager.html:133
 msgid "Charging station"
@@ -300,7 +300,7 @@ msgstr "Puissance de charge maximale au dépôt"
 
 #: templates/detail.html:49 templates/detail.html:111
 msgid "Buses efficiency"
-msgstr "Efficacité des bus"
+msgstr "Consommation spécifique des bus"
 
 #: templates/detail.html:53 templates/new_sim_step2.html:146
 msgid "Buses maintainance"
@@ -316,11 +316,11 @@ msgstr "Tarif de l'énergie"
 
 #: templates/detail.html:65 templates/new_sim_step2.html:130
 msgid "Connection cost"
-msgstr "Coût de connexion"
+msgstr "Coût de raccordement"
 
 #: templates/detail.html:69 templates/new_sim_step2.html:58
 msgid "Energy model calibration parameter"
-msgstr "Paramètre d’étalonnage du modèle énergétique"
+msgstr "Paramètre de calibration du modèle énergétique"
 
 #: templates/detail.html:73 templates/new_sim_step2.html:170
 msgid "Diesel cost for comparison"
@@ -364,11 +364,11 @@ msgstr "Coûts d'investissement"
 #: templates/new_sim_step2.html:84 templates/new_sim_step2.html:104
 #: templates/new_sim_step2.html:120 templates/new_sim_step2.html:135
 msgid "years"
-msgstr "années"
+msgstr "ans"
 
 #: templates/detail.html:151
 msgid "Connection fee"
-msgstr "Coût de connexion"
+msgstr "Coût de raccordement"
 
 #: templates/detail.html:158 templates/detail.html:162
 #: templates/detail.html:192
@@ -515,7 +515,7 @@ msgstr ""
 
 #: templates/index.html:21
 msgid "Created at"
-msgstr "Créé à"
+msgstr "Date de création"
 
 #: templates/index.html:22
 msgid "Bus Line"
@@ -531,7 +531,7 @@ msgstr "Taille de la batterie"
 
 #: templates/index.html:27
 msgid "Detail"
-msgstr "Détail"
+msgstr "Détails"
 
 #: templates/index.html:62
 msgid "Unfeasible simulation"
@@ -629,7 +629,7 @@ msgstr "Type de jour"
 #: templates/new_sim_step2.html:55
 #, fuzzy
 msgid "Energy model section"
-msgstr "Section des bornes"
+msgstr "Section des terminus"
 
 #: templates/new_sim_step2.html:62
 msgid "CAPEX section"
@@ -678,7 +678,7 @@ msgstr "Frais de connexion et taux d’intérêt"
 #: templates/new_sim_step2.html:134
 #, fuzzy
 msgid "Connection lifetime"
-msgstr "Coût de connexion"
+msgstr "Coût de raccordement"
 
 #: templates/new_sim_step2.html:138
 msgid "Interest rate"
